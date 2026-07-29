@@ -1,6 +1,5 @@
-import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { Client, DatabaseError, type FieldDef } from 'pg';
+import { Client, DatabaseError } from 'pg';
 
 const CONNECTION_STRING = 'postgresql://postgres:devpass@localhost:5433/bird';
 const GOLD_PATH = 'data/minidev/MINIDEV/mini_dev_postgresql.json';
@@ -25,7 +24,6 @@ type ExecutedRecord = {
   sql: string;
   rowCount: number;
   columns: string[];
-  resultHash: string;
   ms: number;
 };
 
@@ -40,44 +38,6 @@ type RejectedRecord = {
   errorMessage: string;
   ms: number;
 };
-
-/**
- * resultHash exists to detect gold drift (schema reload, data reload), never to grade
- * candidate SQL. Two correct queries can order rows or columns differently, so the hash
- * is taken over a canonical form: columns sorted by name, rows sorted as text, floats
- * rounded to 6 decimals, nulls given a sentinel no string value can collide with.
- */
-function canonicalValue(value: unknown): string {
-  if (value === null || value === undefined) return '\u0000null';
-  if (typeof value === 'number') {
-    if (!Number.isFinite(value)) return String(value);
-    // Only float8/float4 arrive as JS numbers; numeric arrives as an exact string, so
-    // rounding here targets binary float noise without mangling text like '01234'.
-    return Number.isInteger(value) ? String(value) : value.toFixed(6);
-  }
-  if (typeof value === 'boolean') return String(value);
-  if (typeof value === 'string') return value;
-  if (value instanceof Date) return value.toISOString();
-  if (Buffer.isBuffer(value)) return value.toString('hex');
-  return JSON.stringify(value);
-}
-
-function hashResult(fields: FieldDef[], rows: unknown[][]): string {
-  // Duplicate column names are legal in a result set, so ties break on original position.
-  const sortedFields = fields
-    .map((field, position) => ({ name: field.name, position }))
-    .sort((a, b) => a.name.localeCompare(b.name) || a.position - b.position);
-
-  const canonicalRows = rows
-    .map((row) => sortedFields.map((field) => canonicalValue(row[field.position])).join('\u0001'))
-    .sort();
-
-  return createHash('sha256')
-    .update(sortedFields.map((field) => field.name).join('\u0001'))
-    .update('\u0002')
-    .update(canonicalRows.join('\n'))
-    .digest('hex');
-}
 
 function describeError(error: unknown): { code: string | null; message: string } {
   if (error instanceof DatabaseError) return { code: error.code ?? null, message: error.message };
@@ -113,7 +73,6 @@ async function main(): Promise<void> {
         ...identity,
         rowCount: result.rows.length,
         columns: result.fields.map((field) => field.name),
-        resultHash: hashResult(result.fields, result.rows),
         ms: Date.now() - startedAt,
       };
       if (result.rows.length === 0) {

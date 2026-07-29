@@ -80,8 +80,9 @@ duplicate rows on purpose. Do not add normalization without a real failure that
 demands it, and when adding one, measure how many points it moves and record the
 number. See `PLAN.md` § Deferred risks.
 
-**`resultHash` in `gold/validated.json` detects database drift. It is never a
-grader.**
+**Gold records store no result fingerprint.** `validate-gold` records `rowCount`
+and `columns` only. Value canonicalization lives in the row comparator and
+nowhere else — do not add a second one, and never hash rows for comparison.
 
 **Accuracy denominator is `|validated|`** — currently 498 (500 gold − 2
 quarantined − 0 rejected). Read it from the file at runtime; a hardcoded

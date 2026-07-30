@@ -17,9 +17,9 @@ export const MODEL = process.env.MODEL ?? 'gpt-5.6-terra';
 const EFFORTS = ['none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max'] as const;
 export type Effort = (typeof EFFORTS)[number];
 
-// Not settled in docs/decisions.md. Pinned to the API's own default and read
-// from env so that every run records a value rather than inheriting whatever
-// the API defaults to on the day it ran.
+// Pinned (D18). Read from env so every run records a value rather than
+// inheriting whatever the API defaults to on the day it ran — there is no
+// `auto`, and an omitted parameter is a choice that can move server-side.
 export const EFFORT: Effort = readEffort();
 
 function readEffort(): Effort {

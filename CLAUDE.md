@@ -26,7 +26,8 @@ npm test                       # node:test — pure only, never touches Postgres
 npm run test:db                # tests needing the container: role, catalog, executor
 npm run lint                   # MUST pass before any commit
 npm run smoke                  # one model call: parsed JSON, usage, rate-limit headers
-npm run ask -- "<question>" [db_id]   # one question end to end; db_id scopes tables
+npm run ask -- bird-0000       # one gold question end to end, with its own evidence and db_id
+npm run ask -- "<question>" [db_id]   # ad-hoc question, no evidence; db_id scopes tables
 npm run eval:dev               # frozen 100-question dev slice
 npm run eval:easy              # all 500, tables scoped to the record's db_id
 npm run eval:hard              # all 500, table selection on
@@ -52,7 +53,7 @@ eval file to express a configuration.
   recall*, and *same rows* mean. Use these words; they are load-bearing.
 - `docs/decisions.md` — **read before implementing any phase.** Every question
   `PLAN.md` left open, resolved, with reasoning and with what would invalidate
-  it. Cited as **D1**–**D17** throughout the plan.
+  it. Cited as **D1**–**D18** throughout the plan.
 - `docs/adr/` — the two decisions with consequences big enough to need a page.
 - `KNOWN_ISSUES.md` — deliberate divergences from BIRD's evaluation.
 - `RUNS.md` — append-only log of every run, with its verdict.
@@ -100,9 +101,8 @@ run. Configure the store to a persistent path — evalite v1 defaults to
   product path only
 - `MODEL` — overrides the pinned `gpt-5.6-terra`. Set it and every earlier number
   is retired, not carried forward.
-- `EFFORT` — reasoning effort, default `medium`. **Not settled in
-  `docs/decisions.md`** — pick a value before the Batch B runs, because it moves
-  both cost and accuracy and every run records it.
+- `EFFORT` — reasoning effort, pinned to `medium` (**D18**). Changing it retires
+  every earlier number, exactly as changing `MODEL` does.
 
 All live in `.env` (gitignored). Read `DATABASE_URL` from env — never hardcode a
 connection string, and **never hardcode a LAN IP**.

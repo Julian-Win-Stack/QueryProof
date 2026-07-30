@@ -143,6 +143,16 @@ the ceiling is unknown until measured. Guessing low costs hours per run; guessin
 high costs visible, retryable errors. Julian's call, and the right one — provided
 the two guardrails below hold.
 
+**Superseded in its numbers, 2026-07-30 — the ceiling is now measured.** Phase
+4a's headers give 500 requests/minute and **500,000 tokens/minute** (recorded in
+`RUNS.md`), which is well below the tier this decision assumed. Measured prompts
+at v1 are 352 tokens for EASY and 8,611 for the 75-table baseline, so the
+ceiling allows roughly 500 EASY questions a minute (requests bind) and 58
+baseline questions a minute (tokens bind). At observed latency that is ~15 in
+flight for EASY and ~2 for the baseline, not 100 and 20.
+The reasoning above still holds — start from the ceiling and tune down from
+observed 429s. **The replacement numbers are Julian's call and are not set here.**
+
 **D12a — The Postgres pool is capped at 20, independent of LLM concurrency.**
 *Why:* Postgres `max_connections` defaults to 100 and every question runs two
 queries, so 100 concurrent questions exhaust the server. That surfaces as
@@ -177,6 +187,28 @@ on every result.
 something and it failed, rather than repeating it.
 *Why not re-picking tables:* repair and table selection would change together,
 and neither delta in the README would be attributable to one thing.
+
+**D18 — Reasoning effort is pinned to `medium`, for every run.**
+`EFFORT=medium`, read from env with that default in `src/model.ts`, recorded in
+every run's configuration. Decided 2026-07-30.
+*Why pinned at all:* omitting the parameter lets the API choose, and that choice
+can move server-side. Every run would then record "whatever OpenAI was doing that
+day" — the same failure the pinned model id exists to prevent. There is no `auto`
+value; the set is `none | minimal | low | medium | high | xhigh | max`.
+*Why medium:* it adapts to question difficulty rather than spending a fixed
+budget, and it leaves room to move in either direction. Higher effort risks
+compressing the very differences the project measures — a model reasoning hard
+enough to recover from a mediocre table set narrows the picker gap and softens
+the recall ceiling, which are the two claims the README is built on.
+*Not verified:* very likely the API's own default for this model, but the SDK
+documents no per-model default and no response field reports the effort applied.
+The value matters because it is recorded, not because it matches OpenAI's.
+*Invalidated if:* a dev-slice comparison at a second effort level moves accuracy
+by more than the Phase 5c noise band. That experiment is deferred and optional —
+if it is ever run, it is reported as its own number, never folded into a
+measured configuration.
+*Consequence:* changing this retires every number measured before it, exactly as
+changing `MODEL` does.
 
 ---
 

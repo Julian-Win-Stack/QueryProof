@@ -57,6 +57,20 @@ Whether every table the gold SQL touches was present in the set of tables sent
 to the model. Measured against the gold SQL, never against `db_id`.
 _Avoid_: coverage, precision, hit rate
 
+**Run**:
+One pass over a question set with a single fixed configuration, producing one
+accuracy number. Change any setting and it is a different run, not the same run
+repeated.
+_Avoid_: test, experiment, trial (a trial is one repeat of a run, used to measure
+the noise floor)
+
+**Void run**:
+A run that is not evidence — wrong configuration, crashed part-way, a model other
+than the pinned one, or a cached response. Distinct from a **rejected** run,
+whose number is real and whose approach simply lost. Void numbers are discarded;
+rejected numbers are kept.
+_Avoid_: failed run (it means both of these, which is why it is banned)
+
 **Noise floor**:
 The spread in accuracy across repeat runs of an unchanged configuration. A
 difference between two configurations smaller than the noise floor is not a
@@ -71,7 +85,9 @@ answer needs. Part of the question in eval runs.
 
 **Mode**:
 Which tables reach the prompt. **EASY** sends every table belonging to the
-record's `db_id`. **HARD** sends whatever a picker selects out of all 75.
+record's `db_id`, so finding the right table is not part of the task. **HARD**
+sends whatever a picker selects out of all 75. EASY is a yardstick against
+BIRD's published baselines and is never tuned; HARD is the project's own number.
 _Avoid_: difficulty (that word belongs to BIRD's per-question `simple` /
 `moderate` / `challenging` label)
 

@@ -6,7 +6,8 @@
   "scripts": {
     "validate-gold": "tsx --env-file-if-exists=.env scripts/validate-gold.ts",
     "lint": "eslint .",
-    "test": "node --env-file-if-exists=.env --test"
+    "test": "node --env-file-if-exists=.env --test",
+    "test:db": "node --env-file-if-exists=.env --test 'src/**/*.dbtest.ts'"
   },
   "keywords": [],
   "author": "",

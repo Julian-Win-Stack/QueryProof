@@ -31,7 +31,13 @@ npm run eval:hard              # all 500, table selection on
 npm run eval:pickers           # keyword vs LLM picker, one run, dev slice
 ```
 
-The `eval:*` and `test:db` scripts do not exist yet — Phases 2 and 5 add them.
+The `eval:*` scripts do not exist yet — Phase 5 adds them.
+
+Test files split by what they need, and the split is the filename: `src/*.test.ts`
+is pure and runs under `npm test`, `src/*.dbtest.ts` needs the container and runs
+only under `npm run test:db`. `.dbtest.ts` is deliberately not `.db.test.ts` —
+`node --test` discovers anything ending `.test.ts`, so the second form would drag
+Postgres into the pure suite.
 
 **Every eval script is one eval file plus environment variables** (`MODE`,
 `PICKER`, `REPAIR`, `DEV`, `CONCURRENCY`). evalite's CLI accepts no custom flags,
@@ -81,7 +87,11 @@ run. Configure the store to a persistent path — evalite v1 defaults to
 
 ## Environment
 
-- `DATABASE_URL` — `postgresql://postgres:devpass@localhost:5433/bird`
+- `DATABASE_URL` — `postgresql://postgres:devpass@localhost:5433/bird`. Gold
+  validation and the schema catalog. Never generated SQL.
+- `DATABASE_URL_RO` — `postgresql://queryproof_ro:ro_devpass@localhost:5433/bird`.
+  The only string generated SQL ever connects with. Create the role with
+  `psql "$DATABASE_URL" -f scripts/create-ro-role.sql`.
 - `OPENAI_API_KEY` — used directly by every eval run
 - `RESPAN_API_KEY` — the gateway key, used *in place of* `OPENAI_API_KEY` on the
   product path only
@@ -179,7 +189,9 @@ never by scraping a fenced code block.
 
 **Generated SQL executes as the `queryproof_ro` role**, which has `SELECT` only.
 A regex over generated SQL is a speed bump; the role is the wall. Never run
-generated SQL as `postgres`.
+generated SQL as `postgres`. One path exists — `executeReadOnly` in
+`src/execute-readonly.ts`; it refuses to open a pool as any other role. A
+Postgres error comes back as a result with its `code`, never as a throw.
 
 **Eval runs call OpenAI directly. Only the product path goes through Respan.**
 

@@ -26,3 +26,17 @@ worth not repeating by accident. It is therefore run on the 100-question dev
 slice first (~$5) to confirm the pipeline, the recorded configuration, and a sane
 number before the full run is launched. Watch the credit balance immediately
 before it.
+
+## Amendment — 2026-07-30
+
+There is no credit budget. The project runs on a standard OpenAI API key and
+every run bills to that account, so "watch the credit balance" reads as "watch
+the spend, against a billing limit set before Batch B."
+
+The ~$27 also predates measurement. Phase 4b puts the 75-table prompt at 8,611
+tokens rather than the ~20k assumed, so the baseline run's input cost is ~$11.
+Output is still unmeasured — the calls made so far spent zero reasoning tokens on
+trivial questions, which real ones will not.
+
+The decision is unaffected: the baseline row is still no picker at all. Only the
+figures it cites have moved, and both moved in its favour.

@@ -35,3 +35,29 @@ export:        runs/YYYY-MM-DD-<id>.json
 ```
 
 ---
+
+## Rate-limit ceiling for this key
+
+Measured 2026-07-30 from the Phase 4a smoke-test response headers, per D12b.
+Authoritative for this key and model; published tier tables are not. Re-measure
+if the key or the tier changes.
+
+```
+x-ratelimit-limit-requests:      500        per minute
+x-ratelimit-limit-tokens:        500,000    per minute
+x-ratelimit-reset-requests:      120ms
+x-ratelimit-reset-tokens:        3ms
+```
+
+Measured prompt sizes at prompt v1, same question both ways:
+
+| Configuration | Prompt tokens | Questions/min at the ceiling | Binds on |
+|---|---|---|---|
+| EASY, 5 tables | 352 | ~500 | requests |
+| Baseline, all 75 tables | 8,611 | ~58 | tokens |
+
+**D12's concurrency figures were set before this was measured and do not survive
+it.** 500k tokens/minute is far below the tier D12 assumed. See D12 in
+`docs/decisions.md`.
+
+---

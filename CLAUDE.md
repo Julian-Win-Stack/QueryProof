@@ -124,6 +124,11 @@ do **not** match Postgres. So: build every prompt and query from
 removes all the special cases — including `order`, which is both a table name and
 a reserved keyword and must always be written `"order"`.
 
+One path exists — `loadSchema` / `renderSchema` in `src/schema.ts`. `renderSchema`
+takes tables already chosen, so table selection stays in the caller. EASY mode's
+`db_id` → tables lookup is `tablesForDbId`, which matches `dev_tables.json`
+case-insensitively; 17 of its 75 names do not exist in Postgres as spelled.
+
 **Gold record ids are array position, zero padded** (`bird-0000`). `question_id`
 in the source file is **not** unique — ids 137 and 138 each appear twice.
 **Never renumber.**

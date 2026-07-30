@@ -3,3 +3,10 @@ node_modules/
 gold/
 .env
 PLAN.md
+
+# evalite's SQLite store — the UI and run-over-run diffing read from it.
+# The durable evidence is runs/*.json, which IS committed.
+.evalite/
+
+# macOS
+.DS_Store

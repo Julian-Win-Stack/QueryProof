@@ -4,20 +4,25 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "validate-gold": "tsx scripts/validate-gold.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "validate-gold": "tsx --env-file-if-exists=.env scripts/validate-gold.ts",
+    "lint": "eslint .",
+    "test": "node --env-file-if-exists=.env --test",
+    "test:db": "node --env-file-if-exists=.env --test 'src/**/*.dbtest.ts'"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
     "pg": "^8.22.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^26.1.2",
     "@types/pg": "^8.20.0",
+    "eslint": "^10.8.0",
     "tsx": "^4.23.1",
-    "typescript": "^7.0.2"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.65.0"
   }
 }

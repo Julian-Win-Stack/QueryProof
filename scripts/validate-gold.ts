@@ -1,10 +1,14 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { Client, DatabaseError } from 'pg';
 
-const CONNECTION_STRING = 'postgresql://postgres:devpass@localhost:5433/bird';
 const GOLD_PATH = 'data/minidev/MINIDEV/mini_dev_postgresql.json';
 const STATEMENT_TIMEOUT_MS = 15_000;
 const OUTPUT_DIR = 'gold';
+
+// Every timestamptz literal in BIRD_dev.sql carries a +08 offset, so a naive
+// timestamp literal in gold SQL only matches under that zone. Named zone, not
+// '+08' — Postgres reads the POSIX form with the sign inverted. See KNOWN_ISSUES.md.
+const SESSION_TIME_ZONE = 'Asia/Shanghai';
 
 type GoldRecord = {
   question_id: number;
@@ -46,11 +50,17 @@ function describeError(error: unknown): { code: string | null; message: string }
 }
 
 async function main(): Promise<void> {
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error('DATABASE_URL is not set. Add it to .env — see CLAUDE.md for the expected value.');
+  }
+
   const goldRecords: GoldRecord[] = JSON.parse(readFileSync(GOLD_PATH, 'utf8'));
 
-  const client = new Client({ connectionString: CONNECTION_STRING });
+  const client = new Client({ connectionString });
   await client.connect();
   await client.query(`SET statement_timeout = ${STATEMENT_TIMEOUT_MS}`);
+  await client.query(`SET TimeZone = '${SESSION_TIME_ZONE}'`);
 
   const validated: ExecutedRecord[] = [];
   const quarantined: ExecutedRecord[] = [];

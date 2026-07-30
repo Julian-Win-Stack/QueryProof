@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "validate-gold": "tsx --env-file-if-exists=.env scripts/validate-gold.ts",
+    "smoke": "tsx --env-file-if-exists=.env scripts/smoke.ts",
+    "ask": "tsx --env-file-if-exists=.env scripts/ask.ts",
     "lint": "eslint .",
     "test": "node --env-file-if-exists=.env --test",
     "test:db": "node --env-file-if-exists=.env --test 'src/**/*.dbtest.ts'"
@@ -14,6 +16,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "openai": "^7.2.0",
     "pg": "^8.22.0"
   },
   "devDependencies": {

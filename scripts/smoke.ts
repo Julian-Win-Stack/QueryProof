@@ -1,9 +1,9 @@
 // Phase 4a's exit test. One call, no SQL and no schema text involved, to prove
 // the round trip works before anything is built on top of it.
 //
-// The x-ratelimit-* numbers it prints go into RUNS.md by hand: they are the only
-// authoritative ceiling for this key, and every concurrency decision downstream
-// reads them (D12).
+// The anthropic-ratelimit-* numbers it prints go into RUNS.md by hand: they are
+// the only authoritative ceiling for this key, and every concurrency decision
+// downstream reads them (D12).
 
 import { completeJson, EFFORT, MODEL } from '../src/model.ts';
 
@@ -11,7 +11,6 @@ async function main(): Promise<void> {
   const reply = await completeJson({
     system: 'Answer with JSON matching the given schema.',
     user: 'What is the capital of France, and in what year did the Eiffel Tower open?',
-    schemaName: 'smoke',
     schema: {
       type: 'object',
       properties: {
@@ -31,10 +30,10 @@ async function main(): Promise<void> {
   console.log(reply.json);
   console.log('');
   console.log('usage:');
-  console.log(`  prompt tokens:     ${reply.usage.promptTokens}`);
-  console.log(`  completion tokens: ${reply.usage.completionTokens}`);
-  console.log(`  reasoning tokens:  ${reply.usage.reasoningTokens}  (billed as output)`);
-  console.log(`  total tokens:      ${reply.usage.totalTokens}`);
+  console.log(`  input tokens:     ${reply.usage.inputTokens}`);
+  console.log(`  output tokens:    ${reply.usage.outputTokens}`);
+  console.log(`  thinking tokens:  ${reply.usage.thinkingTokens}  (inside output, billed as output)`);
+  console.log(`  total tokens:     ${reply.usage.totalTokens}`);
   console.log('');
   console.log('rate limit headers — copy these into RUNS.md:');
   const headers = Object.entries(reply.rateLimit).sort();

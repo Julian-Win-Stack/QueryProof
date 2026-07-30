@@ -84,8 +84,8 @@ async function main(): Promise<void> {
 
   console.log('');
   console.log(
-    `tokens: ${generated.usage.promptTokens} in, ${generated.usage.completionTokens} out ` +
-      `(${generated.usage.reasoningTokens} reasoning) — $${usdCost(generated.usage).toFixed(4)} in ${generated.ms}ms`,
+    `tokens: ${generated.usage.inputTokens} in, ${generated.usage.outputTokens} out ` +
+      `(${generated.usage.thinkingTokens} thinking) — $${usdCost(generated.usage).toFixed(4)} in ${generated.ms}ms`,
   );
 }
 

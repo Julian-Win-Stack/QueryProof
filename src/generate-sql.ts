@@ -27,7 +27,6 @@ export async function generateSql(params: {
   const reply = await completeJson({
     system: SYSTEM,
     user: buildUserMessage(params),
-    schemaName: 'generated_sql',
     schema: SQL_SCHEMA,
   });
 
@@ -39,7 +38,7 @@ export async function generateSql(params: {
   };
 }
 
-// strict json_schema makes this shape a contract, so a failure here is the
+// The output schema makes this shape a contract, so a failure here is the
 // contract breaking rather than the model rambling — worth a throw, not a
 // scored wrong answer.
 function readSql(json: unknown): string {

@@ -19,45 +19,54 @@ would hide the failure mode the project exists to measure.
 sometimes lower. That gap is the point, not an error to reconcile. Never add a
 dedupe step to make the numbers line up.
 
-## 2. Session timezone is pinned to `Asia/Shanghai` (+08)
 
-**Choice.** Every connection runs `SET TimeZone = 'Asia/Shanghai'` — gold
-validation and eval execution alike.
 
-**Why.** Eleven columns in `BIRD_dev.sql` are `timestamp with time zone`, and
-all 882,084 timestamp literals in the dump carry a `+08` offset. Postgres
-resolves a naive literal against the *session* zone, so under UTC the gold
-predicate `CreationDate = '2014-04-23 20:29:39.0'` misses the stored instant by
-eight hours. BIRD's original SQLite holds these as naive text, so `+08` is the
-reading the gold SQL was written against.
+## 2. Reference queries that do not answer their own question stay in the set
 
-**Measured effect.** Under UTC, `bird-0307` and `bird-0308` return zero rows.
-Under `+08` they return one row each — the row their question asks for. That is
-the entire difference between a 498 and a 500 denominator.
+**Choice.** A gold query whose SQL answers a different question than its English
+prompt is scored as written, like every other question. It is not quarantined,
+not rejected, and not excluded from the denominator.
 
-**Gotcha.** Use the named zone. `SET TimeZone = '+08'` is read POSIX-style and
-means UTC−8, i.e. sixteen hours off in the wrong direction.
+**Example.** `bird-0032` asks "Among the events attended by more than 10 members,
+how many of them are meetings?" — a count. Its gold SQL takes events with more
+than 10 attendees, `EXCEPT`s away every event of type `Meeting`, and returns the
+*names* of what remains: nine rows describing the events that are **not**
+meetings. A correct answer to the English question scores 0.
 
-**Residual divergence.** An absolute instant is still not the same object as
-SQLite's naive text. A query that formats or extracts from these columns agrees
-with BIRD under `+08`, but one that compares them across zones has no SQLite
-equivalent to agree with.
+**Why not exclude them.** Two reasons, and the first is the serious one.
 
-## 3. Zero-row gold queries are excluded — currently there are none
+Excluding requires inspecting a question, and questions get inspected because
+they failed. A question where the reference is equally defective but the
+generated SQL happened to match it is never looked at, so it stays. The rule
+would therefore only ever remove failures and never remove successes, and
+accuracy would rise by construction. That is selection on the outcome, not a
+correction.
 
-**Choice.** A gold query that executes but returns no rows goes to
-`gold/quarantine.json` and is out of the denominator. One that fails to execute
-goes to `gold/rejected.json` and is likewise out.
+Second, the published BIRD baseline this project cites was measured over all
+500. Removing questions makes the two numbers describe different question sets
+while still looking comparable — the failure mode this whole file exists to
+prevent.
 
-**Why quarantine at all.** An empty result is matched by any query that also
-returns nothing, including SQL that is wrong in every other respect. Such a
-question scores a free point and measures nothing.
+**Effect.** Some unmeasured share of the remaining failures cannot be won by any
+prompt, tool, or model. The accuracy ceiling is below 100% and nothing in the
+system will ever say so. Quote the defect rate as an estimate from a hand audit,
+never as a subtraction from the denominator.
 
-**Current state.** 500 validated, 0 quarantined, 0 rejected. Every one of BIRD's
-500 gold queries is valid Postgres and returns at least one row under `+08`. The
-rule stays in force because it governs re-runs, not because anything is excluded
-today.
+## 3. Deduplication is a coin flip the questions do not settle
 
-**Denominator.** Read `|validated|` from the file at runtime. It is 500 now and
-a hardcoded 500 is still a bug — a future re-run that quarantines something must
-produce a different percentage, not a wrong one.
+**Choice.** No prompt rule instructs the model when to use `SELECT DISTINCT`.
+
+**Why.** A question like "what are the budget categories of events at MU 215"
+does not say whether to return each category once or once per matching event.
+Both readings are correct English; the gold SQL picks one, and on the next
+question it picks the other. Measured over the 227 failures of the HARD baseline
+run: gold used `DISTINCT` where the generated SQL did not **29** times, and the
+generated SQL used it where gold did not **28** times. A blanket rule in either
+direction wins one side and loses the other.
+
+**Interaction with issue 1.** Under BIRD's set comparison this disagreement is
+mostly invisible; under multiset comparison it is a full failure. So this bucket
+is partly the price of the stricter comparator, and it is paid deliberately.
+
+**Effect.** Treat these as ceiling, not backlog. Do not add a dedupe step to the
+comparator to recover them — see issue 1.

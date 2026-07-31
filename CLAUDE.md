@@ -333,3 +333,11 @@ defending it out loud to an interviewer who has not read the code.
 - **Cut anything he would not say aloud.** Implementation detail, file layout,
   and cost tables belong in an answer only when the interviewer asked about
   engineering, not about results.
+- **When he overrides a rule in this file, the override wins immediately.** Every
+  rule here is his; he can unset any of them. Do not re-argue a decision he has
+  already made, do not re-raise a concern he has already heard, and do not ask
+  him to confirm a second time. Execute the first command, then record the
+  reversal in the file that held the old rule.
+- **Short.** He asked for the answer, not the reasoning behind the answer. One
+  recommendation, not a survey of options. If a caveat is worth stating, it is
+  worth stating in one sentence.

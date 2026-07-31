@@ -103,13 +103,23 @@ across all 500 gold queries before trusting a recall number.
 ## Running an eval (Phases 5, 6, 7)
 
 **D8 — Configuration arrives by environment variable, one eval file.**
-`MODE=hard PICKER=llm REPAIR=on CONCURRENCY=12 npx evalite run evals/main.eval.ts`,
+`EVAL_MODE=hard PICKER=llm REPAIR=on CONCURRENCY=12 npx evalite run evals/main.eval.ts`,
 wrapped in `package.json` scripts. Not one file per configuration.
 *Why:* evalite's CLI accepts path filters plus `--threshold`, `--hideTable`,
 `--outputPath` and `--no-cache` — **it does not accept custom flags**. The
 `npm run eval:dev -- --mode=hard --picker=keyword` form in earlier drafts of
 `PLAN.md` cannot work. Four copies of the wiring is also how the EASY and HARD
 paths silently drift apart.
+
+**Amended 2026-07-30 — the names are `EVAL_MODE` and `EVAL_DEV`, not `MODE` and
+`DEV`.** evalite runs eval files inside vitest workers, and vite owns `MODE`,
+`DEV`, `PROD` and `BASE_URL` there: it sets `MODE="test"` and `DEV="1"` in every
+worker, so an eval configured with those names silently reads vite's values
+instead. Found the expensive way — the first `eval:easy` run filtered itself to
+the dev slice through vite's `DEV` and was voided (see `RUNS.md`). `PICKER`,
+`REPAIR`, `TRIALS`, `LIMIT` and `CONCURRENCY` are not vite-owned and keep their
+plain names. `LIMIT=N` (first N questions, wiring smoke) stamps `limit=N` into
+the run name so its number can never read as a real one.
 
 **D9 — `evalite.each` is used for exactly one job: the picker bake-off.**
 Keyword versus LLM picker, one run, same data, same process.

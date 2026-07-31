@@ -32,9 +32,10 @@ npm run eval:dev               # frozen 100-question dev slice
 npm run eval:easy              # all 500, tables scoped to the record's db_id
 npm run eval:hard              # all 500, table selection on
 npm run eval:pickers           # keyword vs LLM picker, one run, dev slice
+npm run triage -- runs/<file>.json    # failure counts, four buckets
 ```
 
-The `eval:*` scripts do not exist yet — Phase 5 adds them.
+`eval:hard` and `eval:pickers` do not exist yet — Phase 6 adds them.
 
 Test files split by what they need, and the split is the filename: `src/*.test.ts`
 is pure and runs under `npm test`, `src/*.dbtest.ts` needs the container and runs
@@ -42,10 +43,13 @@ only under `npm run test:db`. `.dbtest.ts` is deliberately not `.db.test.ts` —
 `node --test` discovers anything ending `.test.ts`, so the second form would drag
 Postgres into the pure suite.
 
-**Every eval script is one eval file plus environment variables** (`MODE`,
-`PICKER`, `REPAIR`, `DEV`, `CONCURRENCY`). evalite's CLI accepts no custom flags,
-so `npm run eval:dev -- --picker=llm` silently does nothing. Never add a second
-eval file to express a configuration.
+**Every eval script is one eval file plus environment variables** (`EVAL_MODE`,
+`EVAL_DEV`, `PICKER`, `REPAIR`, `TRIALS`, `LIMIT`, `CONCURRENCY`). evalite's CLI
+accepts no custom flags, so `npm run eval:dev -- --picker=llm` silently does
+nothing. Never add a second eval file to express a configuration. **Never name
+an eval env var `MODE`, `DEV`, `PROD`, or `BASE_URL`** — vite owns those names
+inside every worker and overwrites them (D8 amendment); the first `eval:easy`
+run was voided by exactly this.
 
 ## Where decisions live
 
@@ -71,6 +75,7 @@ src/           library code
 src/prompts/   one file per prompt version, each exporting PROMPT_VERSION
 evals/         *.eval.ts, configuration comes from env, not from new files
 evals/dev-slice.json  the frozen 100 ids — committed, never regenerated
+evalite.config.ts     storage (persistent SQLite), concurrency, trials, timeouts
 runs/          one JSON export per eval run           (committed — this is the evidence)
 CONTEXT.md     the project's glossary — what the words mean
 docs/adr/      decisions that would otherwise look arbitrary

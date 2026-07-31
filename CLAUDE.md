@@ -113,8 +113,15 @@ run. Configure the store to a persistent path — evalite v1 defaults to
 - `PRODUCT_PATH=1` — routes model calls through the Respan gateway
   (`https://api.respan.ai/api/anthropic/`, Respan key in the Anthropic key's
   place). Set only by `npm run demo`; the eval file throws if it is set. The
-  gateway account must hold an Anthropic provider key (Respan Settings →
-  Providers) or calls 401.
+  gateway needs a way to pay for the call — either credits on the Respan
+  account, or a provider key of your own under Settings → Providers, which is
+  a paid-plan feature. With neither, every call returns a 401 whose body names
+  both options. Verified serving the pinned `claude-sonnet-5`.
+
+  The gateway does **not** pass the `anthropic-ratelimit-*` response headers
+  through, so `npm run smoke` prints "none returned" under `PRODUCT_PATH=1`.
+  Nothing depends on them here: they exist to size eval concurrency (D12), and
+  eval runs go direct.
 - `MODEL` — overrides the pinned `claude-sonnet-5`. Set it and every earlier
   number is retired, not carried forward.
 - `EFFORT` — thinking effort, pinned to `medium` (**D18**). Changing it retires

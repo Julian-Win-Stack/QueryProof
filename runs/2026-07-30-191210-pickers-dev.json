@@ -1,0 +1,666 @@
+{
+  "run": {
+    "id": 10,
+    "runType": "full",
+    "createdAt": "2026-07-31 02:12:10"
+  },
+  "suites": [
+    {
+      "id": 11,
+      "name": "hard | slice=dev | limit=3 | picker=bakeoff | prompt=v1 | pickerPrompt=picker-v1 | effort=medium | claude-sonnet-5 [keyword]",
+      "filepath": "/Users/phyonyanwinn/Project/ProJect/QueryProof/evals/main.eval.ts",
+      "duration": 0,
+      "status": "success",
+      "variantName": "keyword",
+      "variantGroup": "hard | slice=dev | limit=3 | picker=bakeoff | prompt=v1 | pickerPrompt=picker-v1 | effort=medium | claude-sonnet-5",
+      "createdAt": "2026-07-31 02:12:10",
+      "averageScore": 0.6666666666666666,
+      "evals": [
+        {
+          "id": 1113,
+          "duration": 5104,
+          "input": {
+            "id": "bird-0005",
+            "db_id": "debit_card_specializing",
+            "difficulty": "moderate",
+            "question": "What was the gas consumption peak month for SME customers in 2013?",
+            "evidence": "Year 2013 can be presented as Between 201301 And 201312; The first 4 strings of the Date values in the yearmonth table can represent year; The 5th and 6th string of the date can refer to month.",
+            "sql": "SELECT SUBSTR(T2.Date, 5, 2) FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID WHERE SUBSTR(T2.Date, 1, 4) = '2013' AND T1.Segment = 'SME' GROUP BY SUBSTR(T2.Date, 5, 2) ORDER BY SUM(T2.Consumption) DESC NULLS LAST LIMIT 1",
+            "rowCount": 1,
+            "columns": [
+              "substr"
+            ],
+            "ms": 44
+          },
+          "output": {
+            "correct": false,
+            "generatedSql": "SELECT SUBSTRING(y.\"date\",5,2) AS month, SUM(y.consumption) AS total_consumption FROM yearmonth y JOIN customers c ON y.customerid = c.customerid WHERE c.segment = 'SME' AND y.\"date\" BETWEEN '201301' AND '201312' GROUP BY month ORDER BY total_consumption DESC LIMIT 1",
+            "attempts": 1,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": false,
+            "tablesSent": [
+              "yearmonth",
+              "customers",
+              "frpm",
+              "account",
+              "alignment",
+              "atom",
+              "attendance",
+              "attribute",
+              "badges",
+              "bond"
+            ],
+            "tablesGoldNeeded": [
+              "customers",
+              "yearmonth"
+            ],
+            "recallHit": true,
+            "tokensIn": 1744,
+            "tokensOut": 184,
+            "thinkingTokens": 33,
+            "pickerTokensIn": 0,
+            "pickerTokensOut": 0,
+            "pickerMs": 0,
+            "usd": 0.005328,
+            "modelMs": 4982,
+            "executionMs": 43,
+            "mode": "hard",
+            "picker": "keyword",
+            "repair": "off",
+            "promptVersion": "v1",
+            "pickerPromptVersion": "",
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT SUBSTR(T2.Date, 5, 2) FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID WHERE SUBSTR(T2.Date, 1, 4) = '2013' AND T1.Segment = 'SME' GROUP BY SUBSTR(T2.Date, 5, 2) ORDER BY SUM(T2.Consumption) DESC NULLS LAST LIMIT 1",
+          "status": "success",
+          "colOrder": 0,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0005 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT SUBSTRING(y.\"date\",5,2) AS month, SUM(y.consumption) AS total_consumption FROM yearmonth y JOIN customers c ON y.customerid = c.customerid WHERE c.segment = 'SME' AND y.\"date\" BETWEEN '201301' AND '201312' GROUP BY month ORDER BY total_consumption DESC LIMIT 1"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "10 sent, recall hit"
+            },
+            {
+              "label": "tokens",
+              "value": "1744 in, 184 out"
+            }
+          ],
+          "createdAt": "2026-07-31 02:12:10",
+          "averageScore": 0.5,
+          "scores": [
+            {
+              "id": 1117,
+              "name": "same-rows",
+              "score": 0,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-07-31 02:12:15"
+            },
+            {
+              "id": 1118,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-07-31 02:12:15"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 1114,
+          "duration": 5059,
+          "input": {
+            "id": "bird-0007",
+            "db_id": "debit_card_specializing",
+            "difficulty": "challenging",
+            "question": "Which of the three segments—SME, LAM and KAM—has the biggest and lowest percentage increases in consumption paid in EUR between 2012 and 2013?",
+            "evidence": "Increase or Decrease = consumption for 2013 - consumption for 2012; Percentage of Increase = (Increase or Decrease / consumption for 2013) * 100%; The first 4 strings of the Date values in the yearmonth table can represent year",
+            "sql": "SELECT CAST((SUM(CASE WHEN T1.Segment = 'SME' AND T2.Date LIKE '2013%' THEN T2.Consumption ELSE 0 END) - SUM(CASE WHEN T1.Segment = 'SME' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END)) AS REAL) * 100 / NULLIF(SUM(CASE WHEN T1.Segment = 'SME' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END), 0), CAST(SUM(CASE WHEN T1.Segment = 'LAM' AND T2.Date LIKE '2013%' THEN T2.Consumption ELSE 0 END) - SUM(CASE WHEN T1.Segment = 'LAM' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(CASE WHEN T1.Segment = 'LAM' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END), 0), CAST(SUM(CASE WHEN T1.Segment = 'KAM' AND T2.Date LIKE '2013%' THEN T2.Consumption ELSE 0 END) - SUM(CASE WHEN T1.Segment = 'KAM' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(CASE WHEN T1.Segment = 'KAM' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END), 0) FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID",
+            "rowCount": 1,
+            "columns": [
+              "?column?",
+              "?column?",
+              "?column?"
+            ],
+            "ms": 47
+          },
+          "output": {
+            "correct": false,
+            "generatedSql": "WITH yearly AS (SELECT c.segment, SUBSTRING(y.date,1,4) AS yr, SUM(y.consumption) AS total FROM yearmonth y JOIN customers c ON y.customerid = c.customerid WHERE c.currency = 'EUR' AND SUBSTRING(y.date,1,4) IN ('2012','2013') GROUP BY c.segment, SUBSTRING(y.date,1,4)) SELECT segment, (SUM(CASE WHEN yr='2013' THEN total ELSE 0 END) - SUM(CASE WHEN yr='2012' THEN total ELSE 0 END)) / SUM(CASE WHEN yr='2013' THEN total ELSE 0 END) * 100 AS pct_increase FROM yearly GROUP BY segment ORDER BY pct_increase DESC",
+            "attempts": 1,
+            "lastPgError": null,
+            "rowsReturned": 3,
+            "goldRowCount": 1,
+            "columnCountMatch": false,
+            "tablesSent": [
+              "frpm",
+              "yearmonth",
+              "customers",
+              "gasstations",
+              "account",
+              "alignment",
+              "atom",
+              "attendance",
+              "attribute",
+              "badges"
+            ],
+            "tablesGoldNeeded": [
+              "customers",
+              "yearmonth"
+            ],
+            "recallHit": true,
+            "tokensIn": 1765,
+            "tokensOut": 340,
+            "thinkingTokens": 37,
+            "pickerTokensIn": 0,
+            "pickerTokensOut": 0,
+            "pickerMs": 0,
+            "usd": 0.00693,
+            "modelMs": 4923,
+            "executionMs": 51,
+            "mode": "hard",
+            "picker": "keyword",
+            "repair": "off",
+            "promptVersion": "v1",
+            "pickerPromptVersion": "",
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT CAST((SUM(CASE WHEN T1.Segment = 'SME' AND T2.Date LIKE '2013%' THEN T2.Consumption ELSE 0 END) - SUM(CASE WHEN T1.Segment = 'SME' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END)) AS REAL) * 100 / NULLIF(SUM(CASE WHEN T1.Segment = 'SME' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END), 0), CAST(SUM(CASE WHEN T1.Segment = 'LAM' AND T2.Date LIKE '2013%' THEN T2.Consumption ELSE 0 END) - SUM(CASE WHEN T1.Segment = 'LAM' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(CASE WHEN T1.Segment = 'LAM' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END), 0), CAST(SUM(CASE WHEN T1.Segment = 'KAM' AND T2.Date LIKE '2013%' THEN T2.Consumption ELSE 0 END) - SUM(CASE WHEN T1.Segment = 'KAM' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(CASE WHEN T1.Segment = 'KAM' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END), 0) FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID",
+          "status": "success",
+          "colOrder": 1,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0007 (challenging)"
+            },
+            {
+              "label": "sql",
+              "value": "WITH yearly AS (SELECT c.segment, SUBSTRING(y.date,1,4) AS yr, SUM(y.consumption) AS total FROM yearmonth y JOIN customers c ON y.customerid = c.customerid WHERE c.currency = 'EUR' AND SUBSTRING(y.date,1,4) IN ('2012','2013') GROUP BY c.segment, SUBSTRING(y.date,1,4)) SELECT segment, (SUM(CASE WHEN yr='2013' THEN total ELSE 0 END) - SUM(CASE WHEN yr='2012' THEN total ELSE 0 END)) / SUM(CASE WHEN yr='2013' THEN total ELSE 0 END) * 100 AS pct_increase FROM yearly GROUP BY segment ORDER BY pct_increase DESC"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "3 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "10 sent, recall hit"
+            },
+            {
+              "label": "tokens",
+              "value": "1765 in, 340 out"
+            }
+          ],
+          "createdAt": "2026-07-31 02:12:10",
+          "averageScore": 0.5,
+          "scores": [
+            {
+              "id": 1115,
+              "name": "same-rows",
+              "score": 0,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-07-31 02:12:15"
+            },
+            {
+              "id": 1116,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-07-31 02:12:15"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 1115,
+          "duration": 2876,
+          "input": {
+            "id": "bird-0009",
+            "db_id": "debit_card_specializing",
+            "difficulty": "simple",
+            "question": "How many more \"discount\" gas stations does the Czech Republic have compared to Slovakia?",
+            "evidence": "Czech Republic can be represented as the Country value in gasstations table is 'CZE'; Slovakia can be represented as the Country value in the gasstations table is 'SVK';  Computation of more \"discount\" gas stations= Total no. of discount gas stations in Czech Republic - Total no. of discount gas stations in Slovakia",
+            "sql": "SELECT SUM(CASE WHEN Country = 'CZE' THEN 1 ELSE 0 END) - SUM(CASE WHEN Country = 'SVK' THEN 1 ELSE 0 END) FROM gasstations WHERE Segment = 'Discount'",
+            "rowCount": 1,
+            "columns": [
+              "?column?"
+            ],
+            "ms": 3
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT (SELECT COUNT(*) FROM gasstations WHERE country='CZE' AND segment='Discount') - (SELECT COUNT(*) FROM gasstations WHERE country='SVK' AND segment='Discount') AS difference",
+            "attempts": 1,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "attendance",
+              "budget",
+              "expense",
+              "income",
+              "member",
+              "order",
+              "frpm",
+              "gasstations",
+              "tags",
+              "account"
+            ],
+            "tablesGoldNeeded": [
+              "gasstations"
+            ],
+            "recallHit": true,
+            "tokensIn": 2192,
+            "tokensOut": 110,
+            "thinkingTokens": 15,
+            "pickerTokensIn": 0,
+            "pickerTokensOut": 0,
+            "pickerMs": 0,
+            "usd": 0.005484,
+            "modelMs": 2817,
+            "executionMs": 15,
+            "mode": "hard",
+            "picker": "keyword",
+            "repair": "off",
+            "promptVersion": "v1",
+            "pickerPromptVersion": "",
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT SUM(CASE WHEN Country = 'CZE' THEN 1 ELSE 0 END) - SUM(CASE WHEN Country = 'SVK' THEN 1 ELSE 0 END) FROM gasstations WHERE Segment = 'Discount'",
+          "status": "success",
+          "colOrder": 2,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0009 (simple)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT (SELECT COUNT(*) FROM gasstations WHERE country='CZE' AND segment='Discount') - (SELECT COUNT(*) FROM gasstations WHERE country='SVK' AND segment='Discount') AS difference"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "10 sent, recall hit"
+            },
+            {
+              "label": "tokens",
+              "value": "2192 in, 110 out"
+            }
+          ],
+          "createdAt": "2026-07-31 02:12:10",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 1113,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-07-31 02:12:13"
+            },
+            {
+              "id": 1114,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-07-31 02:12:13"
+            }
+          ],
+          "traces": []
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "hard | slice=dev | limit=3 | picker=bakeoff | prompt=v1 | pickerPrompt=picker-v1 | effort=medium | claude-sonnet-5 [llm]",
+      "filepath": "/Users/phyonyanwinn/Project/ProJect/QueryProof/evals/main.eval.ts",
+      "duration": 0,
+      "status": "success",
+      "variantName": "llm",
+      "variantGroup": "hard | slice=dev | limit=3 | picker=bakeoff | prompt=v1 | pickerPrompt=picker-v1 | effort=medium | claude-sonnet-5",
+      "createdAt": "2026-07-31 02:12:10",
+      "averageScore": 0.6666666666666666,
+      "evals": [
+        {
+          "id": 1116,
+          "duration": 11704,
+          "input": {
+            "id": "bird-0005",
+            "db_id": "debit_card_specializing",
+            "difficulty": "moderate",
+            "question": "What was the gas consumption peak month for SME customers in 2013?",
+            "evidence": "Year 2013 can be presented as Between 201301 And 201312; The first 4 strings of the Date values in the yearmonth table can represent year; The 5th and 6th string of the date can refer to month.",
+            "sql": "SELECT SUBSTR(T2.Date, 5, 2) FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID WHERE SUBSTR(T2.Date, 1, 4) = '2013' AND T1.Segment = 'SME' GROUP BY SUBSTR(T2.Date, 5, 2) ORDER BY SUM(T2.Consumption) DESC NULLS LAST LIMIT 1",
+            "rowCount": 1,
+            "columns": [
+              "substr"
+            ],
+            "ms": 44
+          },
+          "output": {
+            "correct": false,
+            "generatedSql": "SELECT SUBSTRING(y.\"date\", 5, 2) AS month, SUM(y.\"consumption\") AS total_consumption FROM \"yearmonth\" y JOIN \"customers\" c ON y.\"customerid\" = c.\"customerid\" WHERE c.\"segment\" = 'SME' AND y.\"date\" BETWEEN '201301' AND '201312' GROUP BY SUBSTRING(y.\"date\", 5, 2) ORDER BY total_consumption DESC LIMIT 1",
+            "attempts": 1,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": false,
+            "tablesSent": [
+              "customers",
+              "yearmonth"
+            ],
+            "tablesGoldNeeded": [
+              "customers",
+              "yearmonth"
+            ],
+            "recallHit": true,
+            "tokensIn": 553,
+            "tokensOut": 246,
+            "thinkingTokens": 50,
+            "pickerTokensIn": 4470,
+            "pickerTokensOut": 43,
+            "pickerMs": 3772,
+            "usd": 0.012936,
+            "modelMs": 7785,
+            "executionMs": 71,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "v1",
+            "pickerPromptVersion": "picker-v1",
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT SUBSTR(T2.Date, 5, 2) FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID WHERE SUBSTR(T2.Date, 1, 4) = '2013' AND T1.Segment = 'SME' GROUP BY SUBSTR(T2.Date, 5, 2) ORDER BY SUM(T2.Consumption) DESC NULLS LAST LIMIT 1",
+          "status": "success",
+          "colOrder": 0,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0005 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT SUBSTRING(y.\"date\", 5, 2) AS month, SUM(y.\"consumption\") AS total_consumption FROM \"yearmonth\" y JOIN \"customers\" c ON y.\"customerid\" = c.\"customerid\" WHERE c.\"segment\" = 'SME' AND y.\"date\" BETWEEN '201301' AND '201312' GROUP BY SUBSTRING(y.\"date\", 5, 2) ORDER BY total_consumption DESC LIMIT 1"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "2 sent, recall hit"
+            },
+            {
+              "label": "tokens",
+              "value": "553 in, 246 out"
+            }
+          ],
+          "createdAt": "2026-07-31 02:12:10",
+          "averageScore": 0.5,
+          "scores": [
+            {
+              "id": 1123,
+              "name": "same-rows",
+              "score": 0,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-07-31 02:12:22"
+            },
+            {
+              "id": 1124,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-07-31 02:12:22"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 1117,
+          "duration": 8730,
+          "input": {
+            "id": "bird-0007",
+            "db_id": "debit_card_specializing",
+            "difficulty": "challenging",
+            "question": "Which of the three segments—SME, LAM and KAM—has the biggest and lowest percentage increases in consumption paid in EUR between 2012 and 2013?",
+            "evidence": "Increase or Decrease = consumption for 2013 - consumption for 2012; Percentage of Increase = (Increase or Decrease / consumption for 2013) * 100%; The first 4 strings of the Date values in the yearmonth table can represent year",
+            "sql": "SELECT CAST((SUM(CASE WHEN T1.Segment = 'SME' AND T2.Date LIKE '2013%' THEN T2.Consumption ELSE 0 END) - SUM(CASE WHEN T1.Segment = 'SME' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END)) AS REAL) * 100 / NULLIF(SUM(CASE WHEN T1.Segment = 'SME' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END), 0), CAST(SUM(CASE WHEN T1.Segment = 'LAM' AND T2.Date LIKE '2013%' THEN T2.Consumption ELSE 0 END) - SUM(CASE WHEN T1.Segment = 'LAM' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(CASE WHEN T1.Segment = 'LAM' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END), 0), CAST(SUM(CASE WHEN T1.Segment = 'KAM' AND T2.Date LIKE '2013%' THEN T2.Consumption ELSE 0 END) - SUM(CASE WHEN T1.Segment = 'KAM' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(CASE WHEN T1.Segment = 'KAM' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END), 0) FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID",
+            "rowCount": 1,
+            "columns": [
+              "?column?",
+              "?column?",
+              "?column?"
+            ],
+            "ms": 47
+          },
+          "output": {
+            "correct": false,
+            "generatedSql": "WITH cons AS (SELECT c.segment, SUM(CASE WHEN LEFT(y.date,4)='2013' THEN y.consumption ELSE 0 END) AS c2013, SUM(CASE WHEN LEFT(y.date,4)='2012' THEN y.consumption ELSE 0 END) AS c2012 FROM customers c JOIN yearmonth y ON c.customerid = y.customerid WHERE c.currency = 'EUR' AND c.segment IN ('SME','LAM','KAM') GROUP BY c.segment) SELECT segment, ((c2013 - c2012) / NULLIF(c2013,0)) * 100 AS pct_increase FROM cons ORDER BY pct_increase DESC",
+            "attempts": 1,
+            "lastPgError": null,
+            "rowsReturned": 3,
+            "goldRowCount": 1,
+            "columnCountMatch": false,
+            "tablesSent": [
+              "customers",
+              "yearmonth"
+            ],
+            "tablesGoldNeeded": [
+              "customers",
+              "yearmonth"
+            ],
+            "recallHit": true,
+            "tokensIn": 602,
+            "tokensOut": 302,
+            "thinkingTokens": 39,
+            "pickerTokensIn": 4502,
+            "pickerTokensOut": 49,
+            "pickerMs": 3458,
+            "usd": 0.013718000000000001,
+            "modelMs": 5148,
+            "executionMs": 32,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "v1",
+            "pickerPromptVersion": "picker-v1",
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT CAST((SUM(CASE WHEN T1.Segment = 'SME' AND T2.Date LIKE '2013%' THEN T2.Consumption ELSE 0 END) - SUM(CASE WHEN T1.Segment = 'SME' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END)) AS REAL) * 100 / NULLIF(SUM(CASE WHEN T1.Segment = 'SME' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END), 0), CAST(SUM(CASE WHEN T1.Segment = 'LAM' AND T2.Date LIKE '2013%' THEN T2.Consumption ELSE 0 END) - SUM(CASE WHEN T1.Segment = 'LAM' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(CASE WHEN T1.Segment = 'LAM' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END), 0), CAST(SUM(CASE WHEN T1.Segment = 'KAM' AND T2.Date LIKE '2013%' THEN T2.Consumption ELSE 0 END) - SUM(CASE WHEN T1.Segment = 'KAM' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(CASE WHEN T1.Segment = 'KAM' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END), 0) FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID",
+          "status": "success",
+          "colOrder": 1,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0007 (challenging)"
+            },
+            {
+              "label": "sql",
+              "value": "WITH cons AS (SELECT c.segment, SUM(CASE WHEN LEFT(y.date,4)='2013' THEN y.consumption ELSE 0 END) AS c2013, SUM(CASE WHEN LEFT(y.date,4)='2012' THEN y.consumption ELSE 0 END) AS c2012 FROM customers c JOIN yearmonth y ON c.customerid = y.customerid WHERE c.currency = 'EUR' AND c.segment IN ('SME','LAM','KAM') GROUP BY c.segment) SELECT segment, ((c2013 - c2012) / NULLIF(c2013,0)) * 100 AS pct_increase FROM cons ORDER BY pct_increase DESC"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "3 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "2 sent, recall hit"
+            },
+            {
+              "label": "tokens",
+              "value": "602 in, 302 out"
+            }
+          ],
+          "createdAt": "2026-07-31 02:12:10",
+          "averageScore": 0.5,
+          "scores": [
+            {
+              "id": 1121,
+              "name": "same-rows",
+              "score": 0,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-07-31 02:12:19"
+            },
+            {
+              "id": 1122,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-07-31 02:12:19"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 1118,
+          "duration": 7023,
+          "input": {
+            "id": "bird-0009",
+            "db_id": "debit_card_specializing",
+            "difficulty": "simple",
+            "question": "How many more \"discount\" gas stations does the Czech Republic have compared to Slovakia?",
+            "evidence": "Czech Republic can be represented as the Country value in gasstations table is 'CZE'; Slovakia can be represented as the Country value in the gasstations table is 'SVK';  Computation of more \"discount\" gas stations= Total no. of discount gas stations in Czech Republic - Total no. of discount gas stations in Slovakia",
+            "sql": "SELECT SUM(CASE WHEN Country = 'CZE' THEN 1 ELSE 0 END) - SUM(CASE WHEN Country = 'SVK' THEN 1 ELSE 0 END) FROM gasstations WHERE Segment = 'Discount'",
+            "rowCount": 1,
+            "columns": [
+              "?column?"
+            ],
+            "ms": 3
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT (SELECT COUNT(*) FROM \"gasstations\" WHERE \"country\"='CZE' AND \"segment\"='Discount') - (SELECT COUNT(*) FROM \"gasstations\" WHERE \"country\"='SVK' AND \"segment\"='Discount') AS difference",
+            "attempts": 1,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "gasstations"
+            ],
+            "tablesGoldNeeded": [
+              "gasstations"
+            ],
+            "recallHit": true,
+            "tokensIn": 575,
+            "tokensOut": 138,
+            "thinkingTokens": 19,
+            "pickerTokensIn": 4478,
+            "pickerTokensOut": 15,
+            "pickerMs": 3863,
+            "usd": 0.011636,
+            "modelMs": 3113,
+            "executionMs": 5,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "v1",
+            "pickerPromptVersion": "picker-v1",
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT SUM(CASE WHEN Country = 'CZE' THEN 1 ELSE 0 END) - SUM(CASE WHEN Country = 'SVK' THEN 1 ELSE 0 END) FROM gasstations WHERE Segment = 'Discount'",
+          "status": "success",
+          "colOrder": 2,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0009 (simple)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT (SELECT COUNT(*) FROM \"gasstations\" WHERE \"country\"='CZE' AND \"segment\"='Discount') - (SELECT COUNT(*) FROM \"gasstations\" WHERE \"country\"='SVK' AND \"segment\"='Discount') AS difference"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "1 sent, recall hit"
+            },
+            {
+              "label": "tokens",
+              "value": "575 in, 138 out"
+            }
+          ],
+          "createdAt": "2026-07-31 02:12:10",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 1119,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-07-31 02:12:17"
+            },
+            {
+              "id": 1120,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-07-31 02:12:17"
+            }
+          ],
+          "traces": []
+        }
+      ]
+    }
+  ]
+}

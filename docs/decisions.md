@@ -98,6 +98,39 @@ were sent, so precision is visible without being scored.
 catalog check is what makes the cheap approach safe. Verify the extractor once
 across all 500 gold queries before trusting a recall number.
 
+**D20 — The pickers see the question only, never the evidence.**
+Both pickers. Evidence still goes into SQL generation in both modes, unchanged —
+this is only about what the picker reads. Julian's call, 2026-07-30.
+*Why:* the plan's wording ("match question tokens"), and evidence often names
+the exact column, so folding it in at birth would bake an unmeasured boost into
+the first recall number. Adding it later is a measured improvement on the slice.
+*Invalidated by:* nothing — a picker-sees-evidence run is a new configuration
+with its own number, not a correction to this one.
+
+**D21 — The LLM picker: pinned model, catalog names + columns, invented names
+dropped.**
+One call to the pinned `claude-sonnet-5` per question: 75 lines of
+`table: column, column, ...` built from `information_schema`, structured output,
+at most 10 tables (D6). Prompt versioned as `picker-v1`. A returned name that is
+not in the catalog is dropped, never thrown. Decided 2026-07-30.
+*Why the pinned model:* a second model id is a second pin to record and defend
+in every run config; the call is small enough that the cheaper model saves
+almost nothing.
+*Why no BIRD descriptions:* D5 defers them as a measured experiment. Using them
+in the picker first would muddy that experiment before it runs.
+*Why dropped rather than thrown:* a picker mistake has to surface as a recall
+miss and a scored wrong answer. Throwing would void the question (D19's path)
+and hide exactly the failures the bake-off exists to measure.
+
+**D22 — HARD mode requires an explicit `PICKER`; an unknown value throws.**
+`PICKER=none | keyword | llm` — required in hard mode, forbidden in easy mode,
+and forbidden with `EVAL_PICKERS=1` (the bake-off always runs both). Decided
+2026-07-30.
+*Why:* `none` (all 75 tables) is the Batch D baseline row — it has to be said,
+never arrived at by forgetting to set a variable. And a typo like
+`PICKER=keywrd` quietly falling back to all-75 would produce a plausible number
+under a configuration nobody chose, which is the vite-`DEV` void all over again.
+
 ---
 
 ## Running an eval (Phases 5, 6, 7)

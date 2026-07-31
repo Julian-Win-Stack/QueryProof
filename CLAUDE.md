@@ -28,14 +28,16 @@ npm run lint                   # MUST pass before any commit
 npm run smoke                  # one model call: parsed JSON, usage, rate-limit headers
 npm run ask -- bird-0000       # one gold question end to end, with its own evidence and db_id
 npm run ask -- "<question>" [db_id]   # ad-hoc question, no evidence; db_id scopes tables
-npm run eval:dev               # frozen 100-question dev slice
+npm run eval:dev               # frozen 100-question dev slice, EASY
 npm run eval:easy              # all 500, tables scoped to the record's db_id
-npm run eval:hard              # all 500, table selection on
-npm run eval:pickers           # keyword vs LLM picker, one run, dev slice
-npm run triage -- runs/<file>.json    # failure counts, four buckets
+PICKER=llm npm run eval:hard   # all 500, hard mode; PICKER required: none|keyword|llm
+PICKER=keyword npm run eval:hard:dev  # hard mode on the dev slice
+npm run eval:pickers           # keyword vs LLM picker, one evalite.each run, dev slice
+npm run triage -- runs/<file>.json    # failure counts, four buckets, per suite
 ```
 
-`eval:hard` and `eval:pickers` do not exist yet — Phase 6 adds them.
+In hard mode `PICKER` is mandatory — `none` (all 75 tables, the baseline row)
+has to be said, never defaulted into, and an unknown value throws (D22).
 
 Test files split by what they need, and the split is the filename: `src/*.test.ts`
 is pure and runs under `npm test`, `src/*.dbtest.ts` needs the container and runs
@@ -73,6 +75,7 @@ gold/          validated/rejected/quarantine.json   (gitignored, output of valid
 scripts/       one-shot and measurement scripts
 src/           library code
 src/prompts/   one file per prompt version, each exporting PROMPT_VERSION
+src/pickers/   table selection: keyword.ts (no LLM), llm.ts (pinned model)
 evals/         *.eval.ts, configuration comes from env, not from new files
 evals/dev-slice.json  the frozen 100 ids — committed, never regenerated
 evalite.config.ts     storage (persistent SQLite), concurrency, trials, timeouts

@@ -181,3 +181,43 @@ note:          The EASY yardstick (D15: run once, never tuned). By difficulty:
                925,970 in / 67,356 out (12,173 thinking) — $2.53.
 export:        runs/2026-07-30-153025-easy-full.json
 ```
+
+## 2026-07-30 — Bake-off wiring smokes (LIMIT=3), two runs
+
+```
+approach:      mode=hard picker=bakeoff prompt=v1 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium limit=3
+question set:  dev-slice, first 3 ids only
+accuracy:      wiring smoke — number meaningless by construction (LIMIT stamps the run name)
+verdict:       void
+note:          Two runs. The first caught a real bug before money was spent at
+               scale: the API rejects maxItems on array schemas, so every llm
+               variant question 400'd in ~700ms; cap moved to the prompt and
+               resolveNames. Second smoke: 3/3 both variants, recall and picker
+               tokens recorded per row.
+export:        runs/2026-07-30-191137-pickers-dev.json (broken llm variant)
+               runs/2026-07-30-191210-pickers-dev.json (clean)
+```
+
+## 2026-07-30 — Picker bake-off, keyword vs LLM (Phase 6c) ⭐ first HARD numbers
+
+```
+approach:      mode=hard picker=bakeoff prompt=v1 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium concurrency=50
+question set:  dev-slice (100), both pickers in one evalite.each run (D9)
+accuracy:      keyword 45.0% | llm 56.0%
+table recall:  keyword 60.0% | llm 85.0%
+noise band:    ±2.5 points (dev slice, 3 trials, 2026-07-30)
+verdict:       kept
+note:          First HARD-mode numbers. The gaps dwarf the band: +11 accuracy,
+               +25 recall for the llm picker. Accuracy stays under recall in
+               both, as it must. The llm picker sends 2.1 tables on average vs
+               keyword's fill-to-10, and hard+llm (56%) lands inside the EASY
+               dev-slice range (52–58) — with a good picker, not knowing the
+               database label costs almost nothing on the slice. Triage, llm:
+               13 table missing / 1 never valid / 12 comparator suspect /
+               18 valid but wrong. keyword: 32 / 0 / 12 / 11. Pickers see the
+               question only (D20). 0 voids. Cost $2.04 ($0.79 + $1.25);
+               llm picker adds ~4.5k input tokens per question.
+               Which picker gets the Batch D full run is Julian's call —
+               the slice evidence says llm, by 10x the band.
+export:        runs/2026-07-30-191255-pickers-dev.json
+```

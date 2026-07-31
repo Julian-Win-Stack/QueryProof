@@ -66,8 +66,22 @@ export function usdCost(usage: Usage): number {
 
 let client: Anthropic | undefined;
 
+// PRODUCT_PATH=1 routes every model call through the Respan gateway — caching,
+// fallback and tracing, wins for the demo and poison for measurement. Only the
+// demo's start script sets it, and the eval file refuses to run under it.
+const RESPAN_BASE_URL = 'https://api.respan.ai/api/anthropic/';
+
 function anthropic(): Anthropic {
   if (client) return client;
+
+  if (process.env.PRODUCT_PATH === '1') {
+    const respanKey = process.env.RESPAN_API_KEY;
+    if (!respanKey) throw new Error('PRODUCT_PATH=1 needs RESPAN_API_KEY — see CLAUDE.md.');
+    // The Respan key goes where the Anthropic key would; the gateway holds the
+    // provider credentials.
+    client = new Anthropic({ apiKey: respanKey, baseURL: RESPAN_BASE_URL, maxRetries: 5 });
+    return client;
+  }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY is not set — see CLAUDE.md.');

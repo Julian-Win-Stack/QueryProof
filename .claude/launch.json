@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "demo",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "demo"],
+      "port": 3000
+    },
+    {
+      "name": "demo-direct",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["next", "dev", "-p", "3001"],
+      "port": 3001
+    }
+  ]
+}

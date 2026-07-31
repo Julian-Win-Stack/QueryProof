@@ -6,6 +6,7 @@
   "scripts": {
     "validate-gold": "tsx --env-file-if-exists=.env scripts/validate-gold.ts",
     "smoke": "tsx --env-file-if-exists=.env scripts/smoke.ts",
+    "demo": "PRODUCT_PATH=1 next dev",
     "ask": "tsx --env-file-if-exists=.env scripts/ask.ts",
     "eval:dev": "EVAL_MODE=easy EVAL_DEV=1 evalite run evals/main.eval.ts --outputPath=runs/$(date +%Y-%m-%d-%H%M%S)-easy-dev.json",
     "eval:easy": "EVAL_MODE=easy evalite run evals/main.eval.ts --outputPath=runs/$(date +%Y-%m-%d-%H%M%S)-easy-full.json",
@@ -24,12 +25,17 @@
   "type": "module",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
-    "pg": "^8.22.0"
+    "next": "^16.2.12",
+    "pg": "^8.22.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.1.2",
     "@types/pg": "^8.20.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
     "better-sqlite3": "^11.10.0",
     "eslint": "^10.8.0",
     "evalite": "^1.0.0-beta.16",

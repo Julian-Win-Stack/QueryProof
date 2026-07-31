@@ -58,6 +58,12 @@ type GoldRecord = {
 type PickerName = 'none' | 'keyword' | 'llm';
 const PICKER_NAMES: PickerName[] = ['none', 'keyword', 'llm'];
 
+// The gateway caches, and a cached repeat run reports zero variance — a fake
+// noise floor. Eval runs call Anthropic directly, always.
+if (process.env.PRODUCT_PATH === '1') {
+  throw new Error('PRODUCT_PATH=1 routes through the Respan gateway — eval runs never do. Unset it.');
+}
+
 const MODE = process.env.EVAL_MODE ?? 'easy';
 if (MODE !== 'easy' && MODE !== 'hard') {
   throw new Error(`EVAL_MODE="${MODE}" — easy or hard`);

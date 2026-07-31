@@ -313,3 +313,23 @@ lives in one place — `anthropic()` in `src/model.ts`, keyed on `PRODUCT_PATH`.
 - Every eval run file records its full configuration — prompt version, model,
   effort, picker, limit, mode. A run that does not record its config is not
   evidence.
+
+## How to answer Julian
+
+This project is a hiring portfolio piece. Every answer is preparation for
+defending it out loud to an interviewer who has not read the code.
+
+- **Answer in what he would say, not in what the repo contains.** Give the claim,
+  the number behind it, and the sentence that survives a follow-up question.
+- **Assume no context.** Never open with a file path, a symbol name, or a term
+  from `CONTEXT.md` as if it were shared vocabulary. Define it in plain words
+  first, then name it.
+- **Every number carries its noise band.** A difference smaller than ±2.5 points
+  is a tie — say "tie", never "small improvement". That discipline *is* the
+  pitch; stating a tie as a win is the one thing that loses the room.
+- **Name the pushback and answer it.** The strongest answers here are the
+  negative results, so give him the objection ("so nothing worked?") and the
+  reply in the same breath.
+- **Cut anything he would not say aloud.** Implementation detail, file layout,
+  and cost tables belong in an answer only when the interviewer asked about
+  engineering, not about results.

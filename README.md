@@ -73,6 +73,39 @@ Three findings, all against intuition, all measured:
    the bottleneck (~2% of questions), so the loop is nearly free ($0.07) and
    nearly useless. Reported as the negative result it is.
 
+## Where the other 43% goes
+
+Every failure in the baseline run, classified by executing both queries — no
+sampling, both SQL strings are in the committed export:
+
+| Cause | Share of 227 failures |
+|---|---|
+| Right shape, wrong values | 41% |
+| Wrong number of columns | 34% |
+| Wrong number of rows | 19% |
+| Query crashed | 5% |
+
+**The second row is mostly not a model error.** Asked *"which year recorded the
+most consumption,"* the model returns the year and the total it sorted by; the
+reference returns the year alone. Same answer, different column count, graded
+wrong.
+
+The obvious fix — a prompt rule saying "return only the columns asked for, never
+the one you sorted by" — was written, measured on the dev slice, and
+**rejected**: 62.0% → 57.0%. It failed because the reference queries do not
+agree with each other. Some exclude the sorted column, one includes it, and one
+answers only half of a two-part question. A rule followed consistently is
+guaranteed to be wrong somewhere. Worse, told not to *select* the column it
+sorted by, the model stopped *sorting* — rewriting "order by salary, take the
+top" as an equality subquery that returns zero rows. Empty results doubled.
+
+It is also a smaller bucket than it looks: 38 of those 78 return the wrong row
+count too and were never column-limited. The addressable share is 40 questions —
+**8% of the set**, not 34% of failures.
+
+Recorded as a measurement ceiling, not a tuning target
+([RUNS.md](RUNS.md), 2026-07-31).
+
 ## Why the numbers can be trusted
 
 - **Execution-based grading, hand-written comparator.** Row order ignored,

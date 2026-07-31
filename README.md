@@ -1,23 +1,30 @@
 # QueryProof
 
-Ask a Postgres database a question in English; get SQL and rows back — with a
-measured, reproducible accuracy number behind every claim.
+Ask a Postgres database a question in English; get SQL and rows back.
 
-The pipeline: an LLM picks the relevant tables out of a 75-table database, a
-second call writes the SQL, the query runs under a `SELECT`-only role, and on a
-Postgres error the error text is fed back for a retry. Grading is
-**execution-based only**: an answer is correct iff running its SQL returns the
-same rows as the reference SQL. No LLM judges anything, anywhere.
+**59.2% correct on [BIRD Mini-Dev](https://github.com/bird-bench/mini_dev)** —
+against the **36.0%** GPT-4-turbo baseline BIRD publishes for the same 500
+questions, and measured in a harder setting than that baseline uses.
 
-Benchmark: [BIRD Mini-Dev](https://github.com/bird-bench/mini_dev) (500
-questions over 11 real databases), loaded into a single Postgres instance.
-Model: `claude-sonnet-5`, pinned for every number below.
+Correct means *the generated SQL ran and returned the same rows as the reference
+SQL*. No LLM judges anything, anywhere.
+
+Any accuracy number is easy to produce and hard to trust. What this repo ships is
+the second part: a measured noise floor that every comparison is read against, an
+append-only log of every run including the ones that lost, and a classified
+breakdown of the failures that remain. Two of the three configurations below are
+ties — and are labelled as ties.
+
+**The pipeline.** Eleven real databases live in one Postgres instance. An LLM
+picks the relevant tables out of the 75, a second call writes the SQL, the query
+runs under a `SELECT`-only role, and on a Postgres error the error text is fed
+back for a retry. Model: `claude-sonnet-5`, pinned for every number here.
 
 ## Results
 
-**The hard setting** — the question does *not* say which database it belongs
-to. All 11 databases share one namespace; 75 tables, with traps
-(`races` is Formula 1, `race` is alien species).
+**The hard setting** — the question does *not* say which database it belongs to.
+All 11 share one namespace: 75 tables, with traps (`races` is Formula 1, `race`
+is alien species).
 
 | Configuration | Accuracy | Table recall | Cost / run |
 |---|---|---|---|
@@ -25,53 +32,73 @@ to. All 11 databases share one namespace; 75 tables, with traps
 | + LLM table selection (~2 tables sent) | **59.2%** | 86.0% | $6.31 |
 | + self-repair (2 retries on SQL errors) | **58.8%** | 85.4% | $6.38 |
 
-For scale: BIRD's published GPT-4-turbo baseline on these same questions is
-**36.0%** — and it gets told which database each question belongs to, which the
-rows above do not. Grading matches BIRD's: rows compared as a set, so duplicate
-rows are forgiven on both sides. Remaining divergences are listed in
+Noise: **±2.5 points**, from 3 repeat runs of one configuration — the model has
+no determinism knob, so every comparison is read against that band. Denominator:
+all 500 validated questions, 0 quarantined and 0 voided in every run above.
+
+**The easy setting** — the question names its database, which is how BIRD's
+published baselines are measured — scores **58.4%**. That is the fairest
+side-by-side with the 36.0% above. Grading follows BIRD's own rule, so the two
+are comparable; the divergences that remain are listed in
 [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
 
-Measured noise: **±2.5 points** (same configuration, 3 repeat runs — the model
-has no determinism knob, so every comparison is read against this band).
-Denominator: 500 validated questions, 0 quarantined, 0 rejected, 0 voided
-answers in any run above.
-
 ¹ Structural: the baseline sends every table, so recall cannot miss.
-
-**The easy setting** (the question names its database — the setting BIRD's
-published baselines use, and the fairest side-by-side with the 36.0% above)
-scores **58.4%**.
 
 ## What the table actually says
 
 Three findings, all against intuition, all measured:
 
 1. **Not knowing the database costs nothing — if you send everything.** Hard
-   baseline 57.4% vs easy 58.4%: a tie inside the noise band. The model
-   locates the right tables among 75 on its own; what it cannot survive is a
-   *wrong shortlist*.
+   baseline 57.4% vs easy 58.4%: a tie inside the noise band. The model locates
+   the right tables among 75 on its own; what it cannot survive is a *wrong
+   shortlist*.
 
-2. **Table selection bought cost, not accuracy.** +1.8 points is inside the
-   band — a tie. 2.5× cheaper is real: **$6.31 vs $15.70** per 500 questions.
+2. **Table selection bought cost, not accuracy.** +1.8 points is inside the band
+   — a tie. **$6.31 vs $15.70** per 500 questions is not: 2.5× cheaper, for the
+   same accuracy.
 
-   It buys that by adding a call, not removing one. Sending all 75 tables means
-   a **14,946-token** prompt on every question, to get one line of SQL back.
-   Instead the picker reads a condensed catalog (**4,478 tokens**), names the
-   ~2 tables the question needs, and the SQL call's prompt drops to **950
-   tokens — 94% smaller**. Two calls, 5,428 input tokens total instead of
-   14,946. The bill is almost entirely input: the answer is ~150 tokens, the
-   schema is 100× that, so even at output's 5× price the prompt dominates ~20:1.
+   The risk is the picker leaving out a table the question needed — and then no
+   prompt tuning saves the query, because accuracy can never exceed recall. So
+   recall is measured independently on every run. It holds **86.0%**.
 
-   The risk is that the picker leaves out a table the question needed — and
-   then no prompt tuning saves the query, because accuracy can never exceed
-   recall. So recall is measured independently on every run. It holds **86.0%**.
+   <details>
+   <summary>Why adding a second model call costs <em>less</em></summary>
 
-3. **Self-repair repairs the wrong thing.** Feeding Postgres errors back
-   drove final execution errors from 10 to 0 — every retried query *runs*.
-   But only 1 of 11 retried questions became *correct*; the rest moved from
-   "crashes" to "runs and returns the wrong rows". Executability was never
-   the bottleneck (~2% of questions), so the loop is nearly free ($0.07) and
-   nearly useless. Reported as the negative result it is.
+   Sending all 75 tables means a **14,946-token** prompt on every question, to
+   get one line of SQL back. Instead the picker reads a condensed catalog
+   (**4,478 tokens**), names the ~2 tables the question needs, and the SQL
+   call's prompt drops to **950 tokens — 94% smaller**. Two calls, 5,428 input
+   tokens total instead of 14,946.
+
+   The bill is almost entirely input: the answer is ~150 tokens, the schema is
+   100× that, so even at output's 5× price the prompt dominates ~20:1.
+   </details>
+
+3. **Self-repair repairs the wrong thing.** Feeding Postgres errors back drove
+   final execution errors from 10 to 0 — every retried query *runs*. But only 1
+   of 11 retried questions became *correct*; the rest moved from "crashes" to
+   "runs and returns the wrong rows". Executability was never the bottleneck
+   (~2% of questions), so the loop is nearly free ($0.07) and nearly useless.
+   Reported as the negative result it is.
+
+## Why the numbers can be trusted
+
+- **Execution-based grading, hand-written comparator.** Row order ignored,
+  column order significant, column names never consulted, duplicate rows
+  forgiven — BIRD's own rule, so the numbers above are comparable to theirs. The
+  project graded duplicates as differences until 2026-07-31 and scored 2.8–4.2
+  points lower for it; the reversal and what it cost are in
+  [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
+- **A noise floor before any comparison.** Every "improvement" smaller than the
+  measured ±2.5 band is called a tie, including two of the three rows above.
+- **Voids are not zeros.** A refusal or an exhausted rate-limit retry voids the
+  question rather than scoring 0 — a missing answer and a wrong answer are
+  different things. Every run above had zero voids.
+- **Every number is traceable.** Each run's full configuration, verdict, and
+  JSON export are committed: [RUNS.md](RUNS.md) is the append-only log,
+  `runs/*.json` the evidence. A number without an entry does not ship.
+- **Generated SQL cannot write.** It executes as a role with `SELECT` only — the
+  role is the wall, not a regex.
 
 ## Where the other 43% goes
 
@@ -91,40 +118,18 @@ reference returns the year alone. Same answer, different column count, graded
 wrong.
 
 The obvious fix — a prompt rule saying "return only the columns asked for, never
-the one you sorted by" — was written, measured on the dev slice, and
-**rejected**: 62.0% → 57.0%. It failed because the reference queries do not
-agree with each other. Some exclude the sorted column, one includes it, and one
-answers only half of a two-part question. A rule followed consistently is
-guaranteed to be wrong somewhere. Worse, told not to *select* the column it
-sorted by, the model stopped *sorting* — rewriting "order by salary, take the
-top" as an equality subquery that returns zero rows. Empty results doubled.
+the one you sorted by" — was written, measured, and **rejected**: 62.0% → 57.0%
+on the dev slice. It failed because the reference queries do not agree with each
+other. Some exclude the sorted column, one includes it, and one answers only half
+of a two-part question. A rule followed consistently is guaranteed to be wrong
+somewhere. Worse, told not to *select* the column it sorted by, the model stopped
+*sorting* — rewriting "order by salary, take the top" as an equality subquery
+that returns zero rows. Empty results doubled.
 
 It is also a smaller bucket than it looks: 38 of those 78 return the wrong row
 count too and were never column-limited. The addressable share is 40 questions —
-**8% of the set**, not 34% of failures.
-
-Recorded as a measurement ceiling, not a tuning target
-([RUNS.md](RUNS.md), 2026-07-31).
-
-## Why the numbers can be trusted
-
-- **Execution-based grading, hand-written comparator.** Row order ignored,
-  column order significant, column names never consulted, duplicate rows
-  forgiven — BIRD's own rule, so the numbers above are comparable to theirs.
-  The project graded duplicates as differences until 2026-07-31 and scored
-  2.8–4.2 points lower for it; the reversal and what it cost are in
-  [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
-- **A noise floor before any comparison.** Every "improvement" smaller than
-  the measured ±2.5 band is called a tie, including two of the three rows
-  above.
-- **Voids are not zeros.** A refusal or an exhausted rate-limit retry voids
-  the question rather than scoring 0 — a missing answer and a wrong answer
-  are different things. Every run above had zero voids.
-- **Every number is traceable.** Each run's full configuration, verdict, and
-  JSON export are committed: [RUNS.md](RUNS.md) is the append-only log,
-  `runs/*.json` the evidence. A number without an entry does not ship.
-- **Generated SQL cannot write.** It executes as a role with `SELECT` only —
-  the role is the wall, not a regex.
+**8% of the set**, not 34% of failures. Recorded as a measurement ceiling, not a
+tuning target ([RUNS.md](RUNS.md), 2026-07-31).
 
 ## The demo
 
@@ -160,7 +165,7 @@ Needs Docker Postgres with the BIRD dump loaded, `DATABASE_URL`,
 ## Next: Version B
 
 Version A (everything above) hand-writes the control flow: pick tables →
-generate SQL → execute → retry on error. **Version B hands the same five
-tools to the model in a loop and lets it drive** — an agent instead of a
-pipeline. It will be measured on the identical question slice, against
-Version A's numbers and Version A's noise band, and ships next.
+generate SQL → execute → retry on error. **Version B hands the same five tools to
+the model in a loop and lets it drive** — an agent instead of a pipeline. It will
+be measured on the identical question slice, against Version A's numbers and
+Version A's noise band.

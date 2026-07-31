@@ -7,7 +7,7 @@ import { test } from 'node:test';
 import { answerQuestion } from './answer.ts';
 import type { ExecutionResult } from './execute-readonly.ts';
 import type { GeneratedSql } from './generate-sql.ts';
-import type { FailedAttempt } from './prompts/v1.ts';
+import type { FailedAttempt } from './prompts/v2.ts';
 
 const QUESTION = { question: 'How many?', evidence: '', schemaText: 'schema' };
 

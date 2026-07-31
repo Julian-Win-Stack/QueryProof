@@ -21,11 +21,17 @@ test('column names are never consulted', () => {
   assert.ok(compareRows([[7]], [[7]]));
 });
 
-test('a duplicate row is a real difference', () => {
-  // Same length, same distinct values — a set comparison would call these
-  // equal. That is the symptom of a wrong join key.
-  assert.ok(!compareRows([[1], [1], [2]], [[1], [2], [2]]));
-  assert.ok(!compareRows([[1], [1]], [[1]]));
+test('a duplicate row is not a difference', () => {
+  // BIRD's rule, adopted 2026-07-31. Both of these are equal under it, and both
+  // were failures before. The second is what a join on a non-unique key looks
+  // like — accepted cost, recorded in KNOWN_ISSUES.md.
+  assert.ok(compareRows([[1], [1], [2]], [[1], [2], [2]]));
+  assert.ok(compareRows([[1], [1]], [[1]]));
+});
+
+test('a row present on one side only is still a difference', () => {
+  assert.ok(!compareRows([[1], [2]], [[1]]));
+  assert.ok(!compareRows([[1]], [[1], [2]]));
 });
 
 test('an empty result is not the same as rows', () => {

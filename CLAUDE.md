@@ -35,6 +35,7 @@ PICKER=keyword npm run eval:hard:dev  # hard mode on the dev slice
 PICKER=llm npm run eval:hard:repair   # hard mode + self-repair (REPAIR=on, 2 retries)
 npm run eval:pickers           # keyword vs LLM picker, one evalite.each run, dev slice
 npm run triage -- runs/<file>.json    # failure counts, four buckets, per suite
+npm run rescore -- runs/<file>.json   # re-grade a stored run, no model calls
 npm run demo                   # the product surface, PRODUCT_PATH=1, port 3000
 ```
 
@@ -168,11 +169,12 @@ in the source file is **not** unique — ids 137 and 138 each appear twice.
 correct iff running it returns the same rows as the gold query.
 
 **The row comparator's four rules.** Row order ignored. Column order
-significant. Column names never consulted. Duplicates significant (multiset).
-This is stricter than BIRD, which compares result *sets* and so forgives
-duplicate rows — the exact symptom of a wrong join key, which is the most common
-way an LLM gets SQL wrong. Deliberate divergence, recorded in `KNOWN_ISSUES.md`.
-Never add a dedupe step.
+significant. Column names never consulted. Duplicates ignored (set) — BIRD's own
+rule, adopted 2026-07-31, reversing the stricter multiset rule the project
+started with. The cost is that a join on a non-unique key returns every correct
+row several times and now scores correct; comparability with BIRD's published
+baselines was judged worth more (**D23**, `KNOWN_ISSUES.md` issue 1). Every
+number predating the reversal is retired, not carried forward.
 
 **Value canonicalization happens up front, not on demand.** `pg` returns
 `integer` as a number and `bigint`/`numeric` as a string, so two correct queries

@@ -12,7 +12,7 @@
 import { executeReadOnly, type ExecutionResult } from './execute-readonly.ts';
 import { generateSql, type GeneratedSql } from './generate-sql.ts';
 import { type Usage } from './model.ts';
-import { type FailedAttempt } from './prompts/v1.ts';
+import { type FailedAttempt } from './prompts/v2.ts';
 
 const MAX_RETRIES = 2;
 

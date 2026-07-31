@@ -4,20 +4,33 @@ Deliberate divergences from BIRD's evaluation, and decisions that would
 otherwise read as bugs. Each is a settled choice with its reasoning, not an open
 question.
 
-## 1. Rows are compared as a multiset, not a set
+## 1. Rows are compared as a set, matching BIRD — reversed 2026-07-31
 
-**Choice.** Two results are equal iff they contain the same rows the same number
-of times. Row order is ignored, column order is significant, column names are
-never consulted, and a duplicated row is a real difference.
+**Choice.** Two results are equal iff they contain the same distinct rows. Row
+order is ignored, column order is significant, column names are never consulted,
+and a duplicated row is **not** a difference. This is BIRD's own rule.
 
-**Why.** BIRD compares result *sets*, which forgives a result that returns every
-correct row plus duplicates. That is the exact symptom of a join on a non-unique
-key — the single most common way an LLM gets SQL wrong. Grading it as correct
-would hide the failure mode the project exists to measure.
+**Why.** The README's central claim places this project's accuracy next to
+BIRD's published baselines. A number produced by a stricter grader cannot be
+placed there — it is lower for reasons that have nothing to do with the system
+being measured, and no amount of footnoting fixes that.
 
-**Effect.** For identical generated SQL, our accuracy is at most BIRD's and
-sometimes lower. That gap is the point, not an error to reconcile. Never add a
-dedupe step to make the numbers line up.
+**What it was, and what the reversal cost.** Until 2026-07-31 duplicates were
+significant, on the reasoning that a join on a non-unique key returns every
+correct row several times and that is the most common way LLM-written SQL is
+wrong. That reasoning still holds. Set comparison scores those queries correct,
+so the project has traded a real diagnostic for comparability, deliberately
+(**D23**).
+
+**Measured effect of the reversal.** Re-scoring the four full runs from their
+stored SQL, with no new model calls: HARD baseline 54.6% → 57.4%, HARD + picker
+55.4% → 59.2%, HARD + picker + repair 54.8% → 59.0%, EASY 55.4% → 58.4%. The
+noise band re-derived under the new rule is ±2.5 points, unchanged. No
+conclusion moved.
+
+**The old numbers are not deleted.** Their `RUNS.md` entries stand as written;
+the re-scored numbers are separate, later entries. A number is never edited
+after the fact, including when the grader changes underneath it.
 
 
 
@@ -68,5 +81,8 @@ direction wins one side and loses the other.
 mostly invisible; under multiset comparison it is a full failure. So this bucket
 is partly the price of the stricter comparator, and it is paid deliberately.
 
-**Effect.** Treat these as ceiling, not backlog. Do not add a dedupe step to the
-comparator to recover them — see issue 1.
+**Effect.** Largely resolved by the reversal in issue 1: under set comparison a
+dedupe disagreement is invisible unless the two results differ for some other
+reason as well. It is recorded here because the underlying ambiguity in the
+questions is still there, and any future return to multiset grading brings the
+whole bucket back.

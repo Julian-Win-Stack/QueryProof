@@ -318,3 +318,112 @@ note:          The improvement table's third row, and a clean negative result.
                70 comparator suspect / 95 valid but wrong. 0 voids.
 export:        runs/2026-07-30-194223-hard-llm-repair-full.json
 ```
+
+---
+
+## 2026-07-31 — Comparator reversed to BIRD's set comparison (D23)
+
+Duplicate rows stopped being a difference. Every full run below was re-graded
+from its stored SQL by `npm run rescore` — no model calls, no new eval runs, the
+same static database. The entries above are untouched and remain the record of
+what multiset grading gave; the numbers below supersede them.
+
+**The exports still hold the old verdicts.** `runs/*.json` records the `correct`
+flag as it was scored at run time. Re-scoring reads the SQL out of the export
+and re-executes it; it does not rewrite the file. A number read straight out of
+an export predating 2026-07-31 is a multiset number.
+
+### Noise band, re-derived under the new rule
+
+```
+approach:      mode=easy picker=none repair=off prompt=v1 model=claude-sonnet-5 effort=medium trials=3
+question set:  dev-slice (100), each question 3x — the stored Phase 5c run, re-graded
+accuracy:      55.0% / 60.0% / 60.0% per trial   (was 52 / 57 / 57)
+noise band:    ±2.5 points — unchanged
+verdict:       kept
+note:          The band had to be re-derived: a band measured under the old
+               comparator is not the band the new numbers are read against. It
+               came out identical, so every "inside the band" call below stands
+               for the same reason it did before.
+export:        runs/2026-07-30-152816-easy-dev.json (re-graded, not re-run)
+```
+
+### HARD baseline on all 500 — README row 1, re-scored
+
+```
+approach:      mode=hard picker=none repair=off prompt=v1 model=claude-sonnet-5 effort=medium
+question set:  full (500 validated)
+accuracy:      57.4% (287/500)   — was 54.6% (273/500)
+table recall:  100% — structural, unchanged by grading
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       kept
+note:          +2.8 points from grading alone. By difficulty: simple 101/148
+               (68%), moderate 140/250 (56%), challenging 46/102 (45%).
+               15 questions gained, 1 lost — and the loss is not a regression:
+               bird-0003 sums a float column to ~4.0e8, Postgres parallelizes
+               the aggregate, and 50 identical executions return 5 distinct
+               values straddling the comparator's 6-decimal rounding. That
+               question is a coin flip run to run, under either comparator.
+export:        runs/2026-07-30-193710-hard-none-full.json (re-graded)
+```
+
+### HARD + llm picker on all 500 — README row 2, re-scored
+
+```
+approach:      mode=hard picker=llm repair=off prompt=v1 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium
+question set:  full (500 validated)
+accuracy:      59.2% (296/500)   — was 55.4% (277/500)
+table recall:  86.0% — unchanged by grading
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       kept
+note:          +3.8 points, the largest gain of the four — the smaller prompt
+               produces more of the duplicate-row near-misses that set
+               comparison now forgives. Against the re-scored baseline's 57.4%:
+               +1.8 points, still inside the band, still a tie on accuracy.
+               The picker's result is unchanged in kind: it bought cost, not
+               accuracy. By difficulty: simple 101/148, moderate 144/250,
+               challenging 51/102. 20 gained, 1 lost (bird-0003, as above).
+export:        runs/2026-07-30-194011-hard-llm-full.json (re-graded)
+```
+
+### HARD + llm + self-repair on all 500 — README row 3, re-scored
+
+```
+approach:      mode=hard picker=llm repair=on prompt=v1 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium
+question set:  full (500 validated)
+accuracy:      58.8% (294/500)   — was 54.8% (274/500)
+table recall:  85.4% — unchanged by grading
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       kept
+note:          +4.0 points. Against row 2's re-scored 59.2%: -0.4 points, a
+               tie. Self-repair remains a clean negative result under the new
+               grading — it fixes executability, which was never the
+               bottleneck. By difficulty: simple 100/148, moderate 143/250,
+               challenging 51/102. 21 gained, 1 lost.
+               Two re-scoring passes of this run gave 295 and 294: bird-0003
+               flipped between them. Every number in this section carries ±0.2
+               points from that one question — see the baseline entry above for
+               why it is not stable under any comparator.
+               Confidence heuristic, re-measured on this run: flagged (empty
+               result or repaired) 40 questions -> 2.5% correct, unchanged;
+               everything else 460 questions -> 63.7% correct, up from 59.3%.
+export:        runs/2026-07-30-194223-hard-llm-repair-full.json (re-graded)
+```
+
+### EASY on all 500 — the yardstick, re-scored
+
+```
+approach:      mode=easy picker=none repair=off prompt=v1 model=claude-sonnet-5 effort=medium
+question set:  full (500 validated)
+accuracy:      58.4% (292/500)   — was 55.4% (277/500)
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       kept
+note:          +3.0 points. Against the re-scored HARD baseline's 57.4%: +1.0,
+               inside the band. Not knowing which database a question belongs
+               to still costs nothing when the whole catalog is in the prompt —
+               the finding survives the grading change intact. Re-scored under
+               ADR 0002: the yardstick is re-graded, never re-tuned.
+               By difficulty: simple 100/148, moderate 140/250, challenging
+               52/102. 16 gained, 1 lost (bird-0003, as above).
+export:        runs/2026-07-30-153025-easy-full.json (re-graded)
+```

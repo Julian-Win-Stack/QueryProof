@@ -1,7 +1,13 @@
 // The grader. Every accuracy number in the README is this function's output.
 //
 // Four rules: row order ignored, column order significant, column names never
-// consulted (structural — the signature takes arrays), duplicates significant.
+// consulted (structural — the signature takes arrays), duplicates ignored.
+//
+// Duplicates were significant until 2026-07-31 and are not any more — BIRD
+// compares result sets, and a number graded by a stricter rule cannot sit next
+// to BIRD's published baselines. The cost is recorded in KNOWN_ISSUES.md: a
+// join on a non-unique key returns every correct row several times, and this
+// comparison now calls that correct.
 //
 // This is the project's only value canonicalization (D1-D3 in
 // docs/decisions.md). A second one anywhere else grades against a different
@@ -56,10 +62,10 @@ function canonicalizeRow(row: unknown[]): string {
 }
 
 export function compareRows(actual: unknown[][], expected: unknown[][]): boolean {
-  if (actual.length !== expected.length) return false;
+  const canonicalActual = new Set(actual.map(canonicalizeRow));
+  const canonicalExpected = new Set(expected.map(canonicalizeRow));
 
-  const canonicalActual = actual.map(canonicalizeRow).sort();
-  const canonicalExpected = expected.map(canonicalizeRow).sort();
+  if (canonicalActual.size !== canonicalExpected.size) return false;
 
-  return canonicalActual.every((row, index) => row === canonicalExpected[index]);
+  return [...canonicalActual].every((row) => canonicalExpected.has(row));
 }

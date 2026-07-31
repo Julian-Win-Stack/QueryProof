@@ -339,6 +339,27 @@ Question in, all 75 tables, winning picker, SQL and rows out.
 demos EASY mode — the task deliberately labelled a yardstick — and a hint box
 hands the visitor BIRD's evidence field, which no real user has.
 
+**D23 — Rows are compared as a set, not a multiset. This reverses D1's rule.**
+Duplicate rows no longer make two results different. Adopted 2026-07-31. Every
+published number was re-scored under it; the earlier multiset numbers are
+retired, not carried forward, and stay in `RUNS.md` as the record of what the
+stricter rule gave.
+*Why:* BIRD compares result sets. A number graded by a stricter rule cannot sit
+next to BIRD's published baselines, and that comparison is the README's main
+claim. Grading the way the benchmark grades makes the claim honest instead of
+caveated.
+*What it costs:* a join on a non-unique key returns every correct row several
+times over, and that now scores correct. That was the original reason for the
+multiset rule, and the reason is still true — it is a diagnostic the project
+has given up.
+*Measured effect:* +2.8 to +4.2 points across the four full runs, largest on the
+picker configurations. The noise band re-derives to ±2.5 under the new rule,
+unchanged, and every conclusion survives: the picker is still a tie on accuracy,
+self-repair is still a negative result.
+*What would reverse it:* deciding that detecting wrong join keys is worth more
+than comparability with the benchmark. Reporting both numbers was considered and
+rejected — one column, so there is nothing to pick between.
+
 ---
 
 ## Every run leaves a record

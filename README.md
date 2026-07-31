@@ -21,14 +21,15 @@ to. All 11 databases share one namespace; 75 tables, with traps
 
 | Configuration | Accuracy | Table recall | Cost / run |
 |---|---|---|---|
-| Baseline: all 75 tables in the prompt | **54.6%** | 100%¹ | $15.70 |
-| + LLM table selection (~2 tables sent) | **55.4%** | 86.0% | $6.31 |
-| + self-repair (2 retries on SQL errors) | **54.8%** | 85.4% | $6.38 |
+| Baseline: all 75 tables in the prompt | **57.4%** | 100%¹ | $15.70 |
+| + LLM table selection (~2 tables sent) | **59.2%** | 86.0% | $6.31 |
+| + self-repair (2 retries on SQL errors) | **58.8%** | 85.4% | $6.38 |
 
 For scale: BIRD's published GPT-4-turbo baseline on these same questions is
 **36.0%** — and it gets told which database each question belongs to, which the
-rows above do not. Not directly comparable: this project grades stricter
-([KNOWN_ISSUES.md](KNOWN_ISSUES.md)).
+rows above do not. Grading matches BIRD's: rows compared as a set, so duplicate
+rows are forgiven on both sides. Remaining divergences are listed in
+[KNOWN_ISSUES.md](KNOWN_ISSUES.md).
 
 Measured noise: **±2.5 points** (same configuration, 3 repeat runs — the model
 has no determinism knob, so every comparison is read against this band).
@@ -39,22 +40,22 @@ answers in any run above.
 
 **The easy setting** (the question names its database — the setting BIRD's
 published baselines use, and the fairest side-by-side with the 36.0% above)
-scores **55.4%**.
+scores **58.4%**.
 
 ## What the table actually says
 
 Three findings, all against intuition, all measured:
 
 1. **Not knowing the database costs nothing — if you send everything.** Hard
-   baseline 54.6% vs easy 55.4%: a tie inside the noise band. The model
+   baseline 57.4% vs easy 58.4%: a tie inside the noise band. The model
    locates the right tables among 75 on its own; what it cannot survive is a
    *wrong shortlist*.
 
-2. **Table selection bought cost, not accuracy.** +0.8 points is noise; 2.5×
-   cheaper is real ($6.31 vs $15.70 per 500 questions). The picker sends 2.1
-   tables on average instead of 75 and holds 86% recall. Accuracy can never
-   exceed recall — when the right table isn't in the prompt, no prompt tuning
-   saves the query — so recall is measured independently, per run.
+2. **Table selection bought cost, not accuracy.** +1.8 points is inside the
+   band; 2.5× cheaper is real ($6.31 vs $15.70 per 500 questions). The picker
+   sends 2.1 tables on average instead of 75 and holds 86% recall. Accuracy can
+   never exceed recall — when the right table isn't in the prompt, no prompt
+   tuning saves the query — so recall is measured independently, per run.
 
 3. **Self-repair repairs the wrong thing.** Feeding Postgres errors back
    drove final execution errors from 10 to 0 — every retried query *runs*.
@@ -66,8 +67,11 @@ Three findings, all against intuition, all measured:
 ## Why the numbers can be trusted
 
 - **Execution-based grading, hand-written comparator.** Row order ignored,
-  column order significant, duplicates significant (a multiset — stricter than
-  BIRD, which forgives the duplicate rows a wrong join key produces).
+  column order significant, column names never consulted, duplicate rows
+  forgiven — BIRD's own rule, so the numbers above are comparable to theirs.
+  The project graded duplicates as differences until 2026-07-31 and scored
+  2.8–4.2 points lower for it; the reversal and what it cost are in
+  [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
 - **A noise floor before any comparison.** Every "improvement" smaller than
   the measured ±2.5 band is called a tie, including two of the three rows
   above.
@@ -89,7 +93,7 @@ npm run demo        # http://localhost:3000
 Question in; picked tables, SQL, rows, and attempt count out — the exact
 configuration measured in row three. Answers flagged **low confidence** (empty
 result, or a query that needed repair) were right 2.5% of the time on the
-measured run; everything else 59.3%. That heuristic was validated against a
+measured run; everything else 63.7%. That heuristic was validated against a
 finished run before shipping — signals that didn't separate (thinking depth,
 tables picked, result size) were cut.
 

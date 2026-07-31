@@ -25,6 +25,11 @@ to. All 11 databases share one namespace; 75 tables, with traps
 | + LLM table selection (~2 tables sent) | **55.4%** | 86.0% | $6.31 |
 | + self-repair (2 retries on SQL errors) | **54.8%** | 85.4% | $6.38 |
 
+For scale: BIRD's published GPT-4-turbo baseline on these same questions is
+**36.0%** — and it gets told which database each question belongs to, which the
+rows above do not. Not directly comparable: this project grades stricter
+([KNOWN_ISSUES.md](KNOWN_ISSUES.md)).
+
 Measured noise: **±2.5 points** (same configuration, 3 repeat runs — the model
 has no determinism knob, so every comparison is read against this band).
 Denominator: 500 validated questions, 0 quarantined, 0 rejected, 0 voided
@@ -33,10 +38,8 @@ answers in any run above.
 ¹ Structural: the baseline sends every table, so recall cannot miss.
 
 **The easy setting** (the question names its database — the setting BIRD's
-published baselines use) scores **55.4%**. BIRD's published GPT-4-turbo
-baseline on the same questions is 36.0%, though the numbers are not directly
-comparable: this project grades stricter than BIRD (see
-[KNOWN_ISSUES.md](KNOWN_ISSUES.md)).
+published baselines use, and the fairest side-by-side with the 36.0% above)
+scores **55.4%**.
 
 ## What the table actually says
 

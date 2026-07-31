@@ -131,6 +131,41 @@ count too and were never column-limited. The addressable share is 40 questions �
 **8% of the set**, not 34% of failures. Recorded as a measurement ceiling, not a
 tuning target ([RUNS.md](RUNS.md), 2026-07-31).
 
+## Comparing two runs
+
+Accuracy says whether a change won. It cannot say what the change *broke* — a
+score is a net, and "62% → 57%" is equally consistent with four questions
+breaking or with twenty breaking while sixteen were fixed.
+
+```bash
+npm run diff -- runs/<before>.json runs/<after>.json
+```
+
+Free, and no model calls: every run stores the SQL it generated, so both sides
+re-execute against Postgres and are re-graded. On the rejected prompt above:
+
+```
+100 questions in both runs
+  got worse:   4   wrong in every trial after, right in every trial before
+  got better:  1
+  unchanged:  86
+  can't say:   9   the model disagreed with itself across identical trials
+```
+
+Four questions broke, not twenty. The tool then prints each broken query beside
+the one that used to work and the reference — which is where the diagnosis in
+the previous section came from.
+
+Two rules make it trustworthy:
+
+- **Both sides are re-graded now, by the same code.** The comparator changed on
+  2026-07-31 and moved every number ~3 points. Comparing a stored verdict from
+  before that against a fresh one credits the grader's change to the prompt's.
+- **A regression must fail in every trial.** The model answers ~9% of questions
+  differently across identical runs, so a single right-to-wrong flip is usually
+  the dice. Those land in `can't say` and are never counted as evidence either
+  way — which is the only reason the four above are worth reading.
+
 ## The demo
 
 ```bash
@@ -156,7 +191,13 @@ npm run eval:easy                 # easy setting, all 500
 PICKER=none npm run eval:hard     # hard baseline (all 75 tables)
 PICKER=llm  npm run eval:hard     # hard + table selection
 PICKER=llm  npm run eval:hard:repair   # hard + selection + self-repair
+
+npm run diff -- runs/<before>.json runs/<after>.json   # what a change broke
+npm run rescore -- runs/<file>.json                    # re-grade a stored run
 ```
+
+The last two never call the model — a finished run holds the SQL it generated,
+so re-grading and diffing are database passes.
 
 Needs Docker Postgres with the BIRD dump loaded, `DATABASE_URL`,
 `DATABASE_URL_RO`, and `ANTHROPIC_API_KEY` in `.env` — see

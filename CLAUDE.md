@@ -36,6 +36,7 @@ PICKER=llm npm run eval:hard:repair   # hard mode + self-repair (REPAIR=on, 2 re
 npm run eval:pickers           # keyword vs LLM picker, one evalite.each run, dev slice
 npm run triage -- runs/<file>.json    # failure counts, four buckets, per suite
 npm run rescore -- runs/<file>.json   # re-grade a stored run, no model calls
+npm run diff -- runs/<a>.json runs/<b>.json  # per-question regressions and gains, no model calls
 npm run demo                   # the product surface, PRODUCT_PATH=1, port 3000
 ```
 

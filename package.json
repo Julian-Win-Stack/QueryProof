@@ -16,6 +16,7 @@
     "eval:pickers": "EVAL_MODE=hard EVAL_DEV=1 EVAL_PICKERS=1 evalite run evals/main.eval.ts --outputPath=runs/$(date +%Y-%m-%d-%H%M%S)-pickers-dev.json",
     "triage": "tsx scripts/triage.ts",
     "rescore": "tsx --env-file-if-exists=.env scripts/rescore.ts",
+    "diff": "tsx --env-file-if-exists=.env scripts/diff-runs.ts",
     "lint": "eslint .",
     "test": "node --env-file-if-exists=.env --test",
     "test:db": "node --env-file-if-exists=.env --test 'src/**/*.dbtest.ts'"

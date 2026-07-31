@@ -221,3 +221,100 @@ note:          First HARD-mode numbers. The gaps dwarf the band: +11 accuracy,
                the slice evidence says llm, by 10x the band.
 export:        runs/2026-07-30-191255-pickers-dev.json
 ```
+
+## 2026-07-30 — HARD baseline rehearsal, dev slice (Phase 6d)
+
+```
+approach:      mode=hard picker=none repair=off prompt=v1 model=claude-sonnet-5 effort=medium concurrency=15
+question set:  dev-slice (100)
+accuracy:      59.0%
+table recall:  100% — structural: all 75 tables are always sent
+noise band:    ±2.5 points (dev slice, 3 trials, 2026-07-30)
+verdict:       kept
+note:          The rehearsal before the pre-approved full baseline: pipeline,
+               recorded config (hard/none/off/v1/medium, 75 tables per prompt),
+               and a sane number, all confirmed. 59% sits at the top of the
+               EASY dev-slice range (52-58) — sending all 75 tables costs
+               nothing on the slice. 2 pg errors, 0 voids.
+               1,494,456 in / 13,629 out (2,622 thinking) — $3.13.
+export:        runs/2026-07-30-193533-hard-none-dev.json
+```
+
+## 2026-07-30 — HARD baseline on all 500 ⭐ README row 1
+
+```
+approach:      mode=hard picker=none repair=off prompt=v1 model=claude-sonnet-5 effort=medium concurrency=15
+question set:  full (500 validated)
+accuracy:      54.6% (273/500)
+table recall:  100% — structural: all 75 tables are always sent
+noise band:    ±2.5 points (dev slice, 3 trials, same day)
+verdict:       kept
+note:          The improvement table's first row (ADR 0003): no table
+               selection at all. By difficulty: simple 96/148 (65%), moderate
+               133/250 (53%), challenging 44/102 (43%). 11 Postgres errors,
+               0 voids. Statistically identical to EASY's 55.4% — with the
+               whole catalog in the prompt, not knowing which database the
+               question belongs to costs nothing; the 75-table prompt's cost
+               is dollars, not accuracy. Triage: 0 table missing / 11 never
+               valid / 94 comparator suspect / 122 valid but wrong.
+               7,473,114 in / 75,863 out (19,673 thinking) — $15.70.
+export:        runs/2026-07-30-193710-hard-none-full.json
+```
+
+## 2026-07-30 — HARD + llm picker on all 500 ⭐ README row 2
+
+```
+approach:      mode=hard picker=llm repair=off prompt=v1 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium concurrency=50
+question set:  full (500 validated)
+accuracy:      55.4% (277/500)
+table recall:  86.0%
+noise band:    ±2.5 points (dev slice, 3 trials, same day)
+verdict:       kept
+note:          The improvement table's second row. Against the baseline's
+               54.6%: +0.8 points — inside the band, a tie on accuracy. What
+               the picker actually bought is cost: $6.31 vs $15.70 per run
+               (2.7M vs 7.5M input tokens), sending 2.1 tables on average
+               instead of 75. Recall fell to 86% (55 questions had a needed
+               table missing) yet accuracy held — on recall hits the smaller
+               prompt answers better, which offsets the misses exactly.
+               By difficulty: simple 94/148, moderate 137/250, challenging
+               46/102. 10 pg errors, 0 voids. Triage: 55 table missing /
+               5 never valid / 67 comparator suspect / 96 valid but wrong.
+export:        runs/2026-07-30-194011-hard-llm-full.json
+```
+
+## 2026-07-30 — Repair wiring smoke (LIMIT=3)
+
+```
+approach:      mode=hard picker=llm repair=on limit=3, dev slice
+accuracy:      wiring smoke — number meaningless by construction
+verdict:       void
+note:          repair=on stamped in the suite name and on every row, attempts
+               recorded. No pg error among the 3, so the live retry stayed
+               idle — the stopping conditions are covered by src/answer.test.ts.
+export:        runs/2026-07-30-194201-hard-llm-repair-smoke.json
+```
+
+## 2026-07-30 — HARD + llm + self-repair on all 500 ⭐ README row 3
+
+```
+approach:      mode=hard picker=llm repair=on prompt=v1 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium concurrency=50
+question set:  full (500 validated)
+accuracy:      54.8% (274/500)
+table recall:  85.4%
+noise band:    ±2.5 points (dev slice, 3 trials, same day)
+verdict:       kept
+note:          The improvement table's third row, and a clean negative result.
+               Against row 2's 55.4%: -0.6 points — inside the band, a tie.
+               What repair actually did: 11 questions retried, and the final
+               Postgres error count fell 10 -> 0 — every repaired query now
+               *executes*. But executing is not correct: 1 of the 11 ended
+               correct (on attempt 3), the other 10 moved from "never valid"
+               to "valid but wrong". Repair fixes executability, and
+               executability was never the bottleneck — only ~2% of questions
+               fail to execute. Attempts: 489x1 / 10x2 / 1x3, so the loop
+               cost almost nothing ($6.38 vs $6.31). Fixed on attempt 2: 0;
+               on attempt 3: 1. Triage: 61 table missing / 0 never valid /
+               70 comparator suspect / 95 valid but wrong. 0 voids.
+export:        runs/2026-07-30-194223-hard-llm-repair-full.json
+```

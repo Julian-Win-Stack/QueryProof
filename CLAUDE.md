@@ -32,6 +32,7 @@ npm run eval:dev               # frozen 100-question dev slice, EASY
 npm run eval:easy              # all 500, tables scoped to the record's db_id
 PICKER=llm npm run eval:hard   # all 500, hard mode; PICKER required: none|keyword|llm
 PICKER=keyword npm run eval:hard:dev  # hard mode on the dev slice
+PICKER=llm npm run eval:hard:repair   # hard mode + self-repair (REPAIR=on, 2 retries)
 npm run eval:pickers           # keyword vs LLM picker, one evalite.each run, dev slice
 npm run triage -- runs/<file>.json    # failure counts, four buckets, per suite
 ```

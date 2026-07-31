@@ -19,10 +19,19 @@ export const SYSTEM = [
   '- SELECT only. The query runs as a role that cannot write.',
 ].join('\n');
 
+// One failed try at a question: the SQL and the Postgres error it produced.
+// The repair retry sees every one of these, not just the last (D14).
+export type FailedAttempt = {
+  sql: string;
+  errorCode: string | null;
+  errorMessage: string;
+};
+
 export function buildUserMessage(params: {
   question: string;
   evidence: string;
   schemaText: string;
+  failures?: FailedAttempt[];
 }): string {
   const sections = [`Schema:\n\n${params.schemaText}`];
 
@@ -32,6 +41,18 @@ export function buildUserMessage(params: {
   if (params.evidence.trim() !== '') sections.push(`Hint:\n\n${params.evidence}`);
 
   sections.push(`Question:\n\n${params.question}`);
+
+  if (params.failures !== undefined && params.failures.length > 0) {
+    const history = params.failures
+      .map(
+        (failure, index) =>
+          `Attempt ${index + 1}:\n${failure.sql}\n\nPostgres error${failure.errorCode === null ? '' : ` ${failure.errorCode}`}: ${failure.errorMessage}`,
+      )
+      .join('\n\n');
+    sections.push(
+      `Your previous ${params.failures.length === 1 ? 'attempt' : 'attempts'} failed to execute. Write a corrected query. Do not repeat a failed attempt.\n\n${history}`,
+    );
+  }
 
   return sections.join('\n\n---\n\n');
 }

@@ -3,7 +3,7 @@
 // and what happens to the SQL is decided after.
 
 import { completeJson, type Usage } from './model.ts';
-import { buildUserMessage, PROMPT_VERSION, SYSTEM } from './prompts/v1.ts';
+import { buildUserMessage, PROMPT_VERSION, SYSTEM, type FailedAttempt } from './prompts/v1.ts';
 
 const SQL_SCHEMA = {
   type: 'object',
@@ -23,6 +23,7 @@ export async function generateSql(params: {
   question: string;
   evidence: string;
   schemaText: string;
+  failures?: FailedAttempt[];
 }): Promise<GeneratedSql> {
   const reply = await completeJson({
     system: SYSTEM,

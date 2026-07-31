@@ -10,6 +10,8 @@
 //                        so setting it there throws.
 //   EVAL_PICKERS=1       the D9 bake-off: keyword vs llm as evalite.each
 //                        variants, one run, dev slice only.
+//   REPAIR=on|off        Phase 7 self-repair: up to 2 retries on a Postgres
+//                        error, hard mode only. Defaults to off.
 //   EVAL_DEV=1           filter to the frozen 100-id dev slice
 //   LIMIT=N              first N questions only — wiring smoke, never evidence
 //   TRIALS / CONCURRENCY read in evalite.config.ts
@@ -29,9 +31,9 @@ import { readFileSync } from 'node:fs';
 
 import { evalite } from 'evalite';
 
+import { answerQuestion } from '../src/answer.ts';
 import { compareRows } from '../src/compare-rows.ts';
 import { executeReadOnly } from '../src/execute-readonly.ts';
-import { generateSql } from '../src/generate-sql.ts';
 import { EFFORT, MODEL, usdCost } from '../src/model.ts';
 import { keywordPick } from '../src/pickers/keyword.ts';
 import { llmPick } from '../src/pickers/llm.ts';
@@ -70,6 +72,17 @@ const LIMIT = process.env.LIMIT ? Number(process.env.LIMIT) : undefined;
 // alternative is a plausible number measured under a config nobody chose,
 // which is how the first eval:easy run got voided.
 const PICKER: PickerName = readPicker();
+const REPAIR: boolean = readRepair();
+
+function readRepair(): boolean {
+  const value = process.env.REPAIR;
+  if (value === undefined || value === 'off') return false;
+  if (value !== 'on') throw new Error(`REPAIR="${value}" — on or off`);
+  if (MODE !== 'hard' || BAKEOFF) {
+    throw new Error('REPAIR=on is the Phase 7 row: EVAL_MODE=hard, outside the bake-off');
+  }
+  return true;
+}
 
 function readPicker(): PickerName {
   const value = process.env.PICKER;
@@ -188,13 +201,13 @@ async function runQuestion(record: GoldRecord, picker: PickerName): Promise<Ques
   const catalog = await allTables;
   const selection = await selectTables(record, picker);
 
-  const generated = await generateSql({
+  const answer = await answerQuestion({
     question: record.question,
     evidence: record.evidence,
     schemaText: renderSchema(selection.tables),
+    repair: REPAIR,
   });
-
-  const execution = await executeReadOnly(generated.sql);
+  const execution = answer.execution;
 
   // Gold SQL failing is infrastructure — every gold query was validated
   // against this database. Throwing voids the question instead of letting a
@@ -213,8 +226,8 @@ async function runQuestion(record: GoldRecord, picker: PickerName): Promise<Ques
 
   return {
     correct,
-    generatedSql: generated.sql,
-    attempts: 1,
+    generatedSql: answer.sql,
+    attempts: answer.attempts,
     lastPgError: execution.ok ? null : `${execution.errorCode ?? 'no code'} — ${execution.errorMessage}`,
     rowsReturned: execution.ok ? execution.rows.length : null,
     goldRowCount: gold.rows.length,
@@ -222,19 +235,19 @@ async function runQuestion(record: GoldRecord, picker: PickerName): Promise<Ques
     tablesSent,
     tablesGoldNeeded,
     recallHit: recallHit(tablesGoldNeeded, tablesSent),
-    tokensIn: generated.usage.inputTokens,
-    tokensOut: generated.usage.outputTokens,
-    thinkingTokens: generated.usage.thinkingTokens,
+    tokensIn: answer.usage.inputTokens,
+    tokensOut: answer.usage.outputTokens,
+    thinkingTokens: answer.usage.thinkingTokens,
     pickerTokensIn: selection.pickerTokensIn,
     pickerTokensOut: selection.pickerTokensOut,
     pickerMs: selection.pickerMs,
-    usd: usdCost(generated.usage) + selection.pickerUsd,
-    modelMs: generated.ms,
-    executionMs: execution.ms,
+    usd: usdCost(answer.usage) + selection.pickerUsd,
+    modelMs: answer.modelMs,
+    executionMs: answer.executionMs,
     mode: MODE,
     picker: MODE === 'easy' ? 'none' : picker,
-    repair: 'off',
-    promptVersion: generated.promptVersion,
+    repair: REPAIR ? 'on' : 'off',
+    promptVersion: answer.promptVersion,
     pickerPromptVersion: selection.pickerPromptVersion,
     model: MODEL,
     effort: EFFORT,
@@ -245,6 +258,7 @@ const runName = [
   MODE,
   `slice=${DEV ? 'dev' : 'full'}${LIMIT === undefined ? '' : ` | limit=${LIMIT}`}`,
   `picker=${BAKEOFF ? 'bakeoff' : PICKER}`,
+  ...(REPAIR ? ['repair=on'] : []),
   `prompt=${PROMPT_VERSION}`,
   ...(BAKEOFF || PICKER === 'llm' ? [`pickerPrompt=${PICKER_PROMPT_VERSION}`] : []),
   `effort=${EFFORT}`,
@@ -275,6 +289,7 @@ const options = {
     { label: 'pg error', value: output.lastPgError ?? '' },
     { label: 'rows', value: `${output.rowsReturned ?? '—'} vs ${output.goldRowCount}` },
     { label: 'tables', value: `${output.tablesSent.length} sent, recall ${output.recallHit ? 'hit' : 'MISS'}` },
+    { label: 'attempts', value: String(output.attempts) },
     { label: 'tokens', value: `${output.tokensIn} in, ${output.tokensOut} out` },
   ],
 };

@@ -11,6 +11,7 @@
     "eval:easy": "EVAL_MODE=easy evalite run evals/main.eval.ts --outputPath=runs/$(date +%Y-%m-%d-%H%M%S)-easy-full.json",
     "eval:hard": "EVAL_MODE=hard evalite run evals/main.eval.ts --outputPath=runs/$(date +%Y-%m-%d-%H%M%S)-hard-${PICKER:-unset}-full.json",
     "eval:hard:dev": "EVAL_MODE=hard EVAL_DEV=1 evalite run evals/main.eval.ts --outputPath=runs/$(date +%Y-%m-%d-%H%M%S)-hard-${PICKER:-unset}-dev.json",
+    "eval:hard:repair": "EVAL_MODE=hard REPAIR=on evalite run evals/main.eval.ts --outputPath=runs/$(date +%Y-%m-%d-%H%M%S)-hard-${PICKER:-unset}-repair-full.json",
     "eval:pickers": "EVAL_MODE=hard EVAL_DEV=1 EVAL_PICKERS=1 evalite run evals/main.eval.ts --outputPath=runs/$(date +%Y-%m-%d-%H%M%S)-pickers-dev.json",
     "triage": "tsx scripts/triage.ts",
     "lint": "eslint .",

@@ -98,18 +98,61 @@ were sent, so precision is visible without being scored.
 catalog check is what makes the cheap approach safe. Verify the extractor once
 across all 500 gold queries before trusting a recall number.
 
+**D20 — The pickers see the question only, never the evidence.**
+Both pickers. Evidence still goes into SQL generation in both modes, unchanged —
+this is only about what the picker reads. Julian's call, 2026-07-30.
+*Why:* the plan's wording ("match question tokens"), and evidence often names
+the exact column, so folding it in at birth would bake an unmeasured boost into
+the first recall number. Adding it later is a measured improvement on the slice.
+*Invalidated by:* nothing — a picker-sees-evidence run is a new configuration
+with its own number, not a correction to this one.
+
+**D21 — The LLM picker: pinned model, catalog names + columns, invented names
+dropped.**
+One call to the pinned `claude-sonnet-5` per question: 75 lines of
+`table: column, column, ...` built from `information_schema`, structured output,
+at most 10 tables (D6). Prompt versioned as `picker-v1`. A returned name that is
+not in the catalog is dropped, never thrown. Decided 2026-07-30.
+*Why the pinned model:* a second model id is a second pin to record and defend
+in every run config; the call is small enough that the cheaper model saves
+almost nothing.
+*Why no BIRD descriptions:* D5 defers them as a measured experiment. Using them
+in the picker first would muddy that experiment before it runs.
+*Why dropped rather than thrown:* a picker mistake has to surface as a recall
+miss and a scored wrong answer. Throwing would void the question (D19's path)
+and hide exactly the failures the bake-off exists to measure.
+
+**D22 — HARD mode requires an explicit `PICKER`; an unknown value throws.**
+`PICKER=none | keyword | llm` — required in hard mode, forbidden in easy mode,
+and forbidden with `EVAL_PICKERS=1` (the bake-off always runs both). Decided
+2026-07-30.
+*Why:* `none` (all 75 tables) is the Batch D baseline row — it has to be said,
+never arrived at by forgetting to set a variable. And a typo like
+`PICKER=keywrd` quietly falling back to all-75 would produce a plausible number
+under a configuration nobody chose, which is the vite-`DEV` void all over again.
+
 ---
 
 ## Running an eval (Phases 5, 6, 7)
 
 **D8 — Configuration arrives by environment variable, one eval file.**
-`MODE=hard PICKER=llm REPAIR=on CONCURRENCY=12 npx evalite run evals/main.eval.ts`,
+`EVAL_MODE=hard PICKER=llm REPAIR=on CONCURRENCY=12 npx evalite run evals/main.eval.ts`,
 wrapped in `package.json` scripts. Not one file per configuration.
 *Why:* evalite's CLI accepts path filters plus `--threshold`, `--hideTable`,
 `--outputPath` and `--no-cache` — **it does not accept custom flags**. The
 `npm run eval:dev -- --mode=hard --picker=keyword` form in earlier drafts of
 `PLAN.md` cannot work. Four copies of the wiring is also how the EASY and HARD
 paths silently drift apart.
+
+**Amended 2026-07-30 — the names are `EVAL_MODE` and `EVAL_DEV`, not `MODE` and
+`DEV`.** evalite runs eval files inside vitest workers, and vite owns `MODE`,
+`DEV`, `PROD` and `BASE_URL` there: it sets `MODE="test"` and `DEV="1"` in every
+worker, so an eval configured with those names silently reads vite's values
+instead. Found the expensive way — the first `eval:easy` run filtered itself to
+the dev slice through vite's `DEV` and was voided (see `RUNS.md`). `PICKER`,
+`REPAIR`, `TRIALS`, `LIMIT` and `CONCURRENCY` are not vite-owned and keep their
+plain names. `LIMIT=N` (first N questions, wiring smoke) stamps `limit=N` into
+the run name so its number can never read as a real one.
 
 **D9 — `evalite.each` is used for exactly one job: the picker bake-off.**
 Keyword versus LLM picker, one run, same data, same process.
@@ -153,6 +196,44 @@ flight for EASY and ~2 for the baseline, not 100 and 20.
 The reasoning above still holds — start from the ceiling and tune down from
 observed 429s. **The replacement numbers are Julian's call and are not set here.**
 
+**Superseded again, 2026-07-30 — those figures were `gpt-5.6-terra`'s and do not
+transfer.** Both halves moved when the project switched to `claude-sonnet-5`,
+and they moved in opposite directions. The ceiling went up roughly tenfold
+(5,000 requests/minute, 5,000,000 **input** tokens/minute, 1,000,000 **output**
+tokens/minute — re-measured in `RUNS.md`), and the prompts got bigger under a
+different tokenizer: 811 tokens for EASY and 14,886 for the 75-table baseline,
+against 352 and 8,611 before.
+
+Input and output are now throttled *separately*, so there are two token ceilings
+to divide by rather than one:
+
+| Configuration | Input | Output | Binds on | Questions/min | ~In flight |
+|---|---|---|---|---|---|
+| EASY, 5 tables | 811 | 105 | requests | ~5,000 | ~375 |
+| Baseline, all 75 tables | 14,886 | 118 | input tokens | ~336 | ~21 |
+
+*Read those two right-hand columns as ceilings, not settings.* They come from
+one trivially easy question that spent 14 and 21 thinking tokens; a real BIRD
+question thinks far more, which raises output tokens and latency together. That
+pushes EASY toward the **output** ceiling and pushes both in-flight numbers up,
+because slower calls need more in flight to saturate the same rate. The API also
+throttles sharp ramps independently of these limits, so the first run of a new
+configuration ramps rather than opening at the ceiling.
+**The replacement numbers, set 2026-07-30 (Julian's call, delegated):**
+`CONCURRENCY=50` for EASY, dev-slice, picker and repair runs; `CONCURRENCY=15`
+for the 75-table baseline. `maxRetries: 5` on the client, as this decision
+always specified — now actually set, in `src/model.ts`.
+*Why below the ceiling rather than at it:* 375 and 21 are the points where the
+ceiling *binds*. Running there turns ordinary latency variance into 429s, and a
+429 that survives every retry voids the entire run (D12b) — so headroom buys
+protection against re-running, which is worth far more than wall-clock. 15 sits
+~30% under the baseline's input-token ceiling.
+*Why 50 and not 100 for EASY:* the dev slice is 100 questions, so 50 is two
+waves and the slice finishes in well under a minute either way. There is nothing
+above it to buy, and the smaller number keeps a ramp in the run for free.
+*Still start from the ceiling and tune down from observed 429s* — these are
+opening figures, not a floor discovered by measurement.
+
 **D12a — The Postgres pool is capped at 20, independent of LLM concurrency.**
 *Why:* Postgres `max_connections` defaults to 100 and every question runs two
 queries, so 100 concurrent questions exhaust the server. That surfaces as
@@ -166,10 +247,11 @@ It voids that question and is reported as a count next to the accuracy figure. I
 the count is not zero, the run is `void` in `RUNS.md`.
 *Why:* otherwise the accuracy number quietly absorbs infrastructure failures, and
 a throttled run looks like a worse model.
-*How to get the real ceiling:* log `x-ratelimit-limit-tokens`,
-`x-ratelimit-remaining-tokens` and `x-ratelimit-reset-tokens` from the Phase 4a
-smoke-test response. Those headers are authoritative for this key and model;
-published tier tables are not.
+*How to get the real ceiling:* log the `anthropic-ratelimit-*` headers from the
+Phase 4a smoke-test response — `input-tokens` and `output-tokens` are throttled
+separately, so both `-limit` values matter, and `retry-after` is what a 429
+carries. Those headers are authoritative for this key and model; published tier
+tables are not.
 *Known, not taken:* the Batch API is 50% cheaper and would halve the baseline
 run, at up to 24 hours turnaround. Wrong for the dev loop; revisit only for the
 one big run.
@@ -188,27 +270,58 @@ something and it failed, rather than repeating it.
 *Why not re-picking tables:* repair and table selection would change together,
 and neither delta in the README would be attributable to one thing.
 
-**D18 — Reasoning effort is pinned to `medium`, for every run.**
-`EFFORT=medium`, read from env with that default in `src/model.ts`, recorded in
-every run's configuration. Decided 2026-07-30.
+**D18 — Thinking effort is pinned to `medium`, for every run.**
+`EFFORT=medium`, read from env with that default in `src/model.ts` and sent as
+`output_config.effort`, recorded in every run's configuration. Decided
+2026-07-30.
 *Why pinned at all:* omitting the parameter lets the API choose, and that choice
-can move server-side. Every run would then record "whatever OpenAI was doing that
-day" — the same failure the pinned model id exists to prevent. There is no `auto`
-value; the set is `none | minimal | low | medium | high | xhigh | max`.
+can move server-side. Every run would then record "whatever the provider was
+doing that day" — the same failure the pinned model id exists to prevent. There
+is no `auto` value; the set is `low | medium | high | xhigh | max`.
 *Why medium:* it adapts to question difficulty rather than spending a fixed
 budget, and it leaves room to move in either direction. Higher effort risks
-compressing the very differences the project measures — a model reasoning hard
+compressing the very differences the project measures — a model thinking hard
 enough to recover from a mediocre table set narrows the picker gap and softens
 the recall ceiling, which are the two claims the README is built on.
-*Not verified:* very likely the API's own default for this model, but the SDK
-documents no per-model default and no response field reports the effort applied.
-The value matters because it is recorded, not because it matches OpenAI's.
+*Verified:* the documented API default is `high`, so `medium` is one deliberate
+step below it, not a restatement of the default. No response field reports the
+effort actually applied, so the value matters because it is recorded.
 *Invalidated if:* a dev-slice comparison at a second effort level moves accuracy
 by more than the Phase 5c noise band. That experiment is deferred and optional —
 if it is ever run, it is reported as its own number, never folded into a
 measured configuration.
 *Consequence:* changing this retires every number measured before it, exactly as
 changing `MODEL` does.
+
+**Amended 2026-07-30 — same decision, different provider.** The project moved
+from `gpt-5.6-terra` to `claude-sonnet-5` before any eval run existed, so
+nothing was retired. Two facts moved with it: the effort set lost `none` and
+`minimal`, and the API's own default is now documented rather than guessed —
+`high`, which is what makes `medium` a real choice. On this model, effort also
+governs *whether and how much the model thinks*: thinking is on by default and
+has no separate token budget, so `EFFORT` is the only lever on it.
+
+**D19 — A safety refusal voids the question. It never scores 0.**
+Same triage bucket as a 429 that survives every retry (D12b): counted and
+reported next to the accuracy figure, and if the count is not zero the run is
+`void` in `RUNS.md`. Decided 2026-07-30.
+*Why:* a refusal is the provider's safety classifier declining the request, not
+the model writing bad SQL. Scoring it 0 makes accuracy partly a measure of the
+classifier — and one that moves whenever Anthropic retunes it. That is the same
+silent contamination D12b exists to prevent.
+*Why it is not an execution error either:* a refusal returns HTTP 200 with an
+empty or partial body, so nothing reaches Postgres and there is no error code to
+triage. It has to be caught at the model boundary or not at all.
+*What the code does today:* `completeJson` throws on `stop_reason: "refusal"`,
+carrying the category. Phase 5 catches that and counts it. Until Phase 5 exists,
+a refusal is loud — correct for a path still debugged by hand.
+*Why not server-side fallbacks:* the `fallbacks` parameter re-runs a refused
+request on a different model and returns *its* answer. That is a silent model
+switch, the exact failure the pinned `MODEL` exists to prevent, and it would
+land in the run as an ordinary result. Not used, on any path.
+*Expected volume:* text-to-SQL over retail, football and school databases should
+trip nothing. If refusals are ever more than a handful, that is a finding about
+the prompt, not a scoring problem to tune around.
 
 ---
 

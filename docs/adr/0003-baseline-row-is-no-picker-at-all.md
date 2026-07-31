@@ -40,3 +40,24 @@ trivial questions, which real ones will not.
 
 The decision is unaffected: the baseline row is still no picker at all. Only the
 figures it cites have moved, and both moved in its favour.
+
+## Amendment — 2026-07-30, second: the provider changed
+
+The project now runs on a standard **Anthropic** API key, pinned to
+`claude-sonnet-5`. Everything above about billing still holds — every run bills
+to that account, against a spend limit set before Batch B — but every figure in
+the first amendment was priced against `gpt-5.6-terra` and none of them carry
+over.
+
+Re-measured at prompt v1: the 75-table prompt is **14,886 input tokens**, not
+8,611. Across 500 validated questions that is ~7.4M input tokens, so the
+baseline run costs roughly **$15** at Sonnet 5's introductory rate of $2/$10 per
+million — and roughly **$22** after 2026-08-31, when the rate reverts to $3/$15.
+The dev-slice rehearsal is ~$3.
+
+Output is now partly measured and remains small next to input: an easy question
+returns ~118 output tokens of which ~21 are thinking. That is a floor, not an
+estimate — hard questions think far more, and thinking bills at the output rate.
+
+The decision is still unaffected, for the third time. The baseline row is worth
+its cost by a wider margin than when this was written.

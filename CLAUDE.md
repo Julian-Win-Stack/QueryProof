@@ -15,7 +15,7 @@ table is the deliverable; everything else serves it.
 - `pg` for Postgres, `tsx` to run TypeScript directly
 - `node:test` (Node built-in) for unit tests — no test-runner dependency
 - `evalite` for eval run storage, repeat runs, and run-over-run comparison
-- `openai` SDK, model **`gpt-5.6-terra`** — pinned. See below.
+- `@anthropic-ai/sdk`, model **`claude-sonnet-5`** — pinned. See below.
 - Next.js for the demo frontend (phase 8, not built yet)
 
 ## Commands
@@ -28,13 +28,16 @@ npm run lint                   # MUST pass before any commit
 npm run smoke                  # one model call: parsed JSON, usage, rate-limit headers
 npm run ask -- bird-0000       # one gold question end to end, with its own evidence and db_id
 npm run ask -- "<question>" [db_id]   # ad-hoc question, no evidence; db_id scopes tables
-npm run eval:dev               # frozen 100-question dev slice
+npm run eval:dev               # frozen 100-question dev slice, EASY
 npm run eval:easy              # all 500, tables scoped to the record's db_id
-npm run eval:hard              # all 500, table selection on
-npm run eval:pickers           # keyword vs LLM picker, one run, dev slice
+PICKER=llm npm run eval:hard   # all 500, hard mode; PICKER required: none|keyword|llm
+PICKER=keyword npm run eval:hard:dev  # hard mode on the dev slice
+npm run eval:pickers           # keyword vs LLM picker, one evalite.each run, dev slice
+npm run triage -- runs/<file>.json    # failure counts, four buckets, per suite
 ```
 
-The `eval:*` scripts do not exist yet — Phase 5 adds them.
+In hard mode `PICKER` is mandatory — `none` (all 75 tables, the baseline row)
+has to be said, never defaulted into, and an unknown value throws (D22).
 
 Test files split by what they need, and the split is the filename: `src/*.test.ts`
 is pure and runs under `npm test`, `src/*.dbtest.ts` needs the container and runs
@@ -42,10 +45,13 @@ only under `npm run test:db`. `.dbtest.ts` is deliberately not `.db.test.ts` —
 `node --test` discovers anything ending `.test.ts`, so the second form would drag
 Postgres into the pure suite.
 
-**Every eval script is one eval file plus environment variables** (`MODE`,
-`PICKER`, `REPAIR`, `DEV`, `CONCURRENCY`). evalite's CLI accepts no custom flags,
-so `npm run eval:dev -- --picker=llm` silently does nothing. Never add a second
-eval file to express a configuration.
+**Every eval script is one eval file plus environment variables** (`EVAL_MODE`,
+`EVAL_DEV`, `PICKER`, `REPAIR`, `TRIALS`, `LIMIT`, `CONCURRENCY`). evalite's CLI
+accepts no custom flags, so `npm run eval:dev -- --picker=llm` silently does
+nothing. Never add a second eval file to express a configuration. **Never name
+an eval env var `MODE`, `DEV`, `PROD`, or `BASE_URL`** — vite owns those names
+inside every worker and overwrites them (D8 amendment); the first `eval:easy`
+run was voided by exactly this.
 
 ## Where decisions live
 
@@ -69,8 +75,10 @@ gold/          validated/rejected/quarantine.json   (gitignored, output of valid
 scripts/       one-shot and measurement scripts
 src/           library code
 src/prompts/   one file per prompt version, each exporting PROMPT_VERSION
+src/pickers/   table selection: keyword.ts (no LLM), llm.ts (pinned model)
 evals/         *.eval.ts, configuration comes from env, not from new files
 evals/dev-slice.json  the frozen 100 ids — committed, never regenerated
+evalite.config.ts     storage (persistent SQLite), concurrency, trials, timeouts
 runs/          one JSON export per eval run           (committed — this is the evidence)
 CONTEXT.md     the project's glossary — what the words mean
 docs/adr/      decisions that would otherwise look arbitrary
@@ -96,12 +104,12 @@ run. Configure the store to a persistent path — evalite v1 defaults to
 - `DATABASE_URL_RO` — `postgresql://queryproof_ro:ro_devpass@localhost:5433/bird`.
   The only string generated SQL ever connects with. Create the role with
   `psql "$DATABASE_URL" -f scripts/create-ro-role.sql`.
-- `OPENAI_API_KEY` — used directly by every eval run
-- `RESPAN_API_KEY` — the gateway key, used *in place of* `OPENAI_API_KEY` on the
-  product path only
-- `MODEL` — overrides the pinned `gpt-5.6-terra`. Set it and every earlier number
-  is retired, not carried forward.
-- `EFFORT` — reasoning effort, pinned to `medium` (**D18**). Changing it retires
+- `ANTHROPIC_API_KEY` — used directly by every eval run
+- `RESPAN_API_KEY` — the gateway key, used *in place of* `ANTHROPIC_API_KEY` on
+  the product path only
+- `MODEL` — overrides the pinned `claude-sonnet-5`. Set it and every earlier
+  number is retired, not carried forward.
+- `EFFORT` — thinking effort, pinned to `medium` (**D18**). Changing it retires
   every earlier number, exactly as changing `MODEL` does.
 
 All live in `.env` (gitignored). Read `DATABASE_URL` from env — never hardcode a
@@ -183,22 +191,47 @@ a slice that moves makes every earlier run incomparable, silently. It lives in
 `evals/` rather than `gold/` precisely because `gold/` is gitignored and an
 uncommitted slice differs between machines.
 
-**The model is pinned to `gpt-5.6-terra`.** Every number in the README comes
+**The model is pinned to `claude-sonnet-5`.** Every number in the README comes
 from it. It lives in exactly one constant, read from env with that default.
 Switching models mid-project silently invalidates every earlier run — the stored
 numbers stay in the SQLite store looking comparable when they are not. If the
 model ever changes, every prior number is retired, not carried forward.
 
-Do not use the bare `gpt-5.6` alias: it routes to `gpt-5.6-sol`, a different and
-pricier model. Always the full id.
+Write the id exactly as spelled — never append a date suffix. `claude-sonnet-5`
+is complete; `claude-sonnet-5-20260101` and friends are 404s.
 
-**`gpt-5.6-terra` API gotchas.** `temperature`, `top_p`, and `n` are fixed at 1
-and `presence_penalty` / `frequency_penalty` at 0 — reasoning models reject any
-other value. **There is no determinism knob**, which is why every number ships
-with a measured noise band. Reasoning tokens bill as *output* tokens, so output
-cost runs well above what the visible reply length suggests. Get SQL back with
-native structured outputs (`response_format: { type: "json_schema", strict: true }`),
-never by scraping a fenced code block.
+**`claude-sonnet-5` API gotchas.** `temperature`, `top_p`, and `top_k` are
+rejected outright at any non-default value. **There is no determinism knob**,
+which is why every number ships with a measured noise band.
+
+*Thinking is on by default.* Omitting the `thinking` parameter runs adaptive
+thinking; `EFFORT` controls its depth. Thinking tokens bill as *output* tokens
+and are already counted inside `output_tokens`, so output cost runs well above
+what the visible reply length suggests — `usage.output_tokens_details.thinking_tokens`
+reports them, and `usdCost` deliberately does not add them a second time.
+
+*`max_tokens` is required, and it caps thinking and the reply together.* Pinned
+at 16k in `src/model.ts`, which is generous for one line of SQL only because
+thinking eats most of it. Raise it to 64k before running `EFFORT=xhigh` or `max`.
+
+*Get SQL back with `output_config.format`* (`{ type: 'json_schema', schema }`),
+never by scraping a fenced code block. There is no `name` field on that format
+object, unlike OpenAI's.
+
+*Two ways the reply is not where it looks.* A refusal returns **HTTP 200** with
+`stop_reason: "refusal"` and an empty or partial body, so `stop_reason` is
+checked before the content is read. And thinking blocks arrive *ahead* of the
+answer, so the reply is the first `text` block — never `content[0]`.
+
+**Server-side fallbacks are deliberately not used.** The `fallbacks` parameter
+re-runs a refused request on a different model and returns its answer, which is
+exactly the silent model switch the pin above exists to prevent. A refusal
+throws instead, and voids the question rather than scoring 0 (**D19**).
+
+**The prices in `src/model.ts` are introductory and expire 2026-08-31.** Sonnet
+5 bills $2/$10 per million until then and $3/$15 after. Nothing enforces the
+date — a run after it costs 1.5x what `usdCost` reports, silently. Change the
+two constants when it lapses.
 
 **Generated SQL executes as the `queryproof_ro` role**, which has `SELECT` only.
 A regex over generated SQL is a speed bump; the role is the wall. Never run
@@ -206,7 +239,7 @@ generated SQL as `postgres`. One path exists — `executeReadOnly` in
 `src/execute-readonly.ts`; it refuses to open a pool as any other role. A
 Postgres error comes back as a result with its `code`, never as a throw.
 
-**Eval runs call OpenAI directly. Only the product path goes through Respan.**
+**Eval runs call Anthropic directly. Only the product path goes through Respan.**
 
 The Respan gateway caches responses automatically, and an identical prompt
 returns a cached reply. That silently destroys the noise floor: a cached repeat
@@ -214,14 +247,18 @@ run shows zero variance and looks perfectly stable, so ordinary run-to-run wobbl
 gets read as a real improvement. Respan's docs do not document a per-request
 cache bypass, so the split is the fix rather than a flag.
 
-Nothing is lost by it — the OpenAI SDK returns `usage` tokens on every response
-and evalite stores them, so eval runs still capture cost. The product path keeps
-the gateway, where caching, fallback, and traces are all wins.
+Nothing is lost by it — the Anthropic SDK returns `usage` tokens on every
+response and evalite stores them, so eval runs still capture cost. The product
+path keeps the gateway, where caching, fallback, and traces are all wins.
 
 ```
-eval runs    ->  api.openai.com          (no cache, honest variance)
+eval runs    ->  api.anthropic.com       (no cache, honest variance)
 product path ->  api.respan.ai/api/      (cache, fallback, tracing)
 ```
+
+Respan lists Anthropic as a supported provider, so the switch does not strand
+the product path. The base URL and request shape it expects are still unread —
+a Phase 8 question, and the eval path never touches the gateway.
 
 ## Code style
 

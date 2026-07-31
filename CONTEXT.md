@@ -81,7 +81,8 @@ _Avoid_: variance, error bars
 
 **Evidence**:
 The hint BIRD ships alongside a question, naming the columns or the formula the
-answer needs. Part of the question in eval runs.
+answer needs. Part of the question in eval runs — for SQL generation. The
+pickers never see it (D20).
 
 **Mode**:
 Which tables reach the prompt. **EASY** sends every table belonging to the

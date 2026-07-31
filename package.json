@@ -7,6 +7,12 @@
     "validate-gold": "tsx --env-file-if-exists=.env scripts/validate-gold.ts",
     "smoke": "tsx --env-file-if-exists=.env scripts/smoke.ts",
     "ask": "tsx --env-file-if-exists=.env scripts/ask.ts",
+    "eval:dev": "EVAL_MODE=easy EVAL_DEV=1 evalite run evals/main.eval.ts --outputPath=runs/$(date +%Y-%m-%d-%H%M%S)-easy-dev.json",
+    "eval:easy": "EVAL_MODE=easy evalite run evals/main.eval.ts --outputPath=runs/$(date +%Y-%m-%d-%H%M%S)-easy-full.json",
+    "eval:hard": "EVAL_MODE=hard evalite run evals/main.eval.ts --outputPath=runs/$(date +%Y-%m-%d-%H%M%S)-hard-${PICKER:-unset}-full.json",
+    "eval:hard:dev": "EVAL_MODE=hard EVAL_DEV=1 evalite run evals/main.eval.ts --outputPath=runs/$(date +%Y-%m-%d-%H%M%S)-hard-${PICKER:-unset}-dev.json",
+    "eval:pickers": "EVAL_MODE=hard EVAL_DEV=1 EVAL_PICKERS=1 evalite run evals/main.eval.ts --outputPath=runs/$(date +%Y-%m-%d-%H%M%S)-pickers-dev.json",
+    "triage": "tsx scripts/triage.ts",
     "lint": "eslint .",
     "test": "node --env-file-if-exists=.env --test",
     "test:db": "node --env-file-if-exists=.env --test 'src/**/*.dbtest.ts'"
@@ -16,16 +22,19 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "openai": "^7.2.0",
+    "@anthropic-ai/sdk": "^0.115.0",
     "pg": "^8.22.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.1.2",
     "@types/pg": "^8.20.0",
+    "better-sqlite3": "^11.10.0",
     "eslint": "^10.8.0",
+    "evalite": "^1.0.0-beta.16",
     "tsx": "^4.23.1",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.65.0"
+    "typescript-eslint": "^8.65.0",
+    "vitest": "^4.1.10"
   }
 }

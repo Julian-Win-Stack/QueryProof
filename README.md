@@ -52,10 +52,19 @@ Three findings, all against intuition, all measured:
    *wrong shortlist*.
 
 2. **Table selection bought cost, not accuracy.** +1.8 points is inside the
-   band; 2.5× cheaper is real ($6.31 vs $15.70 per 500 questions). The picker
-   sends 2.1 tables on average instead of 75 and holds 86% recall. Accuracy can
-   never exceed recall — when the right table isn't in the prompt, no prompt
-   tuning saves the query — so recall is measured independently, per run.
+   band — a tie. 2.5× cheaper is real: **$6.31 vs $15.70** per 500 questions.
+
+   It buys that by adding a call, not removing one. Sending all 75 tables means
+   a **14,946-token** prompt on every question, to get one line of SQL back.
+   Instead the picker reads a condensed catalog (**4,478 tokens**), names the
+   ~2 tables the question needs, and the SQL call's prompt drops to **950
+   tokens — 94% smaller**. Two calls, 5,428 input tokens total instead of
+   14,946. The bill is almost entirely input: the answer is ~150 tokens, the
+   schema is 100× that, so even at output's 5× price the prompt dominates ~20:1.
+
+   The risk is that the picker leaves out a table the question needed — and
+   then no prompt tuning saves the query, because accuracy can never exceed
+   recall. So recall is measured independently on every run. It holds **86.0%**.
 
 3. **Self-repair repairs the wrong thing.** Feeding Postgres errors back
    drove final execution errors from 10 to 0 — every retried query *runs*.

@@ -40,7 +40,7 @@ import { llmPick } from '../src/pickers/llm.ts';
 import { loadSchema, renderSchema, tablesForDbId, type Table } from '../src/schema.ts';
 import { extractGoldTables, recallHit } from '../src/table-recall.ts';
 import { PICKER_PROMPT_VERSION } from '../src/prompts/picker-v1.ts';
-import { PROMPT_VERSION } from '../src/prompts/v2.ts';
+import { PROMPT_VERSION } from '../src/prompts/v1.ts';
 
 const GOLD_PATH = new URL('../gold/validated.json', import.meta.url);
 const SLICE_PATH = new URL('./dev-slice.json', import.meta.url);

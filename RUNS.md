@@ -427,3 +427,62 @@ note:          +3.0 points. Against the re-scored HARD baseline's 57.4%: +1.0,
                52/102. 16 gained, 1 lost (bird-0003, as above).
 export:        runs/2026-07-30-153025-easy-full.json (re-graded)
 ```
+
+## 2026-07-31 — prompt v2: an output-contract rule for the extra-column failure
+
+```
+approach:      mode=hard picker=none repair=off prompt=v2 model=claude-sonnet-5 effort=medium concurrency=15 trials=3
+question set:  dev-slice (100)
+accuracy:      57.0% (171/300 over 3 trials) — 58.0 / 55.0 / 58.0
+table recall:  100% — structural: all 75 tables are always sent
+noise band:    ±1.5 measured here over 3 trials; read against the published ±2.5
+verdict:       rejected
+note:          v1 with two rules added: return exactly the columns asked for,
+               and never select a column you only sorted, grouped, or filtered
+               by. Aimed at the largest failure bucket — 78 of 227 baseline
+               failures return the wrong number of columns.
+
+               Against v1 on the same slice, re-graded under the current
+               comparator on the same day: 62.0% -> 57.0%. Down 5 points, and
+               v2's best trial (58.0) sits below v1's single run. v1 is one
+               trial, so "5 points worse" overstates it; the defensible claim is
+               that v2 did not help and may have hurt.
+
+               By difficulty: simple 60/93 (64.5%), moderate 81/150 (54.0%),
+               challenging 30/57 (52.6%). 7 pg errors (2.3%, v1 had 2.0%), 0
+               voids. 4,507,968 in / 50,218 out (14,313 thinking) — $9.52.
+
+               The rule did not move the failure it was written for. Column-count
+               mismatches went 13.0% -> 15.0%, inside noise either way. What did
+               move is empty results: 3.0% -> 6.7%.
+
+               Per-question diff (both runs re-graded, no model calls): only 5
+               of 100 questions changed consistently — 4 regressions, 1 gain.
+               Nine questions answered differently across v2's own three
+               identical trials, which is the slice's built-in wobble and the
+               reason a 2-point effect is not visible on 100 questions.
+
+               Reading the 4 regressions gives the mechanism. bird-0472 is the
+               clear case: told not to *select* the column it sorted by, the
+               model stopped *sorting*. It rewrote "order by salary, take the
+               top" as "where salary = (SELECT MAX(salary))", which returns zero
+               rows whenever the two conditions do not coincide. bird-0388
+               dropped a join it needed. The other two — a lowercase string
+               literal, a school name pulled from the wrong table — are ordinary
+               variance, not the rule.
+
+               Why no prompt fixes this bucket: the reference queries do not
+               agree with each other. bird-0004 and bird-0057 exclude the sorted
+               column; bird-0088 includes it; bird-0078 answers only half of a
+               two-part question. The "correct" column set is not derivable from
+               the question, so a rule that is followed consistently is
+               guaranteed to be wrong somewhere. The bucket was also smaller
+               than it looked: of the 78 column-count failures, 38 have the
+               wrong row count too and were never column-limited. The real
+               ceiling was 40 questions (8% of the set), not 34% of failures.
+
+               Treated as a measurement limit, not a tuning target. v2 is not
+               promoted; src/prompts/v2.ts stays in the repo as the evidence
+               behind this entry.
+export:        runs/2026-07-31-122519-hard-none-dev.json
+```

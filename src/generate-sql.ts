@@ -3,7 +3,7 @@
 // and what happens to the SQL is decided after.
 
 import { completeJson, type Usage } from './model.ts';
-import { buildUserMessage, PROMPT_VERSION, SYSTEM, type FailedAttempt } from './prompts/v2.ts';
+import { buildUserMessage, PROMPT_VERSION, SYSTEM, type FailedAttempt } from './prompts/v1.ts';
 
 const SQL_SCHEMA = {
   type: 'object',

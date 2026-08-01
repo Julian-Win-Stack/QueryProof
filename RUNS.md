@@ -980,3 +980,74 @@ note:          Not a measurement — the smoke that proves the new default
                src/prompts/ as the evidence behind their own entries.
 export:        runs/2026-08-01-123304-exp-default-check-g-full.json
 ```
+
+## 2026-08-01 — picker-v3 (evidence in the picker), stage 1: recall only
+
+```
+approach:      picker=llm pickerPrompt=picker-v3 model=claude-sonnet-5 effort=medium concurrency=20
+               recall-only measurement — 500 picker calls, no SQL generation, no accuracy number.
+               Baseline for comparison: per-question tablesSent stored in the Batch G export
+               (runs/2026-08-01-122927-exp-v4-rewrites-full.json, pickerPrompt=picker-v1).
+question set:  full (500 validated)
+table recall:  87.6% (438/500) vs baseline 85.6% (428/500); avg tables sent 2.01 vs 2.09
+verdict:       rejected — as the pre-registered gate for a full stage-2 run
+note:          D20's reserved experiment: picker-v3 is picker-v1 plus the BIRD
+               evidence hint in the message, nothing else changed. The gate,
+               set before the run: at least 12 of the 16 cluster-1 target
+               questions (docs/winnable-failures.md, picker-missed-table
+               failures) must flip to a recall hit. Six flipped: bird-0014,
+               0039, 0041, 0045, 0266, 0356 — the ones whose evidence names
+               the table or a distinctive column. Nine did not, though their
+               evidence names a column of the missing table (cost, KCT,
+               DisplayName, laps): reading the hint does not make the model
+               do a column->owner lookup across 75 catalog lines.
+               12 questions regressed hit -> miss against the single stored
+               baseline sample; several look like the evidence narrowing the
+               pick — the hint names two tables and the picker drops the
+               middle table gold needs (0432 dropped molecule, 0070 budget,
+               0439 schools). Part of the 12 is ordinary picker wobble; no
+               recall noise band exists to split it.
+               Net +2.0 recall at unchanged table count and unchanged cost.
+               Not enough to earn stage 2 as-is. The measured follow-up:
+               deterministic union — add every catalog table owning a column
+               the evidence names verbatim — computable offline against this
+               run's stored selections for $0 before any further model spend.
+               2,268,114 in / 9,820 out (1,355 thinking) — $4.63.
+export:        runs/20260801-200012-picker-v3-recall-stage1.json
+               (smoke: runs/20260801-195847-picker-v3-recall-stage1.json, LIMIT=3, void)
+```
+
+## 2026-08-01 — picker-v4 (evidence + explicit lookup rules), stage 1: recall only
+
+```
+approach:      picker=llm pickerPrompt=picker-v4 model=claude-sonnet-5 effort=medium concurrency=20
+               recall-only, 500 picker calls, no SQL generation. Baseline: the
+               Batch G export's stored per-question selections (picker-v1).
+question set:  full (500 validated)
+table recall:  88.4% (442/500) vs baseline 85.6% (428/500); avg tables sent 2.05 vs 2.09
+verdict:       rejected — gate unmet again (5/16 targets, needed 12)
+note:          Julian's iteration on picker-v3's result, three changes bundled
+               by his call: the "fewer is better" line removed, an explicit
+               "include every table that has a column the hint names — scan
+               the catalog for the owner" rule, and an explicit "the hint
+               does not name every table, add join tables" rule.
+               The instructions did not change the behavior they were aimed
+               at. Column->owner lookup still does not happen: cost->expense
+               (0058), KCT->examination (0127), DisplayName->users (0314)
+               all still missed, with the rule verbatim in the prompt. The
+               narrowing regressions persist: 10 hit->miss, same shape as
+               v3's 12 (middle table the hint never names gets dropped —
+               0070 budget, 0353/0388 cards, 0439 schools). And avg tables
+               sent stayed flat at 2.05 despite two rules pushing toward
+               more — the same non-steering picker-v2 measured in Batch E.
+               v4 vs v3: 442 vs 438 recall, 5 vs 6 targets (0266 flipped
+               back), 10 vs 12 regressions — the two prompts are the same
+               result. Prompt wording has hit its ceiling on this picker;
+               what the LLM will not do (mechanical column->owner lookup),
+               code can: the deterministic evidence-column union, measurable
+               offline against the three stored selection sets for $0.
+               2,323,114 in / 11,193 out (2,643 thinking) — $4.76.
+export:        runs/20260801-202519-picker-v4-recall-stage1.json
+               (smoke: runs/20260801-202415-picker-v4-recall-stage1.json, LIMIT=3, void)
+```
+

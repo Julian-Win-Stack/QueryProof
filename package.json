@@ -16,6 +16,7 @@
     "eval:pickers": "EVAL_MODE=hard EVAL_DEV=1 EVAL_PICKERS=1 evalite run evals/main.eval.ts --outputPath=runs/$(date +%Y-%m-%d-%H%M%S)-pickers-dev.json",
     "eval:exp": "EVAL_MODE=hard evalite run evals/main.eval.ts --outputPath=runs/$(date +%Y-%m-%d-%H%M%S)-exp-${TAG:?set TAG to name the run file}-full.json",
     "triage": "tsx scripts/triage.ts",
+    "picker-recall": "tsx --env-file-if-exists=.env scripts/picker-evidence-recall.ts",
     "replay": "tsx --env-file-if-exists=.env scripts/replay-rewrites.ts",
     "rescore": "tsx --env-file-if-exists=.env scripts/rescore.ts",
     "diff": "tsx --env-file-if-exists=.env scripts/diff-runs.ts",

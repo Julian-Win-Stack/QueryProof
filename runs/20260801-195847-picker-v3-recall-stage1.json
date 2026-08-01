@@ -1,0 +1,59 @@
+{
+ "config": {
+  "pickerPrompt": "picker-v3",
+  "model": "claude-sonnet-5",
+  "effort": "medium",
+  "baseline": "runs/2026-08-01-122927-exp-v4-rewrites-full.json",
+  "limit": 3,
+  "targetIds": [
+   "bird-0014",
+   "bird-0023",
+   "bird-0039",
+   "bird-0041",
+   "bird-0045",
+   "bird-0057",
+   "bird-0058",
+   "bird-0063",
+   "bird-0127",
+   "bird-0206",
+   "bird-0227",
+   "bird-0266",
+   "bird-0314",
+   "bird-0356",
+   "bird-0366",
+   "bird-0367"
+  ]
+ },
+ "usage": {
+  "inputTokens": 13604,
+  "outputTokens": 79,
+  "thinkingTokens": 28,
+  "totalTokens": 13683,
+  "calls": 3
+ },
+ "results": [
+  {
+   "id": "bird-0000",
+   "hit": true,
+   "tables": [
+    "customers"
+   ]
+  },
+  {
+   "id": "bird-0001",
+   "hit": true,
+   "tables": [
+    "customers",
+    "yearmonth"
+   ]
+  },
+  {
+   "id": "bird-0002",
+   "hit": true,
+   "tables": [
+    "yearmonth",
+    "customers"
+   ]
+  }
+ ]
+}

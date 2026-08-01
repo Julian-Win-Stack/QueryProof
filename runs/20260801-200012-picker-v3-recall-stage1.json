@@ -1,0 +1,4042 @@
+{
+ "config": {
+  "pickerPrompt": "picker-v3",
+  "model": "claude-sonnet-5",
+  "effort": "medium",
+  "baseline": "runs/2026-08-01-122927-exp-v4-rewrites-full.json",
+  "limit": null,
+  "targetIds": [
+   "bird-0014",
+   "bird-0023",
+   "bird-0039",
+   "bird-0041",
+   "bird-0045",
+   "bird-0057",
+   "bird-0058",
+   "bird-0063",
+   "bird-0127",
+   "bird-0206",
+   "bird-0227",
+   "bird-0266",
+   "bird-0314",
+   "bird-0356",
+   "bird-0366",
+   "bird-0367"
+  ]
+ },
+ "usage": {
+  "inputTokens": 2268114,
+  "outputTokens": 9820,
+  "thinkingTokens": 1355,
+  "totalTokens": 2277934,
+  "calls": 500
+ },
+ "results": [
+  {
+   "id": "bird-0001",
+   "hit": true,
+   "tables": [
+    "yearmonth",
+    "customers"
+   ]
+  },
+  {
+   "id": "bird-0010",
+   "hit": true,
+   "tables": [
+    "customers"
+   ]
+  },
+  {
+   "id": "bird-0000",
+   "hit": true,
+   "tables": [
+    "customers"
+   ]
+  },
+  {
+   "id": "bird-0019",
+   "hit": true,
+   "tables": [
+    "transactions_1k",
+    "gasstations"
+   ]
+  },
+  {
+   "id": "bird-0016",
+   "hit": true,
+   "tables": [
+    "customers",
+    "yearmonth"
+   ]
+  },
+  {
+   "id": "bird-0017",
+   "hit": true,
+   "tables": [
+    "transactions_1k",
+    "gasstations",
+    "products"
+   ]
+  },
+  {
+   "id": "bird-0018",
+   "hit": true,
+   "tables": [
+    "transactions_1k",
+    "gasstations"
+   ]
+  },
+  {
+   "id": "bird-0004",
+   "hit": true,
+   "tables": [
+    "yearmonth",
+    "customers"
+   ]
+  },
+  {
+   "id": "bird-0003",
+   "hit": true,
+   "tables": [
+    "yearmonth",
+    "customers"
+   ]
+  },
+  {
+   "id": "bird-0002",
+   "hit": true,
+   "tables": [
+    "yearmonth",
+    "customers"
+   ]
+  },
+  {
+   "id": "bird-0007",
+   "hit": true,
+   "tables": [
+    "yearmonth",
+    "customers"
+   ]
+  },
+  {
+   "id": "bird-0012",
+   "hit": true,
+   "tables": [
+    "yearmonth"
+   ]
+  },
+  {
+   "id": "bird-0005",
+   "hit": true,
+   "tables": [
+    "yearmonth",
+    "customers"
+   ]
+  },
+  {
+   "id": "bird-0015",
+   "hit": false,
+   "tables": [
+    "gasstations",
+    "transactions_1k"
+   ]
+  },
+  {
+   "id": "bird-0011",
+   "hit": true,
+   "tables": [
+    "customers",
+    "yearmonth"
+   ]
+  },
+  {
+   "id": "bird-0009",
+   "hit": true,
+   "tables": [
+    "gasstations"
+   ]
+  },
+  {
+   "id": "bird-0013",
+   "hit": true,
+   "tables": [
+    "yearmonth"
+   ]
+  },
+  {
+   "id": "bird-0014",
+   "hit": true,
+   "tables": [
+    "yearmonth",
+    "transactions_1k",
+    "products"
+   ]
+  },
+  {
+   "id": "bird-0006",
+   "hit": true,
+   "tables": [
+    "yearmonth",
+    "customers"
+   ]
+  },
+  {
+   "id": "bird-0020",
+   "hit": false,
+   "tables": [
+    "transactions_1k",
+    "customers"
+   ]
+  },
+  {
+   "id": "bird-0025",
+   "hit": false,
+   "tables": [
+    "transactions_1k",
+    "yearmonth"
+   ]
+  },
+  {
+   "id": "bird-0033",
+   "hit": true,
+   "tables": [
+    "event",
+    "attendance"
+   ]
+  },
+  {
+   "id": "bird-0029",
+   "hit": true,
+   "tables": [
+    "transactions_1k",
+    "yearmonth"
+   ]
+  },
+  {
+   "id": "bird-0024",
+   "hit": false,
+   "tables": [
+    "customers",
+    "yearmonth"
+   ]
+  },
+  {
+   "id": "bird-0023",
+   "hit": false,
+   "tables": [
+    "transactions_1k",
+    "customers"
+   ]
+  },
+  {
+   "id": "bird-0028",
+   "hit": false,
+   "tables": [
+    "transactions_1k",
+    "customers"
+   ]
+  },
+  {
+   "id": "bird-0030",
+   "hit": true,
+   "tables": [
+    "member",
+    "major"
+   ]
+  },
+  {
+   "id": "bird-0027",
+   "hit": false,
+   "tables": [
+    "yearmonth"
+   ]
+  },
+  {
+   "id": "bird-0026",
+   "hit": true,
+   "tables": [
+    "customers",
+    "gasstations"
+   ]
+  },
+  {
+   "id": "bird-0031",
+   "hit": true,
+   "tables": [
+    "member",
+    "attendance",
+    "event"
+   ]
+  },
+  {
+   "id": "bird-0022",
+   "hit": true,
+   "tables": [
+    "transactions_1k",
+    "gasstations"
+   ]
+  },
+  {
+   "id": "bird-0034",
+   "hit": true,
+   "tables": [
+    "income",
+    "member"
+   ]
+  },
+  {
+   "id": "bird-0035",
+   "hit": true,
+   "tables": [
+    "member",
+    "zip_code"
+   ]
+  },
+  {
+   "id": "bird-0021",
+   "hit": true,
+   "tables": [
+    "transactions_1k",
+    "customers"
+   ]
+  },
+  {
+   "id": "bird-0036",
+   "hit": false,
+   "tables": [
+    "expense",
+    "event"
+   ]
+  },
+  {
+   "id": "bird-0032",
+   "hit": true,
+   "tables": [
+    "event",
+    "attendance"
+   ]
+  },
+  {
+   "id": "bird-0038",
+   "hit": true,
+   "tables": [
+    "budget",
+    "event"
+   ]
+  },
+  {
+   "id": "bird-0042",
+   "hit": true,
+   "tables": [
+    "member",
+    "major"
+   ]
+  },
+  {
+   "id": "bird-0040",
+   "hit": true,
+   "tables": [
+    "member"
+   ]
+  },
+  {
+   "id": "bird-0037",
+   "hit": true,
+   "tables": [
+    "expense",
+    "member"
+   ]
+  },
+  {
+   "id": "bird-0039",
+   "hit": true,
+   "tables": [
+    "income"
+   ]
+  },
+  {
+   "id": "bird-0048",
+   "hit": true,
+   "tables": [
+    "zip_code"
+   ]
+  },
+  {
+   "id": "bird-0047",
+   "hit": true,
+   "tables": [
+    "expense"
+   ]
+  },
+  {
+   "id": "bird-0041",
+   "hit": true,
+   "tables": [
+    "expense",
+    "budget"
+   ]
+  },
+  {
+   "id": "bird-0043",
+   "hit": true,
+   "tables": [
+    "member",
+    "major"
+   ]
+  },
+  {
+   "id": "bird-0049",
+   "hit": true,
+   "tables": [
+    "member",
+    "major"
+   ]
+  },
+  {
+   "id": "bird-0045",
+   "hit": true,
+   "tables": [
+    "member",
+    "income"
+   ]
+  },
+  {
+   "id": "bird-0051",
+   "hit": true,
+   "tables": [
+    "member",
+    "major"
+   ]
+  },
+  {
+   "id": "bird-0050",
+   "hit": true,
+   "tables": [
+    "attendance",
+    "event"
+   ]
+  },
+  {
+   "id": "bird-0044",
+   "hit": true,
+   "tables": [
+    "member",
+    "major"
+   ]
+  },
+  {
+   "id": "bird-0053",
+   "hit": true,
+   "tables": [
+    "budget"
+   ]
+  },
+  {
+   "id": "bird-0055",
+   "hit": true,
+   "tables": [
+    "member",
+    "attendance"
+   ]
+  },
+  {
+   "id": "bird-0056",
+   "hit": false,
+   "tables": [
+    "budget",
+    "event",
+    "member"
+   ]
+  },
+  {
+   "id": "bird-0046",
+   "hit": true,
+   "tables": [
+    "budget",
+    "event"
+   ]
+  },
+  {
+   "id": "bird-0008",
+   "hit": true,
+   "tables": [
+    "yearmonth"
+   ]
+  },
+  {
+   "id": "bird-0058",
+   "hit": false,
+   "tables": [
+    "budget",
+    "event"
+   ]
+  },
+  {
+   "id": "bird-0059",
+   "hit": true,
+   "tables": [
+    "income"
+   ]
+  },
+  {
+   "id": "bird-0060",
+   "hit": true,
+   "tables": [
+    "member",
+    "major"
+   ]
+  },
+  {
+   "id": "bird-0054",
+   "hit": true,
+   "tables": [
+    "budget"
+   ]
+  },
+  {
+   "id": "bird-0067",
+   "hit": true,
+   "tables": [
+    "expense"
+   ]
+  },
+  {
+   "id": "bird-0057",
+   "hit": false,
+   "tables": [
+    "event",
+    "expense"
+   ]
+  },
+  {
+   "id": "bird-0066",
+   "hit": true,
+   "tables": [
+    "budget",
+    "event"
+   ]
+  },
+  {
+   "id": "bird-0062",
+   "hit": true,
+   "tables": [
+    "member",
+    "event",
+    "attendance"
+   ]
+  },
+  {
+   "id": "bird-0061",
+   "hit": true,
+   "tables": [
+    "event",
+    "budget"
+   ]
+  },
+  {
+   "id": "bird-0063",
+   "hit": false,
+   "tables": [
+    "expense",
+    "event"
+   ]
+  },
+  {
+   "id": "bird-0068",
+   "hit": true,
+   "tables": [
+    "member",
+    "expense"
+   ]
+  },
+  {
+   "id": "bird-0069",
+   "hit": true,
+   "tables": [
+    "expense",
+    "member"
+   ]
+  },
+  {
+   "id": "bird-0065",
+   "hit": false,
+   "tables": [
+    "expense",
+    "event"
+   ]
+  },
+  {
+   "id": "bird-0064",
+   "hit": true,
+   "tables": [
+    "event",
+    "budget"
+   ]
+  },
+  {
+   "id": "bird-0073",
+   "hit": true,
+   "tables": [
+    "member",
+    "income"
+   ]
+  },
+  {
+   "id": "bird-0074",
+   "hit": true,
+   "tables": [
+    "event"
+   ]
+  },
+  {
+   "id": "bird-0070",
+   "hit": false,
+   "tables": [
+    "event"
+   ]
+  },
+  {
+   "id": "bird-0075",
+   "hit": false,
+   "tables": [
+    "member",
+    "expense"
+   ]
+  },
+  {
+   "id": "bird-0080",
+   "hit": true,
+   "tables": [
+    "patient"
+   ]
+  },
+  {
+   "id": "bird-0081",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0078",
+   "hit": true,
+   "tables": [
+    "patient"
+   ]
+  },
+  {
+   "id": "bird-0076",
+   "hit": true,
+   "tables": [
+    "expense",
+    "member"
+   ]
+  },
+  {
+   "id": "bird-0077",
+   "hit": false,
+   "tables": [
+    "member",
+    "income"
+   ]
+  },
+  {
+   "id": "bird-0072",
+   "hit": true,
+   "tables": [
+    "budget",
+    "event"
+   ]
+  },
+  {
+   "id": "bird-0084",
+   "hit": false,
+   "tables": [
+    "patient"
+   ]
+  },
+  {
+   "id": "bird-0083",
+   "hit": true,
+   "tables": [
+    "patient",
+    "examination"
+   ]
+  },
+  {
+   "id": "bird-0085",
+   "hit": true,
+   "tables": [
+    "patient"
+   ]
+  },
+  {
+   "id": "bird-0088",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0082",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0089",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0091",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0086",
+   "hit": true,
+   "tables": [
+    "patient",
+    "examination"
+   ]
+  },
+  {
+   "id": "bird-0090",
+   "hit": true,
+   "tables": [
+    "patient",
+    "examination"
+   ]
+  },
+  {
+   "id": "bird-0093",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0052",
+   "hit": true,
+   "tables": [
+    "event",
+    "budget"
+   ]
+  },
+  {
+   "id": "bird-0092",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory",
+    "examination"
+   ]
+  },
+  {
+   "id": "bird-0098",
+   "hit": true,
+   "tables": [
+    "patient"
+   ]
+  },
+  {
+   "id": "bird-0094",
+   "hit": true,
+   "tables": [
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0095",
+   "hit": true,
+   "tables": [
+    "examination"
+   ]
+  },
+  {
+   "id": "bird-0097",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0087",
+   "hit": true,
+   "tables": [
+    "patient",
+    "examination"
+   ]
+  },
+  {
+   "id": "bird-0071",
+   "hit": true,
+   "tables": [
+    "member",
+    "major"
+   ]
+  },
+  {
+   "id": "bird-0102",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0101",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0100",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0109",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0096",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0106",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0108",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0104",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0103",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0105",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0107",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0079",
+   "hit": true,
+   "tables": [
+    "patient"
+   ]
+  },
+  {
+   "id": "bird-0115",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0112",
+   "hit": false,
+   "tables": [
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0113",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0114",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0110",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0120",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0116",
+   "hit": false,
+   "tables": [
+    "laboratory",
+    "patient"
+   ]
+  },
+  {
+   "id": "bird-0111",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0121",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0117",
+   "hit": false,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0119",
+   "hit": true,
+   "tables": [
+    "laboratory",
+    "patient"
+   ]
+  },
+  {
+   "id": "bird-0122",
+   "hit": true,
+   "tables": [
+    "laboratory",
+    "patient"
+   ]
+  },
+  {
+   "id": "bird-0125",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0118",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0123",
+   "hit": false,
+   "tables": [
+    "laboratory",
+    "patient"
+   ]
+  },
+  {
+   "id": "bird-0126",
+   "hit": true,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0130",
+   "hit": false,
+   "tables": [
+    "team_attributes"
+   ]
+  },
+  {
+   "id": "bird-0128",
+   "hit": true,
+   "tables": [
+    "league",
+    "match"
+   ]
+  },
+  {
+   "id": "bird-0131",
+   "hit": true,
+   "tables": [
+    "match",
+    "league"
+   ]
+  },
+  {
+   "id": "bird-0124",
+   "hit": false,
+   "tables": [
+    "patient",
+    "laboratory"
+   ]
+  },
+  {
+   "id": "bird-0129",
+   "hit": true,
+   "tables": [
+    "match",
+    "league",
+    "team"
+   ]
+  },
+  {
+   "id": "bird-0134",
+   "hit": true,
+   "tables": [
+    "team_attributes"
+   ]
+  },
+  {
+   "id": "bird-0127",
+   "hit": false,
+   "tables": [
+    "laboratory",
+    "patient"
+   ]
+  },
+  {
+   "id": "bird-0136",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0132",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0133",
+   "hit": true,
+   "tables": [
+    "league",
+    "match"
+   ]
+  },
+  {
+   "id": "bird-0137",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0141",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0135",
+   "hit": true,
+   "tables": [
+    "team",
+    "team_attributes"
+   ]
+  },
+  {
+   "id": "bird-0140",
+   "hit": true,
+   "tables": [
+    "player"
+   ]
+  },
+  {
+   "id": "bird-0138",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0139",
+   "hit": true,
+   "tables": [
+    "league",
+    "match"
+   ]
+  },
+  {
+   "id": "bird-0143",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0142",
+   "hit": true,
+   "tables": [
+    "match",
+    "country"
+   ]
+  },
+  {
+   "id": "bird-0147",
+   "hit": true,
+   "tables": [
+    "player"
+   ]
+  },
+  {
+   "id": "bird-0099",
+   "hit": true,
+   "tables": [
+    "patient"
+   ]
+  },
+  {
+   "id": "bird-0146",
+   "hit": true,
+   "tables": [
+    "player"
+   ]
+  },
+  {
+   "id": "bird-0148",
+   "hit": true,
+   "tables": [
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0144",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0149",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0153",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0155",
+   "hit": true,
+   "tables": [
+    "team",
+    "team_attributes"
+   ]
+  },
+  {
+   "id": "bird-0151",
+   "hit": true,
+   "tables": [
+    "match",
+    "league"
+   ]
+  },
+  {
+   "id": "bird-0154",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0150",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0161",
+   "hit": true,
+   "tables": [
+    "team",
+    "team_attributes"
+   ]
+  },
+  {
+   "id": "bird-0162",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0160",
+   "hit": true,
+   "tables": [
+    "team",
+    "team_attributes"
+   ]
+  },
+  {
+   "id": "bird-0158",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0163",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0145",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0156",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0166",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0165",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0157",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0164",
+   "hit": true,
+   "tables": [
+    "player"
+   ]
+  },
+  {
+   "id": "bird-0167",
+   "hit": true,
+   "tables": [
+    "team",
+    "team_attributes"
+   ]
+  },
+  {
+   "id": "bird-0172",
+   "hit": true,
+   "tables": [
+    "match",
+    "league"
+   ]
+  },
+  {
+   "id": "bird-0159",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0174",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0152",
+   "hit": true,
+   "tables": [
+    "league",
+    "match"
+   ]
+  },
+  {
+   "id": "bird-0168",
+   "hit": true,
+   "tables": [
+    "player"
+   ]
+  },
+  {
+   "id": "bird-0170",
+   "hit": true,
+   "tables": [
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0171",
+   "hit": true,
+   "tables": [
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0176",
+   "hit": true,
+   "tables": [
+    "match",
+    "team"
+   ]
+  },
+  {
+   "id": "bird-0179",
+   "hit": true,
+   "tables": [
+    "qualifying",
+    "drivers"
+   ]
+  },
+  {
+   "id": "bird-0178",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0175",
+   "hit": true,
+   "tables": [
+    "match",
+    "league"
+   ]
+  },
+  {
+   "id": "bird-0177",
+   "hit": true,
+   "tables": [
+    "player",
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0183",
+   "hit": true,
+   "tables": [
+    "races",
+    "circuits"
+   ]
+  },
+  {
+   "id": "bird-0182",
+   "hit": true,
+   "tables": [
+    "circuits",
+    "races"
+   ]
+  },
+  {
+   "id": "bird-0181",
+   "hit": true,
+   "tables": [
+    "races",
+    "circuits"
+   ]
+  },
+  {
+   "id": "bird-0180",
+   "hit": true,
+   "tables": [
+    "qualifying",
+    "drivers"
+   ]
+  },
+  {
+   "id": "bird-0185",
+   "hit": false,
+   "tables": [
+    "qualifying"
+   ]
+  },
+  {
+   "id": "bird-0186",
+   "hit": false,
+   "tables": [
+    "races",
+    "results"
+   ]
+  },
+  {
+   "id": "bird-0184",
+   "hit": true,
+   "tables": [
+    "qualifying",
+    "drivers"
+   ]
+  },
+  {
+   "id": "bird-0187",
+   "hit": true,
+   "tables": [
+    "drivers",
+    "results"
+   ]
+  },
+  {
+   "id": "bird-0169",
+   "hit": true,
+   "tables": [
+    "player_attributes"
+   ]
+  },
+  {
+   "id": "bird-0188",
+   "hit": true,
+   "tables": [
+    "laptimes",
+    "drivers"
+   ]
+  },
+  {
+   "id": "bird-0190",
+   "hit": true,
+   "tables": [
+    "constructorresults",
+    "constructors"
+   ]
+  },
+  {
+   "id": "bird-0191",
+   "hit": true,
+   "tables": [
+    "qualifying",
+    "drivers"
+   ]
+  },
+  {
+   "id": "bird-0193",
+   "hit": true,
+   "tables": [
+    "results",
+    "drivers"
+   ]
+  },
+  {
+   "id": "bird-0195",
+   "hit": true,
+   "tables": [
+    "drivers",
+    "results"
+   ]
+  },
+  {
+   "id": "bird-0189",
+   "hit": true,
+   "tables": [
+    "races",
+    "circuits"
+   ]
+  },
+  {
+   "id": "bird-0201",
+   "hit": false,
+   "tables": [
+    "drivers",
+    "races",
+    "results"
+   ]
+  },
+  {
+   "id": "bird-0197",
+   "hit": true,
+   "tables": [
+    "races"
+   ]
+  },
+  {
+   "id": "bird-0203",
+   "hit": true,
+   "tables": [
+    "drivers"
+   ]
+  },
+  {
+   "id": "bird-0198",
+   "hit": false,
+   "tables": [
+    "drivers",
+    "driverstandings"
+   ]
+  },
+  {
+   "id": "bird-0194",
+   "hit": true,
+   "tables": [
+    "results",
+    "drivers"
+   ]
+  },
+  {
+   "id": "bird-0196",
+   "hit": true,
+   "tables": [
+    "races",
+    "results"
+   ]
+  },
+  {
+   "id": "bird-0200",
+   "hit": true,
+   "tables": [
+    "laptimes",
+    "drivers",
+    "races"
+   ]
+  },
+  {
+   "id": "bird-0202",
+   "hit": true,
+   "tables": [
+    "drivers",
+    "driverstandings"
+   ]
+  },
+  {
+   "id": "bird-0207",
+   "hit": false,
+   "tables": [
+    "drivers",
+    "races",
+    "results"
+   ]
+  },
+  {
+   "id": "bird-0192",
+   "hit": true,
+   "tables": [
+    "races",
+    "seasons"
+   ]
+  },
+  {
+   "id": "bird-0204",
+   "hit": true,
+   "tables": [
+    "races",
+    "circuits"
+   ]
+  },
+  {
+   "id": "bird-0206",
+   "hit": false,
+   "tables": [
+    "results",
+    "races",
+    "drivers"
+   ]
+  },
+  {
+   "id": "bird-0210",
+   "hit": true,
+   "tables": [
+    "circuits"
+   ]
+  },
+  {
+   "id": "bird-0173",
+   "hit": true,
+   "tables": [
+    "team",
+    "team_attributes"
+   ]
+  },
+  {
+   "id": "bird-0211",
+   "hit": true,
+   "tables": [
+    "drivers"
+   ]
+  },
+  {
+   "id": "bird-0208",
+   "hit": true,
+   "tables": [
+    "races",
+    "circuits"
+   ]
+  },
+  {
+   "id": "bird-0209",
+   "hit": true,
+   "tables": [
+    "circuits"
+   ]
+  },
+  {
+   "id": "bird-0215",
+   "hit": true,
+   "tables": [
+    "drivers",
+    "races",
+    "results"
+   ]
+  },
+  {
+   "id": "bird-0213",
+   "hit": true,
+   "tables": [
+    "drivers",
+    "results",
+    "races"
+   ]
+  },
+  {
+   "id": "bird-0216",
+   "hit": true,
+   "tables": [
+    "results",
+    "races"
+   ]
+  },
+  {
+   "id": "bird-0212",
+   "hit": true,
+   "tables": [
+    "races",
+    "results",
+    "drivers"
+   ]
+  },
+  {
+   "id": "bird-0218",
+   "hit": true,
+   "tables": [
+    "races",
+    "results"
+   ]
+  },
+  {
+   "id": "bird-0214",
+   "hit": true,
+   "tables": [
+    "results",
+    "races"
+   ]
+  },
+  {
+   "id": "bird-0222",
+   "hit": false,
+   "tables": [
+    "constructors",
+    "constructorresults"
+   ]
+  },
+  {
+   "id": "bird-0221",
+   "hit": false,
+   "tables": [
+    "constructorresults",
+    "constructors"
+   ]
+  },
+  {
+   "id": "bird-0205",
+   "hit": false,
+   "tables": [
+    "drivers",
+    "results",
+    "races"
+   ]
+  },
+  {
+   "id": "bird-0229",
+   "hit": true,
+   "tables": [
+    "drivers"
+   ]
+  },
+  {
+   "id": "bird-0199",
+   "hit": true,
+   "tables": [
+    "laptimes",
+    "drivers",
+    "races"
+   ]
+  },
+  {
+   "id": "bird-0220",
+   "hit": true,
+   "tables": [
+    "constructors",
+    "constructorstandings"
+   ]
+  },
+  {
+   "id": "bird-0219",
+   "hit": true,
+   "tables": [
+    "circuits"
+   ]
+  },
+  {
+   "id": "bird-0226",
+   "hit": true,
+   "tables": [
+    "results",
+    "races"
+   ]
+  },
+  {
+   "id": "bird-0224",
+   "hit": true,
+   "tables": [
+    "results",
+    "races",
+    "drivers",
+    "status"
+   ]
+  },
+  {
+   "id": "bird-0228",
+   "hit": true,
+   "tables": [
+    "drivers",
+    "laptimes"
+   ]
+  },
+  {
+   "id": "bird-0232",
+   "hit": true,
+   "tables": [
+    "drivers",
+    "results"
+   ]
+  },
+  {
+   "id": "bird-0227",
+   "hit": false,
+   "tables": [
+    "drivers",
+    "laptimes",
+    "races"
+   ]
+  },
+  {
+   "id": "bird-0231",
+   "hit": true,
+   "tables": [
+    "drivers"
+   ]
+  },
+  {
+   "id": "bird-0230",
+   "hit": true,
+   "tables": [
+    "drivers"
+   ]
+  },
+  {
+   "id": "bird-0233",
+   "hit": true,
+   "tables": [
+    "results"
+   ]
+  },
+  {
+   "id": "bird-0234",
+   "hit": true,
+   "tables": [
+    "circuits"
+   ]
+  },
+  {
+   "id": "bird-0235",
+   "hit": true,
+   "tables": [
+    "drivers",
+    "qualifying",
+    "races"
+   ]
+  },
+  {
+   "id": "bird-0236",
+   "hit": true,
+   "tables": [
+    "drivers",
+    "pitstops"
+   ]
+  },
+  {
+   "id": "bird-0238",
+   "hit": true,
+   "tables": [
+    "races",
+    "results",
+    "constructors"
+   ]
+  },
+  {
+   "id": "bird-0225",
+   "hit": false,
+   "tables": [
+    "races",
+    "driverstandings",
+    "laptimes",
+    "drivers"
+   ]
+  },
+  {
+   "id": "bird-0237",
+   "hit": true,
+   "tables": [
+    "races",
+    "results",
+    "drivers"
+   ]
+  },
+  {
+   "id": "bird-0240",
+   "hit": true,
+   "tables": [
+    "races",
+    "constructorresults",
+    "constructors"
+   ]
+  },
+  {
+   "id": "bird-0239",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "hero_power",
+    "superpower"
+   ]
+  },
+  {
+   "id": "bird-0243",
+   "hit": true,
+   "tables": [
+    "results",
+    "races",
+    "status"
+   ]
+  },
+  {
+   "id": "bird-0244",
+   "hit": true,
+   "tables": [
+    "laptimes",
+    "drivers"
+   ]
+  },
+  {
+   "id": "bird-0247",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "colour",
+    "hero_power",
+    "superpower"
+   ]
+  },
+  {
+   "id": "bird-0248",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "colour"
+   ]
+  },
+  {
+   "id": "bird-0246",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "hero_power",
+    "superpower"
+   ]
+  },
+  {
+   "id": "bird-0241",
+   "hit": true,
+   "tables": [
+    "circuits",
+    "races",
+    "qualifying",
+    "drivers"
+   ]
+  },
+  {
+   "id": "bird-0249",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "publisher"
+   ]
+  },
+  {
+   "id": "bird-0250",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "publisher",
+    "colour"
+   ]
+  },
+  {
+   "id": "bird-0254",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "hero_attribute",
+    "attribute"
+   ]
+  },
+  {
+   "id": "bird-0253",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "colour",
+    "publisher"
+   ]
+  },
+  {
+   "id": "bird-0245",
+   "hit": false,
+   "tables": [
+    "circuits",
+    "races",
+    "laptimes"
+   ]
+  },
+  {
+   "id": "bird-0251",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "publisher",
+    "hero_power",
+    "superpower"
+   ]
+  },
+  {
+   "id": "bird-0256",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "hero_attribute",
+    "attribute"
+   ]
+  },
+  {
+   "id": "bird-0252",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "hero_attribute",
+    "attribute",
+    "publisher"
+   ]
+  },
+  {
+   "id": "bird-0259",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "alignment",
+    "publisher"
+   ]
+  },
+  {
+   "id": "bird-0257",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "hero_power",
+    "superpower"
+   ]
+  },
+  {
+   "id": "bird-0242",
+   "hit": false,
+   "tables": [
+    "drivers",
+    "results",
+    "races"
+   ]
+  },
+  {
+   "id": "bird-0255",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "race"
+   ]
+  },
+  {
+   "id": "bird-0258",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "gender",
+    "hero_attribute",
+    "attribute"
+   ]
+  },
+  {
+   "id": "bird-0217",
+   "hit": true,
+   "tables": [
+    "results",
+    "races",
+    "drivers"
+   ]
+  },
+  {
+   "id": "bird-0262",
+   "hit": true,
+   "tables": [
+    "superhero"
+   ]
+  },
+  {
+   "id": "bird-0223",
+   "hit": true,
+   "tables": [
+    "results",
+    "races",
+    "drivers"
+   ]
+  },
+  {
+   "id": "bird-0263",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "gender"
+   ]
+  },
+  {
+   "id": "bird-0260",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "publisher"
+   ]
+  },
+  {
+   "id": "bird-0265",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "colour"
+   ]
+  },
+  {
+   "id": "bird-0264",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "hero_power",
+    "superpower",
+    "gender"
+   ]
+  },
+  {
+   "id": "bird-0268",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "gender"
+   ]
+  },
+  {
+   "id": "bird-0269",
+   "hit": true,
+   "tables": [
+    "hero_power",
+    "superpower"
+   ]
+  },
+  {
+   "id": "bird-0271",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "hero_attribute",
+    "attribute"
+   ]
+  },
+  {
+   "id": "bird-0270",
+   "hit": true,
+   "tables": [
+    "hero_power",
+    "superpower"
+   ]
+  },
+  {
+   "id": "bird-0274",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "publisher"
+   ]
+  },
+  {
+   "id": "bird-0272",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "hero_attribute",
+    "attribute",
+    "publisher"
+   ]
+  },
+  {
+   "id": "bird-0273",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "gender",
+    "publisher",
+    "colour"
+   ]
+  },
+  {
+   "id": "bird-0275",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "colour",
+    "gender"
+   ]
+  },
+  {
+   "id": "bird-0266",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "colour",
+    "race"
+   ]
+  },
+  {
+   "id": "bird-0276",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "hero_power"
+   ]
+  },
+  {
+   "id": "bird-0277",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "colour"
+   ]
+  },
+  {
+   "id": "bird-0261",
+   "hit": true,
+   "tables": [
+    "publisher"
+   ]
+  },
+  {
+   "id": "bird-0285",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "hero_attribute",
+    "attribute"
+   ]
+  },
+  {
+   "id": "bird-0278",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "colour"
+   ]
+  },
+  {
+   "id": "bird-0279",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "alignment"
+   ]
+  },
+  {
+   "id": "bird-0284",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "hero_power",
+    "superpower"
+   ]
+  },
+  {
+   "id": "bird-0280",
+   "hit": true,
+   "tables": [
+    "hero_attribute",
+    "attribute",
+    "superhero"
+   ]
+  },
+  {
+   "id": "bird-0287",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "colour"
+   ]
+  },
+  {
+   "id": "bird-0282",
+   "hit": true,
+   "tables": [
+    "superhero"
+   ]
+  },
+  {
+   "id": "bird-0288",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "publisher"
+   ]
+  },
+  {
+   "id": "bird-0286",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "hero_attribute",
+    "attribute"
+   ]
+  },
+  {
+   "id": "bird-0283",
+   "hit": true,
+   "tables": [
+    "superhero"
+   ]
+  },
+  {
+   "id": "bird-0290",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "gender"
+   ]
+  },
+  {
+   "id": "bird-0291",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "colour"
+   ]
+  },
+  {
+   "id": "bird-0281",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "gender",
+    "publisher"
+   ]
+  },
+  {
+   "id": "bird-0292",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "colour"
+   ]
+  },
+  {
+   "id": "bird-0267",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "publisher"
+   ]
+  },
+  {
+   "id": "bird-0293",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "colour",
+    "alignment"
+   ]
+  },
+  {
+   "id": "bird-0289",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "colour"
+   ]
+  },
+  {
+   "id": "bird-0297",
+   "hit": true,
+   "tables": [
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0295",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "hero_power",
+    "superpower",
+    "gender"
+   ]
+  },
+  {
+   "id": "bird-0300",
+   "hit": true,
+   "tables": [
+    "posts",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0296",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "publisher"
+   ]
+  },
+  {
+   "id": "bird-0302",
+   "hit": true,
+   "tables": [
+    "posts",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0298",
+   "hit": true,
+   "tables": [
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0304",
+   "hit": true,
+   "tables": [
+    "tags",
+    "posts"
+   ]
+  },
+  {
+   "id": "bird-0309",
+   "hit": true,
+   "tables": [
+    "users",
+    "posts"
+   ]
+  },
+  {
+   "id": "bird-0301",
+   "hit": true,
+   "tables": [
+    "users",
+    "posts"
+   ]
+  },
+  {
+   "id": "bird-0303",
+   "hit": true,
+   "tables": [
+    "posts",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0299",
+   "hit": true,
+   "tables": [
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0294",
+   "hit": true,
+   "tables": [
+    "superhero",
+    "hero_power",
+    "superpower"
+   ]
+  },
+  {
+   "id": "bird-0312",
+   "hit": true,
+   "tables": [
+    "posts"
+   ]
+  },
+  {
+   "id": "bird-0305",
+   "hit": true,
+   "tables": [
+    "posts",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0307",
+   "hit": true,
+   "tables": [
+    "comments",
+    "posts"
+   ]
+  },
+  {
+   "id": "bird-0306",
+   "hit": true,
+   "tables": [
+    "posts",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0308",
+   "hit": true,
+   "tables": [
+    "comments",
+    "posts"
+   ]
+  },
+  {
+   "id": "bird-0311",
+   "hit": true,
+   "tables": [
+    "posts",
+    "votes"
+   ]
+  },
+  {
+   "id": "bird-0310",
+   "hit": true,
+   "tables": [
+    "votes",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0316",
+   "hit": true,
+   "tables": [
+    "posts",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0315",
+   "hit": true,
+   "tables": [
+    "posts",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0320",
+   "hit": true,
+   "tables": [
+    "badges"
+   ]
+  },
+  {
+   "id": "bird-0319",
+   "hit": true,
+   "tables": [
+    "posts",
+    "comments"
+   ]
+  },
+  {
+   "id": "bird-0317",
+   "hit": true,
+   "tables": [
+    "comments",
+    "posts",
+    "posthistory"
+   ]
+  },
+  {
+   "id": "bird-0318",
+   "hit": true,
+   "tables": [
+    "votes",
+    "posts",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0313",
+   "hit": true,
+   "tables": [
+    "comments"
+   ]
+  },
+  {
+   "id": "bird-0314",
+   "hit": false,
+   "tables": [
+    "comments"
+   ]
+  },
+  {
+   "id": "bird-0324",
+   "hit": true,
+   "tables": [
+    "votes"
+   ]
+  },
+  {
+   "id": "bird-0323",
+   "hit": true,
+   "tables": [
+    "users",
+    "posts"
+   ]
+  },
+  {
+   "id": "bird-0322",
+   "hit": true,
+   "tables": [
+    "badges"
+   ]
+  },
+  {
+   "id": "bird-0321",
+   "hit": false,
+   "tables": [
+    "posthistory",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0326",
+   "hit": false,
+   "tables": [
+    "posts",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0329",
+   "hit": false,
+   "tables": [
+    "posts",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0330",
+   "hit": true,
+   "tables": [
+    "postlinks",
+    "posts"
+   ]
+  },
+  {
+   "id": "bird-0328",
+   "hit": false,
+   "tables": [
+    "posts",
+    "tags",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0325",
+   "hit": false,
+   "tables": [
+    "posts",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0331",
+   "hit": true,
+   "tables": [
+    "users",
+    "votes"
+   ]
+  },
+  {
+   "id": "bird-0332",
+   "hit": true,
+   "tables": [
+    "badges",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0335",
+   "hit": true,
+   "tables": [
+    "posts",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0341",
+   "hit": true,
+   "tables": [
+    "tags"
+   ]
+  },
+  {
+   "id": "bird-0334",
+   "hit": true,
+   "tables": [
+    "posts",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0327",
+   "hit": false,
+   "tables": [
+    "posts",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0336",
+   "hit": true,
+   "tables": [
+    "posts",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0333",
+   "hit": true,
+   "tables": [
+    "users",
+    "posts"
+   ]
+  },
+  {
+   "id": "bird-0342",
+   "hit": true,
+   "tables": [
+    "comments",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0344",
+   "hit": true,
+   "tables": [
+    "posts",
+    "comments"
+   ]
+  },
+  {
+   "id": "bird-0340",
+   "hit": true,
+   "tables": [
+    "posts",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0345",
+   "hit": true,
+   "tables": [
+    "comments",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0349",
+   "hit": true,
+   "tables": [
+    "cards",
+    "legalities"
+   ]
+  },
+  {
+   "id": "bird-0343",
+   "hit": true,
+   "tables": [
+    "posts",
+    "comments"
+   ]
+  },
+  {
+   "id": "bird-0350",
+   "hit": true,
+   "tables": [
+    "cards",
+    "legalities"
+   ]
+  },
+  {
+   "id": "bird-0339",
+   "hit": false,
+   "tables": [
+    "comments",
+    "posts"
+   ]
+  },
+  {
+   "id": "bird-0347",
+   "hit": true,
+   "tables": [
+    "cards"
+   ]
+  },
+  {
+   "id": "bird-0354",
+   "hit": true,
+   "tables": [
+    "cards"
+   ]
+  },
+  {
+   "id": "bird-0351",
+   "hit": true,
+   "tables": [
+    "cards",
+    "rulings"
+   ]
+  },
+  {
+   "id": "bird-0348",
+   "hit": true,
+   "tables": [
+    "cards",
+    "legalities"
+   ]
+  },
+  {
+   "id": "bird-0337",
+   "hit": true,
+   "tables": [
+    "posts",
+    "posthistory",
+    "users"
+   ]
+  },
+  {
+   "id": "bird-0352",
+   "hit": true,
+   "tables": [
+    "cards",
+    "rulings"
+   ]
+  },
+  {
+   "id": "bird-0357",
+   "hit": true,
+   "tables": [
+    "cards"
+   ]
+  },
+  {
+   "id": "bird-0355",
+   "hit": true,
+   "tables": [
+    "cards"
+   ]
+  },
+  {
+   "id": "bird-0360",
+   "hit": true,
+   "tables": [
+    "cards"
+   ]
+  },
+  {
+   "id": "bird-0358",
+   "hit": true,
+   "tables": [
+    "cards",
+    "foreign_data"
+   ]
+  },
+  {
+   "id": "bird-0359",
+   "hit": true,
+   "tables": [
+    "cards"
+   ]
+  },
+  {
+   "id": "bird-0361",
+   "hit": true,
+   "tables": [
+    "legalities",
+    "cards"
+   ]
+  },
+  {
+   "id": "bird-0364",
+   "hit": true,
+   "tables": [
+    "cards"
+   ]
+  },
+  {
+   "id": "bird-0363",
+   "hit": true,
+   "tables": [
+    "cards"
+   ]
+  },
+  {
+   "id": "bird-0346",
+   "hit": true,
+   "tables": [
+    "cards"
+   ]
+  },
+  {
+   "id": "bird-0362",
+   "hit": true,
+   "tables": [
+    "cards",
+    "foreign_data"
+   ]
+  },
+  {
+   "id": "bird-0368",
+   "hit": true,
+   "tables": [
+    "cards",
+    "legalities",
+    "rulings"
+   ]
+  },
+  {
+   "id": "bird-0366",
+   "hit": true,
+   "tables": [
+    "cards",
+    "foreign_data"
+   ]
+  },
+  {
+   "id": "bird-0367",
+   "hit": false,
+   "tables": [
+    "cards"
+   ]
+  },
+  {
+   "id": "bird-0369",
+   "hit": true,
+   "tables": [
+    "cards",
+    "foreign_data"
+   ]
+  },
+  {
+   "id": "bird-0365",
+   "hit": true,
+   "tables": [
+    "set_translations",
+    "sets"
+   ]
+  },
+  {
+   "id": "bird-0353",
+   "hit": false,
+   "tables": [
+    "foreign_data"
+   ]
+  },
+  {
+   "id": "bird-0371",
+   "hit": true,
+   "tables": [
+    "cards",
+    "legalities"
+   ]
+  },
+  {
+   "id": "bird-0356",
+   "hit": true,
+   "tables": [
+    "cards",
+    "legalities"
+   ]
+  },
+  {
+   "id": "bird-0370",
+   "hit": true,
+   "tables": [
+    "sets",
+    "set_translations"
+   ]
+  },
+  {
+   "id": "bird-0374",
+   "hit": true,
+   "tables": [
+    "cards"
+   ]
+  },
+  {
+   "id": "bird-0375",
+   "hit": true,
+   "tables": [
+    "set_translations",
+    "sets"
+   ]
+  },
+  {
+   "id": "bird-0376",
+   "hit": true,
+   "tables": [
+    "foreign_data"
+   ]
+  },
+  {
+   "id": "bird-0372",
+   "hit": true,
+   "tables": [
+    "cards",
+    "foreign_data"
+   ]
+  },
+  {
+   "id": "bird-0373",
+   "hit": true,
+   "tables": [
+    "foreign_data"
+   ]
+  },
+  {
+   "id": "bird-0380",
+   "hit": true,
+   "tables": [
+    "cards",
+    "set_translations"
+   ]
+  },
+  {
+   "id": "bird-0383",
+   "hit": true,
+   "tables": [
+    "sets",
+    "set_translations"
+   ]
+  },
+  {
+   "id": "bird-0381",
+   "hit": true,
+   "tables": [
+    "set_translations",
+    "sets"
+   ]
+  },
+  {
+   "id": "bird-0377",
+   "hit": true,
+   "tables": [
+    "cards"
+   ]
+  },
+  {
+   "id": "bird-0382",
+   "hit": true,
+   "tables": [
+    "cards",
+    "sets"
+   ]
+  },
+  {
+   "id": "bird-0379",
+   "hit": true,
+   "tables": [
+    "cards",
+    "set_translations"
+   ]
+  },
+  {
+   "id": "bird-0378",
+   "hit": true,
+   "tables": [
+    "cards",
+    "set_translations"
+   ]
+  },
+  {
+   "id": "bird-0387",
+   "hit": true,
+   "tables": [
+    "cards",
+    "sets"
+   ]
+  },
+  {
+   "id": "bird-0389",
+   "hit": true,
+   "tables": [
+    "sets",
+    "cards",
+    "foreign_data"
+   ]
+  },
+  {
+   "id": "bird-0385",
+   "hit": true,
+   "tables": [
+    "sets",
+    "set_translations"
+   ]
+  },
+  {
+   "id": "bird-0384",
+   "hit": true,
+   "tables": [
+    "cards",
+    "sets"
+   ]
+  },
+  {
+   "id": "bird-0386",
+   "hit": true,
+   "tables": [
+    "cards",
+    "sets"
+   ]
+  },
+  {
+   "id": "bird-0388",
+   "hit": true,
+   "tables": [
+    "cards",
+    "foreign_data"
+   ]
+  },
+  {
+   "id": "bird-0338",
+   "hit": true,
+   "tables": [
+    "comments",
+    "posts"
+   ]
+  },
+  {
+   "id": "bird-0395",
+   "hit": true,
+   "tables": [
+    "cards",
+    "sets",
+    "legalities"
+   ]
+  },
+  {
+   "id": "bird-0391",
+   "hit": true,
+   "tables": [
+    "cards",
+    "sets"
+   ]
+  },
+  {
+   "id": "bird-0392",
+   "hit": true,
+   "tables": [
+    "cards",
+    "sets"
+   ]
+  },
+  {
+   "id": "bird-0398",
+   "hit": true,
+   "tables": [
+    "bond"
+   ]
+  },
+  {
+   "id": "bird-0396",
+   "hit": true,
+   "tables": [
+    "sets",
+    "set_translations"
+   ]
+  },
+  {
+   "id": "bird-0397",
+   "hit": true,
+   "tables": [
+    "cards",
+    "legalities"
+   ]
+  },
+  {
+   "id": "bird-0390",
+   "hit": true,
+   "tables": [
+    "sets",
+    "cards",
+    "foreign_data"
+   ]
+  },
+  {
+   "id": "bird-0399",
+   "hit": true,
+   "tables": [
+    "atom",
+    "bond"
+   ]
+  },
+  {
+   "id": "bird-0405",
+   "hit": true,
+   "tables": [
+    "atom",
+    "molecule"
+   ]
+  },
+  {
+   "id": "bird-0409",
+   "hit": true,
+   "tables": [
+    "molecule",
+    "atom"
+   ]
+  },
+  {
+   "id": "bird-0406",
+   "hit": true,
+   "tables": [
+    "atom",
+    "molecule"
+   ]
+  },
+  {
+   "id": "bird-0394",
+   "hit": true,
+   "tables": [
+    "cards",
+    "legalities"
+   ]
+  },
+  {
+   "id": "bird-0410",
+   "hit": false,
+   "tables": [
+    "molecule",
+    "bond"
+   ]
+  },
+  {
+   "id": "bird-0404",
+   "hit": true,
+   "tables": [
+    "bond",
+    "connected",
+    "atom"
+   ]
+  },
+  {
+   "id": "bird-0402",
+   "hit": true,
+   "tables": [
+    "atom",
+    "bond"
+   ]
+  },
+  {
+   "id": "bird-0412",
+   "hit": true,
+   "tables": [
+    "bond"
+   ]
+  },
+  {
+   "id": "bird-0400",
+   "hit": true,
+   "tables": [
+    "molecule",
+    "bond",
+    "atom"
+   ]
+  },
+  {
+   "id": "bird-0403",
+   "hit": false,
+   "tables": [
+    "atom",
+    "bond"
+   ]
+  },
+  {
+   "id": "bird-0411",
+   "hit": true,
+   "tables": [
+    "atom"
+   ]
+  },
+  {
+   "id": "bird-0407",
+   "hit": true,
+   "tables": [
+    "connected",
+    "bond"
+   ]
+  },
+  {
+   "id": "bird-0408",
+   "hit": false,
+   "tables": [
+    "atom",
+    "bond"
+   ]
+  },
+  {
+   "id": "bird-0401",
+   "hit": true,
+   "tables": [
+    "bond",
+    "molecule"
+   ]
+  },
+  {
+   "id": "bird-0393",
+   "hit": true,
+   "tables": [
+    "legalities",
+    "cards"
+   ]
+  },
+  {
+   "id": "bird-0414",
+   "hit": true,
+   "tables": [
+    "atom"
+   ]
+  },
+  {
+   "id": "bird-0416",
+   "hit": true,
+   "tables": [
+    "bond",
+    "molecule"
+   ]
+  },
+  {
+   "id": "bird-0413",
+   "hit": true,
+   "tables": [
+    "molecule"
+   ]
+  },
+  {
+   "id": "bird-0415",
+   "hit": true,
+   "tables": [
+    "atom",
+    "molecule"
+   ]
+  },
+  {
+   "id": "bird-0417",
+   "hit": true,
+   "tables": [
+    "molecule",
+    "bond"
+   ]
+  },
+  {
+   "id": "bird-0419",
+   "hit": true,
+   "tables": [
+    "bond",
+    "connected"
+   ]
+  },
+  {
+   "id": "bird-0418",
+   "hit": true,
+   "tables": [
+    "connected",
+    "bond"
+   ]
+  },
+  {
+   "id": "bird-0429",
+   "hit": false,
+   "tables": [
+    "bond",
+    "atom"
+   ]
+  },
+  {
+   "id": "bird-0424",
+   "hit": true,
+   "tables": [
+    "molecule",
+    "bond"
+   ]
+  },
+  {
+   "id": "bird-0423",
+   "hit": true,
+   "tables": [
+    "bond",
+    "atom",
+    "connected"
+   ]
+  },
+  {
+   "id": "bird-0421",
+   "hit": true,
+   "tables": [
+    "atom"
+   ]
+  },
+  {
+   "id": "bird-0428",
+   "hit": true,
+   "tables": [
+    "bond",
+    "connected",
+    "atom"
+   ]
+  },
+  {
+   "id": "bird-0422",
+   "hit": true,
+   "tables": [
+    "atom",
+    "molecule"
+   ]
+  },
+  {
+   "id": "bird-0431",
+   "hit": false,
+   "tables": [
+    "atom",
+    "bond"
+   ]
+  },
+  {
+   "id": "bird-0426",
+   "hit": true,
+   "tables": [
+    "atom",
+    "connected"
+   ]
+  },
+  {
+   "id": "bird-0434",
+   "hit": true,
+   "tables": [
+    "atom",
+    "molecule"
+   ]
+  },
+  {
+   "id": "bird-0425",
+   "hit": true,
+   "tables": [
+    "atom",
+    "connected",
+    "bond"
+   ]
+  },
+  {
+   "id": "bird-0420",
+   "hit": true,
+   "tables": [
+    "connected"
+   ]
+  },
+  {
+   "id": "bird-0435",
+   "hit": true,
+   "tables": [
+    "atom",
+    "molecule"
+   ]
+  },
+  {
+   "id": "bird-0430",
+   "hit": true,
+   "tables": [
+    "bond",
+    "molecule"
+   ]
+  },
+  {
+   "id": "bird-0436",
+   "hit": true,
+   "tables": [
+    "atom",
+    "molecule"
+   ]
+  },
+  {
+   "id": "bird-0433",
+   "hit": true,
+   "tables": [
+    "bond",
+    "connected",
+    "atom"
+   ]
+  },
+  {
+   "id": "bird-0439",
+   "hit": false,
+   "tables": [
+    "frpm"
+   ]
+  },
+  {
+   "id": "bird-0437",
+   "hit": true,
+   "tables": [
+    "molecule",
+    "atom"
+   ]
+  },
+  {
+   "id": "bird-0432",
+   "hit": false,
+   "tables": [
+    "atom",
+    "bond"
+   ]
+  },
+  {
+   "id": "bird-0445",
+   "hit": true,
+   "tables": [
+    "frpm",
+    "schools"
+   ]
+  },
+  {
+   "id": "bird-0440",
+   "hit": true,
+   "tables": [
+    "satscores",
+    "frpm"
+   ]
+  },
+  {
+   "id": "bird-0442",
+   "hit": true,
+   "tables": [
+    "frpm",
+    "schools"
+   ]
+  },
+  {
+   "id": "bird-0444",
+   "hit": false,
+   "tables": [
+    "schools",
+    "satscores"
+   ]
+  },
+  {
+   "id": "bird-0441",
+   "hit": true,
+   "tables": [
+    "satscores",
+    "schools"
+   ]
+  },
+  {
+   "id": "bird-0427",
+   "hit": true,
+   "tables": [
+    "atom",
+    "bond",
+    "connected"
+   ]
+  },
+  {
+   "id": "bird-0443",
+   "hit": true,
+   "tables": [
+    "frpm",
+    "satscores"
+   ]
+  },
+  {
+   "id": "bird-0448",
+   "hit": true,
+   "tables": [
+    "frpm"
+   ]
+  },
+  {
+   "id": "bird-0438",
+   "hit": true,
+   "tables": [
+    "satscores",
+    "schools"
+   ]
+  },
+  {
+   "id": "bird-0454",
+   "hit": true,
+   "tables": [
+    "schools",
+    "satscores"
+   ]
+  },
+  {
+   "id": "bird-0446",
+   "hit": true,
+   "tables": [
+    "satscores",
+    "schools"
+   ]
+  },
+  {
+   "id": "bird-0451",
+   "hit": true,
+   "tables": [
+    "satscores",
+    "schools"
+   ]
+  },
+  {
+   "id": "bird-0449",
+   "hit": true,
+   "tables": [
+    "frpm",
+    "schools"
+   ]
+  },
+  {
+   "id": "bird-0447",
+   "hit": true,
+   "tables": [
+    "frpm",
+    "schools"
+   ]
+  },
+  {
+   "id": "bird-0453",
+   "hit": true,
+   "tables": [
+    "schools",
+    "satscores"
+   ]
+  },
+  {
+   "id": "bird-0457",
+   "hit": true,
+   "tables": [
+    "schools"
+   ]
+  },
+  {
+   "id": "bird-0452",
+   "hit": true,
+   "tables": [
+    "schools",
+    "satscores"
+   ]
+  },
+  {
+   "id": "bird-0450",
+   "hit": true,
+   "tables": [
+    "schools",
+    "satscores"
+   ]
+  },
+  {
+   "id": "bird-0464",
+   "hit": true,
+   "tables": [
+    "schools"
+   ]
+  },
+  {
+   "id": "bird-0458",
+   "hit": true,
+   "tables": [
+    "schools"
+   ]
+  },
+  {
+   "id": "bird-0456",
+   "hit": true,
+   "tables": [
+    "schools",
+    "frpm"
+   ]
+  },
+  {
+   "id": "bird-0455",
+   "hit": true,
+   "tables": [
+    "schools",
+    "satscores"
+   ]
+  },
+  {
+   "id": "bird-0462",
+   "hit": true,
+   "tables": [
+    "schools",
+    "frpm"
+   ]
+  },
+  {
+   "id": "bird-0465",
+   "hit": true,
+   "tables": [
+    "schools",
+    "frpm"
+   ]
+  },
+  {
+   "id": "bird-0459",
+   "hit": true,
+   "tables": [
+    "schools",
+    "satscores"
+   ]
+  },
+  {
+   "id": "bird-0460",
+   "hit": false,
+   "tables": [
+    "frpm"
+   ]
+  },
+  {
+   "id": "bird-0461",
+   "hit": true,
+   "tables": [
+    "frpm",
+    "schools"
+   ]
+  },
+  {
+   "id": "bird-0468",
+   "hit": true,
+   "tables": [
+    "account",
+    "district"
+   ]
+  },
+  {
+   "id": "bird-0471",
+   "hit": false,
+   "tables": [
+    "client",
+    "district",
+    "disp"
+   ]
+  },
+  {
+   "id": "bird-0467",
+   "hit": false,
+   "tables": [
+    "schools"
+   ]
+  },
+  {
+   "id": "bird-0466",
+   "hit": true,
+   "tables": [
+    "frpm",
+    "schools"
+   ]
+  },
+  {
+   "id": "bird-0470",
+   "hit": true,
+   "tables": [
+    "client",
+    "district"
+   ]
+  },
+  {
+   "id": "bird-0463",
+   "hit": true,
+   "tables": [
+    "schools"
+   ]
+  },
+  {
+   "id": "bird-0473",
+   "hit": true,
+   "tables": [
+    "loan",
+    "account"
+   ]
+  },
+  {
+   "id": "bird-0474",
+   "hit": true,
+   "tables": [
+    "loan",
+    "account"
+   ]
+  },
+  {
+   "id": "bird-0479",
+   "hit": true,
+   "tables": [
+    "loan"
+   ]
+  },
+  {
+   "id": "bird-0475",
+   "hit": true,
+   "tables": [
+    "client",
+    "district"
+   ]
+  },
+  {
+   "id": "bird-0477",
+   "hit": true,
+   "tables": [
+    "district",
+    "client"
+   ]
+  },
+  {
+   "id": "bird-0472",
+   "hit": true,
+   "tables": [
+    "client",
+    "disp",
+    "district",
+    "account"
+   ]
+  },
+  {
+   "id": "bird-0486",
+   "hit": true,
+   "tables": [
+    "trans",
+    "account",
+    "district"
+   ]
+  },
+  {
+   "id": "bird-0476",
+   "hit": true,
+   "tables": [
+    "client",
+    "account",
+    "district"
+   ]
+  },
+  {
+   "id": "bird-0481",
+   "hit": true,
+   "tables": [
+    "loan",
+    "account",
+    "district"
+   ]
+  },
+  {
+   "id": "bird-0484",
+   "hit": true,
+   "tables": [
+    "account",
+    "loan",
+    "district"
+   ]
+  },
+  {
+   "id": "bird-0482",
+   "hit": true,
+   "tables": [
+    "client",
+    "district",
+    "disp"
+   ]
+  },
+  {
+   "id": "bird-0485",
+   "hit": true,
+   "tables": [
+    "district",
+    "client"
+   ]
+  },
+  {
+   "id": "bird-0487",
+   "hit": false,
+   "tables": [
+    "account",
+    "loan"
+   ]
+  },
+  {
+   "id": "bird-0478",
+   "hit": true,
+   "tables": [
+    "loan",
+    "account",
+    "disp",
+    "client",
+    "trans"
+   ]
+  },
+  {
+   "id": "bird-0489",
+   "hit": true,
+   "tables": [
+    "trans",
+    "account",
+    "disp"
+   ]
+  },
+  {
+   "id": "bird-0469",
+   "hit": true,
+   "tables": [
+    "district",
+    "client"
+   ]
+  },
+  {
+   "id": "bird-0488",
+   "hit": true,
+   "tables": [
+    "district",
+    "client"
+   ]
+  },
+  {
+   "id": "bird-0490",
+   "hit": true,
+   "tables": [
+    "disp",
+    "district",
+    "account"
+   ]
+  },
+  {
+   "id": "bird-0493",
+   "hit": true,
+   "tables": [
+    "client",
+    "district"
+   ]
+  },
+  {
+   "id": "bird-0491",
+   "hit": true,
+   "tables": [
+    "district",
+    "account"
+   ]
+  },
+  {
+   "id": "bird-0492",
+   "hit": false,
+   "tables": [
+    "trans",
+    "disp",
+    "client"
+   ]
+  },
+  {
+   "id": "bird-0498",
+   "hit": true,
+   "tables": [
+    "loan",
+    "account"
+   ]
+  },
+  {
+   "id": "bird-0496",
+   "hit": false,
+   "tables": [
+    "client",
+    "disp",
+    "account"
+   ]
+  },
+  {
+   "id": "bird-0495",
+   "hit": false,
+   "tables": [
+    "trans",
+    "account"
+   ]
+  },
+  {
+   "id": "bird-0480",
+   "hit": true,
+   "tables": [
+    "loan"
+   ]
+  },
+  {
+   "id": "bird-0499",
+   "hit": true,
+   "tables": [
+    "client",
+    "disp",
+    "card",
+    "loan"
+   ]
+  },
+  {
+   "id": "bird-0497",
+   "hit": true,
+   "tables": [
+    "client",
+    "account",
+    "district",
+    "disp"
+   ]
+  },
+  {
+   "id": "bird-0494",
+   "hit": true,
+   "tables": [
+    "loan",
+    "account",
+    "disp",
+    "client"
+   ]
+  },
+  {
+   "id": "bird-0483",
+   "hit": true,
+   "tables": [
+    "loan",
+    "account"
+   ]
+  }
+ ]
+}

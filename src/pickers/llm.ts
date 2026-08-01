@@ -13,7 +13,7 @@ import { PICKER_TABLE_CAP } from './keyword.ts';
 export type PickerPrompt = {
   version: string;
   system: string;
-  buildMessage: (params: { question: string; catalogText: string }) => string;
+  buildMessage: (params: { question: string; catalogText: string; evidence?: string }) => string;
 };
 
 export const PICKER_V1: PickerPrompt = {
@@ -47,6 +47,9 @@ export async function llmPick(
   // Extra lines per table name (value lists, descriptions) — the
   // PICKER_CONTEXT experiments. Absent for every published number.
   extraLines?: Map<string, string>,
+  // The BIRD evidence hint. Only picker-v3 renders it (D20's reserved
+  // experiment); v1 and v2 ignore it, so passing it is behavior-neutral there.
+  evidence?: string,
 ): Promise<LlmPick> {
   const catalogText = tables
     .map((table) => {
@@ -58,7 +61,7 @@ export async function llmPick(
 
   const reply = await completeJson({
     system: prompt.system,
-    user: prompt.buildMessage({ question, catalogText }),
+    user: prompt.buildMessage({ question, catalogText, evidence }),
     schema: SHORTLIST_SCHEMA,
   });
 

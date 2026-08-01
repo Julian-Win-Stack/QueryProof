@@ -9,6 +9,33 @@ questions, and measured in a harder setting than that baseline uses.
 Correct means *the generated SQL ran and returned the same rows as the reference
 SQL*. No LLM judges anything, anywhere.
 
+> ### 97 of the 500 questions can never be scored correct
+>
+> **That is 19.4% of the benchmark, and it caps this project at 80.6%.** Not a
+> hard subset — impossible. The reference query is broken, or it answers in a
+> format the question never asks for, and no honest system can match it.
+>
+> | Why | Questions | Example |
+> |---|---|---|
+> | The reference SQL is wrong | 52 | A missing pair of parentheses applies the "male patients" filter to half a condition. It returns 75 rows. The answer is 6. |
+> | It picks an unstated format | 30 | Asked which month peaked, the reference answers `04`. We answer `201304`. Same month. |
+> | The question is genuinely ambiguous | 11 | Two honest readings, different numbers; the reference picked one. |
+> | Other | 4 | |
+>
+> **Checked, not claimed.** Every one of the 500 questions was re-graded by
+> executing both queries. The 137 that no configuration ever solved were then
+> classified one by one. For the "reference is wrong" verdicts, independent
+> reviewers were sent to *refute* a sample — **12 of 14 survived**, and the two
+> that fell were reclassified as ambiguity, not error.
+>
+> Independent work agrees. An audit of this same 500-question set found 18.3%
+> with wrong reference SQL; a CIDR 2026 paper puts annotation errors across
+> BIRD's dev set higher still.
+>
+> The remaining 99 winnable failures are listed one by one, with the reference
+> query, ours, and — for 59 of them — a query that did match, in
+> **[docs/winnable-failures.md](docs/winnable-failures.md)**.
+
 Any accuracy number is easy to produce and hard to trust. What this repo ships is
 the second part: a measured noise floor that every comparison is read against, an
 append-only log of every run including the ones that lost, and a classified

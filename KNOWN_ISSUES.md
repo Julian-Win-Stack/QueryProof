@@ -86,3 +86,40 @@ dedupe disagreement is invisible unless the two results differ for some other
 reason as well. It is recorded here because the underlying ambiguity in the
 questions is still there, and any future return to multiset grading brings the
 whole bucket back.
+
+## 4. The gold set is dialect-patched for Postgres; generated SQL gets the same patches by rewrite
+
+**Finding (2026-08-01).** BIRD ships its reference queries three times — SQLite,
+MySQL, Postgres — and this project grades against the Postgres port. Porting
+changed the queries' meaning in two places, and BIRD's own maintainers patched
+one of them: 60 of the 500 Postgres gold queries carry `NULLS LAST`, a clause
+that appears in **zero** of the SQLite originals. It is there because SQLite
+sorts NULLs last under `ORDER BY x DESC` while Postgres sorts them first, so
+every unpatched `DESC LIMIT 1` used as a max silently returns a NULL row. The
+second place is `LIKE` on a date column — legal in SQLite, where dates are
+text, a hard 42883 error in Postgres.
+
+The model was never told any of this. It writes SQLite-idiom SQL (the bulk of
+public text-to-SQL training data is SQLite), so the reference side of the
+comparison got a dialect patch and the generated side did not.
+
+**Choice.** Two deterministic rewrites in `src/rewrites.ts` (`REWRITE=on`)
+apply the same patches to generated SQL: every bare `DESC` gains `NULLS LAST`
+before execution, and a query that dies with `42883 operator does not exist:
+date ~~ unknown` gets `::text` on the column at the error's position and one
+re-execution. Code, not a prompt rule — prompt v3 already measured how unevenly
+the model follows a convention rule, and this asymmetry is the harness's fault,
+not the model's.
+
+**Measured effect.** Replayed over the stored SQL of the 61.0% run (no model
+calls, so the counts are exact, not noisy): nulls-last fired on 67 queries and
+flipped 5 wrong→right, the text cast fired on 2 and flipped both, zero losses
+either way — 305/500 → 312/500 on identical SQL. The 11 currently-correct
+answers where gold also lacks `NULLS LAST` were re-executed and none broke.
+
+**What it is not.** Not a benchmark hack: the rewrite never sees gold, never
+sees the question, and changes only what the SQL means across dialects — the
+same correction BIRD applied to its own side. A stricter reading ("the model
+should write portable SQL unaided") is available; it was rejected because the
+README compares against BIRD's Postgres baselines, whose reference queries did
+not have to write `NULLS LAST` unaided either.

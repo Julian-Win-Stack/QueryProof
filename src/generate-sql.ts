@@ -3,15 +3,15 @@
 // and what happens to the SQL is decided after.
 
 import { completeJson, type Usage } from './model.ts';
-import { buildUserMessage, PROMPT_VERSION, SYSTEM, type FailedAttempt } from './prompts/v1.ts';
+import { buildUserMessage, PROMPT_VERSION, SYSTEM, type FailedAttempt } from './prompts/v4.ts';
 
 // The one place the active SQL prompt is chosen. Everything that stamps a
 // version — the eval's run name included — reads it from here, so switching
 // the import above can never leave a run labeled with the wrong prompt.
 //
-// v1 is the default: every published number came from it, and both later
-// versions measured as ties (v2 worse, v3 inside the band). See "The default
-// configuration" in CLAUDE.md.
+// v4 = v1 plus projection discipline (Batch G) — what belongs in the SELECT
+// list, in what order. v2 and v3 measured as ties and stay unshipped; see
+// "The default configuration" in CLAUDE.md and the Batch G entries in RUNS.md.
 export { PROMPT_VERSION };
 
 const SQL_SCHEMA = {

@@ -20,7 +20,16 @@ const SESSION_TIME_ZONE = 'Asia/Shanghai';
 
 export type ExecutionResult =
   | { ok: true; rows: unknown[][]; columns: string[]; ms: number }
-  | { ok: false; errorCode: string | null; errorMessage: string; ms: number };
+  | {
+      ok: false;
+      errorCode: string | null;
+      errorMessage: string;
+      // 1-based character index into the SQL where Postgres stopped parsing —
+      // pg sends it as a string, and not every error carries one. The text-cast
+      // rewrite (src/rewrites.ts) needs it to find the column to cast.
+      errorPosition: number | null;
+      ms: number;
+    };
 
 let pool: Pool | undefined;
 
@@ -58,10 +67,20 @@ function readOnlyPool(): Pool {
   return pool;
 }
 
-function describeError(error: unknown): { code: string | null; message: string } {
-  if (error instanceof DatabaseError) return { code: error.code ?? null, message: error.message };
-  if (error instanceof Error) return { code: null, message: error.message };
-  return { code: null, message: String(error) };
+function describeError(error: unknown): {
+  code: string | null;
+  message: string;
+  position: number | null;
+} {
+  if (error instanceof DatabaseError) {
+    return {
+      code: error.code ?? null,
+      message: error.message,
+      position: error.position === undefined ? null : Number(error.position),
+    };
+  }
+  if (error instanceof Error) return { code: null, message: error.message, position: null };
+  return { code: null, message: String(error), position: null };
 }
 
 // Never throws on a bad query: a Postgres error is an outcome to score and to
@@ -77,8 +96,14 @@ export async function executeReadOnly(sql: string): Promise<ExecutionResult> {
       ms: Date.now() - startedAt,
     };
   } catch (error: unknown) {
-    const { code, message } = describeError(error);
-    return { ok: false, errorCode: code, errorMessage: message, ms: Date.now() - startedAt };
+    const { code, message, position } = describeError(error);
+    return {
+      ok: false,
+      errorCode: code,
+      errorMessage: message,
+      errorPosition: position,
+      ms: Date.now() - startedAt,
+    };
   }
 }
 

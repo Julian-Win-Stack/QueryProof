@@ -19,7 +19,13 @@ export type VotedAnswer = Answer & {
   voteAgreement: number;
 };
 
-type AnswerParams = { question: string; evidence: string; schemaText: string; repair: boolean };
+type AnswerParams = {
+  question: string;
+  evidence: string;
+  schemaText: string;
+  repair: boolean;
+  rewrite?: boolean;
+};
 
 type Deps = {
   answer: (params: AnswerParams) => Promise<Answer>;

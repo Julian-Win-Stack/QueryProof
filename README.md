@@ -2,7 +2,7 @@
 
 Ask a Postgres database a question in English; get SQL and rows back.
 
-**62.4% correct on [BIRD Mini-Dev](https://github.com/bird-bench/mini_dev)** —
+**65.6% correct on [BIRD Mini-Dev](https://github.com/bird-bench/mini_dev)** —
 against the **36.0%** GPT-4-turbo baseline BIRD publishes for the same 500
 questions, and measured in a harder setting than that baseline uses.
 
@@ -45,8 +45,10 @@ nine of them are labelled *rejected* or *tie* in the log.
 
 **The pipeline.** Eleven real databases live in one Postgres instance. An LLM
 picks the relevant tables out of the 75; a second call writes the SQL from those
-tables' schemas plus five real sample rows each; the question is asked five
-times and the answer the most attempts agree on ships; every query runs under a
+tables' schemas plus five real sample rows each, under a prompt that pins the
+SELECT list to exactly what the question asks; two deterministic dialect
+repairs run over the SQL before it executes (`NULLS LAST` onto bare `DESC`,
+`::text` onto a date column that failed under `LIKE`); every query runs under a
 `SELECT`-only role. Model: `claude-sonnet-5`, pinned for every number here.
 
 ## Results
@@ -60,12 +62,16 @@ is alien species).
 | Baseline: all 75 tables in the prompt | **57.4%** | 100%¹ | $15.70 |
 | + LLM table selection (~2 tables sent) | **59.2%** | 86.0% | $6.31 |
 | + five real sample rows per table | **61.0%²** | 85.4% | $7.34 |
-| + a counting-convention prompt rule | **61.6%³** | 84.6% | $7.44 |
-| + best-of-5 by execution agreement | **62.4%³** | 85.4% | $18.85 |
+| + projection prompt rule + two dialect rewrites | **65.6%³** | 85.6% | $7.56 |
 
 Noise: **±2.5 points**, from 3 repeat runs of one configuration — the model has
 no determinism knob, so every comparison is read against that band. Denominator:
 all 500 validated questions, 0 quarantined and 0 voided in every run above.
+
+Two earlier steps rode the previous headline and are off the shipped path now:
+a counting-convention prompt rule (61.6%) and best-of-5 by execution agreement
+(62.4%, at 2.5× the cost) — both ties, both kept in [RUNS.md](RUNS.md) as the
+negative results they are.
 
 Sample rows is one of twelve single-change experiments run on 2026-07-31 —
 value lists and BIRD's human-written column descriptions in both prompts, a
@@ -89,11 +95,12 @@ are comparable; the divergences that remain are listed in
 the band of the 59.2% above): +3.2, past ±2.5. Run-to-run wobble is exactly why
 every step reads against a same-day control, never against a stored number.
 
-³ +0.6 and +0.8 — each inside the ±2.5 band, logged as **ties** in
-[RUNS.md](RUNS.md). They ride the headline because together they are the best
-configuration measured, not because either step is proven on its own: one
-500-question trial each cannot separate them from noise, and the honest
-decomposition of 62.4 is "+3.2 from sample rows, the rest unproven".
+³ +4.6 against the sample-rows run — past the band by margin, the only step
+here that is. It is two changes measured in one run, but the split is known:
+the rewrites account for **exactly +7 questions**, because replaying the
+previous run's stored SQL with only the rewrites applied flips 7 wrong→right
+and 0 right→wrong — same SQL both sides, so no noise band applies. The
+remainder rides on the prompt rule ([RUNS.md](RUNS.md), Batch G).
 
 ## What the table actually says
 
@@ -163,7 +170,8 @@ Five findings, all against intuition, all measured:
   points lower for it; the reversal and what it cost are in
   [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
 - **A noise floor before any comparison.** Every "improvement" smaller than the
-  measured ±2.5 band is called a tie, including two of the three rows above.
+  measured ±2.5 band is called a tie, including the table-selection row above
+  and both steps dropped from the previous headline.
 - **Voids are not zeros.** A refusal or an exhausted rate-limit retry voids the
   question rather than scoring 0 — a missing answer and a wrong answer are
   different things. Every run above had zero voids.
@@ -173,7 +181,7 @@ Five findings, all against intuition, all measured:
 - **Generated SQL cannot write.** It executes as a role with `SELECT` only — the
   role is the wall, not a regex.
 
-## Where the other 43% goes
+## Where the baseline's other 43% went
 
 Every failure in the baseline run, classified by executing both queries — no
 sampling, both SQL strings are in the committed export:
@@ -201,8 +209,9 @@ that returns zero rows. Empty results doubled.
 
 It is also a smaller bucket than it looks: 38 of those 78 return the wrong row
 count too and were never column-limited. The addressable share is 40 questions —
-**8% of the set**, not 34% of failures. Recorded as a measurement ceiling, not a
-tuning target ([RUNS.md](RUNS.md), 2026-07-31).
+**8% of the set**, not 34% of failures. Recorded then as a measurement ceiling,
+not a tuning target ([RUNS.md](RUNS.md), 2026-07-31) — a verdict Batch G later
+overturned; see below.
 
 The same lesson repeated from the other direction. The largest greppable
 signature in the remaining failures — 17 queries writing `COUNT(DISTINCT …)`
@@ -212,6 +221,30 @@ the six answers measured as at-risk flipped. The score still did not move,
 because only 2 of the 17 converted — the other 15 were also wrong somewhere
 else, and fixing the count exposed the next error. A signature you can grep for
 is a correlate, not a cause ([RUNS.md](RUNS.md), Batch F run A).
+
+**What finally moved it: reading all 99 remaining winnable failures by hand**
+([docs/winnable-failures.md](docs/winnable-failures.md)), which produced the
+two Batch G changes in the results table.
+
+The rejected column rule came back with the failure mode designed out. The
+first version said *never return the column you sorted by*, and the model
+responded by not sorting. The shipped version says what to do instead — the
+sort expression *belongs in ORDER BY* — plus the column order the question
+implies, measured over the full 500 instead of the dev slice: wrong-column-count
+failures fell **79 → 47**, and empty results did not double this time.
+
+The other change was not a model fix at all. The reference queries are BIRD's
+*Postgres port* of SQL written for SQLite, and BIRD patched its own side of the
+dialect gap: **60 of the 500 Postgres reference queries carry `NULLS LAST`,
+a clause zero SQLite originals have** — added because SQLite sorts NULLs last
+under `DESC` while Postgres sorts them first, so every unpatched
+`ORDER BY x DESC LIMIT 1` used as a max returns a NULL row. The generated SQL
+never got the same patch. Two deterministic rewrites apply it (`NULLS LAST` on
+bare `DESC`; `::text` on a date column that `LIKE` crashed into) — code, not a
+prompt rule, because Batch F measured exactly how unevenly the model follows
+conventions. Replayed over frozen SQL they flip **+7 questions with zero
+losses**, a count that is exact because nothing regenerates
+([KNOWN_ISSUES.md](KNOWN_ISSUES.md) issue 4).
 
 ## Comparing two runs
 
@@ -256,8 +289,8 @@ npm run demo        # http://localhost:3000
 
 Question in; picked tables, SQL, rows, and attempt count out — the
 table-selection configuration plus the self-repair loop from finding 3. The
-headline configuration's sample rows, counting rule, and best-of-5 are not on
-the product path yet. Answers flagged **low confidence** (empty
+headline configuration's sample rows, projection prompt, and dialect rewrites
+are not on the product path yet. Answers flagged **low confidence** (empty
 result, or a query that needed repair) were right 2.5% of the time on the
 measured run; everything else 63.7%. That heuristic was validated against a
 finished run before shipping — signals that didn't separate (thinking depth,
@@ -276,27 +309,33 @@ reports zero variance, which would fake the noise floor the numbers depend on.
 
 ```bash
 npm run validate-gold             # execute all 500 reference queries -> gold/
-PICKER=llm  npm run eval:hard     # the default configuration — prompt v1,
-                                  # table selection, five sample rows: 61.0%
+PICKER=llm  npm run eval:hard     # the default configuration — prompt v4,
+                                  # table selection, five sample rows,
+                                  # dialect rewrites: 65.6%
 
-SQL_CONTEXT=off PICKER=none npm run eval:hard   # baseline (all 75 tables)
-SQL_CONTEXT=off PICKER=llm  npm run eval:hard   # + table selection only
-TAG=vote5 PICKER=llm VOTE=5 npm run eval:exp    # + best-of-5 (the headline row)
+SQL_CONTEXT=off REWRITE=off PICKER=none npm run eval:hard  # baseline (all 75 tables)
+SQL_CONTEXT=off REWRITE=off PICKER=llm  npm run eval:hard  # + table selection only
+REWRITE=off PICKER=llm npm run eval:hard        # + sample rows (the 61.0% row, prompt v1 import)
 PICKER=llm  npm run eval:hard:repair            # + self-repair
 npm run eval:easy                               # easy setting, all 500
 
 npm run diff -- runs/<before>.json runs/<after>.json   # what a change broke
+npm run replay -- runs/<file>.json                     # rewrites on stored SQL
 npm run rescore -- runs/<file>.json                    # re-grade a stored run
 ```
 
-Sample rows are on by default, because they are the best measured configuration.
-**`SQL_CONTEXT=off` is required to reproduce any number measured before
-2026-07-31**, all of which were taken without them. Every run stamps its full
-configuration into its own name, so a run can never be silently mislabeled — but
-the stamp catches the mistake afterwards rather than preventing it.
+Sample rows and the dialect rewrites are on by default, because they are the
+best measured configuration. **`SQL_CONTEXT=off` is required to reproduce any
+number measured before 2026-07-31, and `REWRITE=off` for any number before
+2026-08-01** — the 61.0% row additionally needs `src/generate-sql.ts` importing
+prompt v1, the same one-line switch every prompt change goes through. Every run
+stamps its full configuration into its own name, so a run can never be silently
+mislabeled — but the stamp catches the mistake afterwards rather than
+preventing it.
 
-The last two commands never call the model — a finished run holds the SQL it
-generated, so re-grading and diffing are database passes.
+The last three commands never call the model — a finished run holds the SQL it
+generated, so re-grading, diffing, and replaying the rewrites are database
+passes.
 
 Needs Docker Postgres with the BIRD dump loaded, `DATABASE_URL`,
 `DATABASE_URL_RO`, and `ANTHROPIC_API_KEY` in `.env` — see

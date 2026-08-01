@@ -23,7 +23,7 @@ function generated(sql: string): GeneratedSql {
 const ROWS: ExecutionResult = { ok: true, rows: [[1]], columns: ['count'], ms: 1 };
 
 function pgError(code: string | null): ExecutionResult {
-  return { ok: false, errorCode: code, errorMessage: `error ${code ?? 'none'}`, ms: 1 };
+  return { ok: false, errorCode: code, errorMessage: `error ${code ?? 'none'}`, errorPosition: null, ms: 1 };
 }
 
 // Returns canned replies in order and records the failure history each
@@ -127,4 +127,67 @@ test('a statement timeout is a plain failure, never a repair case (D13)', async 
 
   assert.equal(answer.attempts, 1);
   assert.equal(answer.execution.ok, false);
+});
+
+test('rewrite on: the executed SQL carries NULLS LAST and the rewrite is recorded', async () => {
+  const model = fakeModel(['SELECT a FROM t ORDER BY a DESC LIMIT 1']);
+  const answer = await answerQuestion(
+    { ...QUESTION, repair: false, rewrite: true },
+    {
+      generate: model.generate,
+      execute: fakeDb({ 'SELECT a FROM t ORDER BY a DESC NULLS LAST LIMIT 1': ROWS }),
+    },
+  );
+
+  assert.equal(answer.sql, 'SELECT a FROM t ORDER BY a DESC NULLS LAST LIMIT 1');
+  assert.deepEqual(answer.rewrites, ['nulls-last']);
+});
+
+test('rewrite off by default: the generated SQL executes untouched', async () => {
+  const model = fakeModel(['SELECT a FROM t ORDER BY a DESC LIMIT 1']);
+  const answer = await answerQuestion(
+    { ...QUESTION, repair: false },
+    {
+      generate: model.generate,
+      execute: fakeDb({ 'SELECT a FROM t ORDER BY a DESC LIMIT 1': ROWS }),
+    },
+  );
+
+  assert.equal(answer.sql, 'SELECT a FROM t ORDER BY a DESC LIMIT 1');
+  assert.deepEqual(answer.rewrites, []);
+});
+
+test('rewrite on: a date-LIKE 42883 gets ::text and re-executes, casting each LIKE in turn', async () => {
+  // bird-0093's shape: two LIKEs on the same date column — the first cast
+  // surfaces the second error, so the loop must run again.
+  const sql = `SELECT 1 FROM l WHERE d LIKE '1981-11-%' AND d LIKE '1981-12-%'`;
+  const afterFirst = `SELECT 1 FROM l WHERE d::text LIKE '1981-11-%' AND d LIKE '1981-12-%'`;
+  const afterSecond = `SELECT 1 FROM l WHERE d::text LIKE '1981-11-%' AND d::text LIKE '1981-12-%'`;
+
+  const dateLike = (operatorIndex: number): ExecutionResult => ({
+    ok: false,
+    errorCode: '42883',
+    errorMessage: 'operator does not exist: date ~~ unknown',
+    errorPosition: operatorIndex + 1,
+    ms: 1,
+  });
+
+  const model = fakeModel([sql]);
+  const answer = await answerQuestion(
+    { ...QUESTION, repair: false, rewrite: true },
+    {
+      generate: model.generate,
+      execute: fakeDb({
+        [sql]: dateLike(sql.indexOf('LIKE')),
+        [afterFirst]: dateLike(afterFirst.lastIndexOf('LIKE')),
+        [afterSecond]: ROWS,
+      }),
+    },
+  );
+
+  assert.equal(answer.sql, afterSecond);
+  assert.equal(answer.execution.ok, true);
+  assert.deepEqual(answer.rewrites, ['text-cast']);
+  // One generation, three executions — the casts never call the model.
+  assert.equal(answer.attempts, 1);
 });

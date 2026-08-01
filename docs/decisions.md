@@ -360,6 +360,25 @@ self-repair is still a negative result.
 than comparability with the benchmark. Reporting both numbers was considered and
 rejected — one column, so there is nothing to pick between.
 
+**D24 — Dialect repairs are deterministic rewrites in code, never prompt rules.**
+Adopted 2026-08-01, Batch G. Two rewrites (`src/rewrites.ts`, `REWRITE=on`):
+`NULLS LAST` onto every bare `DESC` before execution, and `::text` onto a date
+column that failed under `LIKE` with 42883, using the error's `position` field —
+then one re-execution. Nothing else qualifies.
+*Why:* the gold set is BIRD's Postgres port, and BIRD patched its own side —
+60 of 500 gold queries carry `NULLS LAST` that zero SQLite originals have. The
+asymmetry is the harness's, so the fix must fire on every affected query, and
+only code does that: prompt v3 measured exactly how unevenly the model follows
+a convention rule (2 of 17 targets converted). Replayed on stored SQL the
+rewrites flip +7/500 with zero losses, a count that is exact because nothing
+regenerates.
+*The bar for adding a third rewrite:* the failure must be deterministic, named
+by Postgres itself (an error code, not a heuristic over the SQL text), and
+carry exactly one possible meaning. A rewrite that guesses intent is a model
+change and belongs in a prompt version, where it gets measured as one.
+*What would reverse it:* moving the benchmark to a SQLite executor, which
+removes the dialect gap at the source.
+
 ---
 
 ## Every run leaves a record

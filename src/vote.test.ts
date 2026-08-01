@@ -19,6 +19,7 @@ function answerWith(sql: string, execution: ExecutionResult): Answer {
     modelMs: 5,
     executionMs: 1,
     promptVersion: 'v3',
+    rewrites: [],
   };
 }
 
@@ -26,7 +27,7 @@ function ok(rows: unknown[][]): ExecutionResult {
   return { ok: true, rows, columns: ['c'], ms: 1 };
 }
 
-const failed: ExecutionResult = { ok: false, errorCode: '42703', errorMessage: 'no such column', ms: 1 };
+const failed: ExecutionResult = { ok: false, errorCode: '42703', errorMessage: 'no such column', errorPosition: null, ms: 1 };
 
 function deps(answers: Answer[]) {
   let next = 0;

@@ -876,3 +876,107 @@ note:          Not a measurement — the smoke that proves the new default
                the 17 failures it was written for.
 export:        runs/2026-07-31-204731-exp-default-check-full.json
 ```
+
+---
+
+# Batch G — 2026-08-01, the winnable-failures work list turned into fixes
+
+Reading all 99 winnable failures by hand produced two findings and one prompt
+paragraph. Finding one: the gold set is BIRD's *Postgres port*, and BIRD
+patched its own side of the dialect gap — 60 of 500 gold queries carry
+NULLS LAST that zero SQLite originals have — while the model keeps writing
+SQLite-idiom SQL (`ORDER BY x DESC LIMIT 1` as a max picks a NULL row in
+Postgres; `LIKE` on a date column is a hard 42883). Fixed in code, not prompt:
+two deterministic rewrites (src/rewrites.ts, REWRITE axis, D24), measured for
+free by replaying stored SQL. Finding two: output shape was the largest
+failure mode — 79 of the rows run's 195 wrong answers returned the wrong
+NUMBER of columns, because v1 said nothing about what belongs in the SELECT
+list. Fixed in prompt v4 = v1 plus projection discipline, measured by one full
+run. KNOWN_ISSUES.md issue 4 records the dialect finding.
+
+## 2026-08-01 — Rewrites replayed over the rows run's stored SQL (no model calls)
+
+```
+approach:      npm run replay -- runs/2026-07-31-152120-exp-rows-full.json
+               (stored SQL from the 61.0% run, re-executed as-is and under
+               each rewrite, both sides compared to gold)
+question set:  full (500 validated)
+accuracy:      baseline 305/500 (61.0%) -> both rewrites 312/500 (62.4%)
+noise band:    none applies — identical SQL both sides, the flip count is exact
+verdict:       kept
+note:          nulls-last fired on 67 queries: 5 flipped wrong->right
+               (bird-0177 0235 0249 0454 0488), 0 lost — including all 11
+               currently-correct answers where gold also lacks NULLS LAST,
+               every one re-executed unchanged. text-cast fired on 2: both
+               flipped (bird-0093 0096), 0 lost — it only ever touches a query
+               that already died. +7/500 with zero losses, deterministic,
+               free at measurement time. This is the evidence REWRITE=on
+               ships on; the 62.4% here ties the rejected vote5 number at
+               none of its 2.5x cost.
+export:        printed by the script; source run file unchanged
+```
+
+## 2026-08-01 — Batch G wiring smoke (LIMIT=3)
+
+```
+approach:      mode=hard picker=llm rewrite=on prompt=v4 limit=3
+verdict:       void
+note:          Wiring only. prompt=v4 and rewrite=on stamp the suite name;
+               rewrite and rewritesFired land on every exported row. 3/3.
+export:        runs/2026-08-01-122859-exp-smoke-g1-full.json
+```
+
+## 2026-08-01 — Batch G: prompt v4 (projection) + dialect rewrites ⭐ new best
+
+```
+approach:      mode=hard picker=llm sqlContext=rows rewrite=on repair=off prompt=v4 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium concurrency=50
+question set:  full (500 validated)
+accuracy:      65.6% (328/500)
+table recall:  85.6%
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       kept
+note:          +4.6 vs the rows run (61.0) — past the band, the first change
+               to clear it by margin rather than by decimals. v4 = v1 plus
+               one paragraph: SELECT exactly the asked-for columns, in the
+               question's order; sort keys stay in ORDER BY; no context
+               columns; hint-enumerated columns stay separate. The target
+               moved as predicted: wrong-column-count failures 79 -> 47.
+               Diff vs rows run: 37 gained, 14 lost, net +23 — and 35 of the
+               37 gains are questions from docs/winnable-failures.md, so the
+               work list converted at 35 of 99. nulls-last fired on 70
+               questions in-run; text-cast fired 0 times (this generation
+               happened to write ::text itself on the two date-LIKE
+               questions — its evidence is the replay entry above, not this
+               run). 0 voids. $7.56.
+
+               Attribution: the replay puts the rewrites at exactly +7 on
+               frozen SQL, so the prompt carries roughly the rest of the +23
+               — "roughly" because regenerated SQL moves for both reasons at
+               once. The 14 losses share no cause; ordinary churn at the
+               band's scale.
+export:        runs/2026-08-01-122927-exp-v4-rewrites-full.json
+```
+
+## 2026-08-01 — Default set to the 65.6% configuration (wiring smoke, LIMIT=3)
+
+```
+approach:      mode=hard picker=llm limit=3, nothing else set
+verdict:       void
+note:          Not a measurement — the smoke that proves the new default
+               resolves. Default is now the Batch G configuration: prompt v4,
+               llm picker, five sample rows, dialect rewrites on, everything
+               else off. Two code changes carry it: generate-sql.ts imports
+               prompts/v4 (was v1), and REWRITE defaults to on, with
+               REWRITE=off to turn it back off.
+
+               With nothing set, the suite name came back
+               "prompt=v4 | sqlContext=rows | rewrite=on" — stamped on every
+               row. 3/3 scored.
+
+               The consequence to remember: reproducing any pre-Batch-G
+               number now needs REWRITE=off, and the 61.0 run also needs the
+               generate-sql import switched back to v1 — same reproduction
+               rule as every earlier default change. v1, v2 and v3 stay in
+               src/prompts/ as the evidence behind their own entries.
+export:        runs/2026-08-01-123304-exp-default-check-g-full.json
+```

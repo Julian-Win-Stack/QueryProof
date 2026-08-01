@@ -20,12 +20,13 @@ function answerWith(execution: ExecutionResult): Answer {
     modelMs: 5,
     executionMs: 1,
     promptVersion: 'v1',
+    rewrites: [],
   };
 }
 
 const okEmpty: ExecutionResult = { ok: true, rows: [], columns: ['n'], ms: 1 };
 const okOneRow: ExecutionResult = { ok: true, rows: [[42]], columns: ['n'], ms: 1 };
-const failed: ExecutionResult = { ok: false, errorCode: '42703', errorMessage: 'no such column', ms: 1 };
+const failed: ExecutionResult = { ok: false, errorCode: '42703', errorMessage: 'no such column', errorPosition: null, ms: 1 };
 
 function reply(sql: string): ModelReply {
   return {

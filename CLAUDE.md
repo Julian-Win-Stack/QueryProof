@@ -36,6 +36,7 @@ PICKER=llm npm run eval:hard:repair   # hard mode + self-repair (REPAIR=on, 2 re
 npm run eval:pickers           # keyword vs LLM picker, one evalite.each run, dev slice
 TAG=<name> PICKER=llm npm run eval:exp    # hard-mode experiment run; TAG names the export file
 npm run triage -- runs/<file>.json    # failure counts, four buckets, per suite
+npm run replay -- runs/<file>.json    # measure the dialect rewrites on stored SQL, no model calls
 npm run rescore -- runs/<file>.json   # re-grade a stored run, no model calls
 npm run diff -- runs/<a>.json runs/<b>.json  # per-question regressions and gains, no model calls
 npm run demo                   # the product surface, PRODUCT_PATH=1, port 3000
@@ -46,32 +47,42 @@ has to be said, never defaulted into, and an unknown value throws (D22).
 
 ## The default configuration
 
-Set 2026-07-31. **Prompt v1, LLM table picker, five sample rows per table,
-everything else off.** That is the 61.0% run — the best measured configuration,
-and now what runs when nothing is specified.
+Set 2026-08-01 (Batch G). **Prompt v4, LLM table picker, five sample rows per
+table, dialect rewrites on, everything else off.** That is the 65.6% run — the
+best measured configuration, and now what runs when nothing is specified.
 
 ```
-prompt       v1        src/generate-sql.ts imports it; the one switch point
-SQL_CONTEXT  rows      five real rows per table, the only change that beat the band
+prompt       v4        src/generate-sql.ts imports it; the one switch point.
+                       v4 = v1 + projection discipline: SELECT exactly the
+                       asked-for columns, in the question's order
+REWRITE      on        deterministic dialect repairs (src/rewrites.ts, D24):
+                       NULLS LAST onto every bare DESC, ::text onto a date
+                       column that 42883'd under LIKE. +7/500 exactly, zero
+                       losses, measured by replay on frozen SQL
+SQL_CONTEXT  rows      five real rows per table
 picker       llm       stated explicitly in hard mode, never defaulted
 repair       off       ties on accuracy; the demo turns it on for its own reasons
 EXPAND / PICKER_CONTEXT / CHECK / VOTE   off
 MODEL        claude-sonnet-5     EFFORT medium
 ```
 
-Three things follow from this, and each one has bitten:
+Four things follow from this, and each one has bitten:
 
-- **`SQL_CONTEXT` defaults to `rows`, not to empty.** Reproducing any number
-  measured before 2026-07-31 needs `SQL_CONTEXT=off`. The run name stamps
-  `sqlContext=rows` either way, so no run is ever mislabeled — but a baseline
-  re-run without `off` is measuring the wrong thing.
-- **v3 is not the default and v2 never was.** Both stay in `src/prompts/` as the
-  evidence behind their RUNS.md entries. v3's counting rule was written for 17
-  specific failures and converted 2 — harmless, unearned, not shipped.
+- **`SQL_CONTEXT` defaults to `rows` and `REWRITE` defaults to `on`.**
+  Reproducing a pre-2026-07-31 number needs `SQL_CONTEXT=off`; reproducing any
+  pre-Batch-G number needs `REWRITE=off`. Run names stamp both either way, so
+  no run is ever mislabeled — but a baseline re-run without the `off`s is
+  measuring the wrong thing.
+- **v4 is the default; v1, v2 and v3 stay in `src/prompts/`** as the evidence
+  behind their RUNS.md entries. Reproducing the 61.0 run needs the
+  `generate-sql.ts` import switched back to v1 *and* `REWRITE=off`.
+- **`CHECK` runs must say `REWRITE=off` explicitly** — a check rewrite skips
+  the dialect repairs, so the eval throws rather than letting the default
+  silently apply to half the answer.
 - **The demo is not this configuration.** `app/api/ask/route.ts` hardcodes its
-  own: picker on, repair on, **no sample rows**. So the product path is not the
-  headline number and has never been measured as it ships. Julian deferred the
-  fix deliberately — do not "correct" it without asking.
+  own: picker on, repair on, **no sample rows, no rewrites**. So the product
+  path is not the headline number and has never been measured as it ships.
+  Julian deferred the fix deliberately — do not "correct" it without asking.
 
 Test files split by what they need, and the split is the filename: `src/*.test.ts`
 is pure and runs under `npm test`, `src/*.dbtest.ts` needs the container and runs
@@ -82,8 +93,9 @@ Postgres into the pure suite.
 **Every eval script is one eval file plus environment variables** (`EVAL_MODE`,
 `EVAL_DEV`, `PICKER`, `REPAIR`, `TRIALS`, `LIMIT`, `CONCURRENCY`, the Batch E
 experiment axes `PICKER_PROMPT`, `EXPAND`, `SQL_CONTEXT`, `PICKER_CONTEXT`,
-`CHECK`, and the Batch F axis `VOTE=N` — best-of-N by execution agreement,
-`src/vote.ts` — see the header of `evals/main.eval.ts`). evalite's CLI
+`CHECK`, the Batch F axis `VOTE=N` — best-of-N by execution agreement,
+`src/vote.ts` — and the Batch G axis `REWRITE` — dialect repairs,
+`src/rewrites.ts`, default **on** — see the header of `evals/main.eval.ts`). evalite's CLI
 accepts no custom flags, so `npm run eval:dev -- --picker=llm` silently does
 nothing. Never add a second eval file to express a configuration. **Never name
 an eval env var `MODE`, `DEV`, `PROD`, or `BASE_URL`** — vite owns those names
@@ -125,6 +137,9 @@ src/schema-extras.ts  sample rows / value lists / BIRD descriptions for the
 src/check.ts   post-execution checks (CHECK=probe|self)
 src/vote.ts    best-of-N: N attempts, result sets grouped by the row
                comparator, largest group ships (VOTE=N)
+src/rewrites.ts  deterministic dialect repairs on generated SQL (REWRITE=on,
+               the default): NULLS LAST on bare DESC, ::text on a date column
+               that failed under LIKE — see KNOWN_ISSUES.md issue 4 and D24
 evals/         *.eval.ts, configuration comes from env, not from new files
 evals/dev-slice.json  the frozen 100 ids — committed, never regenerated
 evalite.config.ts     storage (persistent SQLite), concurrency, trials, timeouts

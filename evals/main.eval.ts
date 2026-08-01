@@ -35,6 +35,17 @@
 //                        results wins. 2-9; unset or "off" means one attempt.
 //                        Throws with CHECK — that interaction is unmeasured.
 //
+// Batch G axis (2026-08-01):
+//   REWRITE=on|off       deterministic dialect repairs on generated SQL
+//                        (src/rewrites.ts): NULLS LAST on every bare DESC, and
+//                        ::text on a date column that 42883'd under LIKE.
+//                        Defaults to on — the best measured configuration
+//                        (Batch G, 65.6%) — so REWRITE=off is how any earlier
+//                        number is reproduced. Off inside the bake-off, whose
+//                        variants are frozen at the D9 configuration. CHECK
+//                        runs must say REWRITE=off — a check rewrite skips the
+//                        dialect repairs, so the combined stamp would lie.
+//
 // EVAL_MODE and EVAL_DEV, not the MODE and DEV the plan wrote: vite owns both
 // names and sets them inside every worker (MODE="test", DEV="1"), so a run
 // configured with them silently reads vite's values — the first eval:easy run
@@ -129,6 +140,7 @@ const SQL_CONTEXT: SqlContextKind[] = readContext(
 const PICKER_CONTEXT: PickerContextKind[] = readContext('PICKER_CONTEXT', PICKER_CONTEXT_KINDS);
 const CHECK: CheckMode = readCheck();
 const VOTE: number = readVote();
+const REWRITE: boolean = readRewrite();
 
 function requireLlmPicker(name: string): void {
   if (MODE !== 'hard' || PICKER !== 'llm' || BAKEOFF) {
@@ -197,6 +209,28 @@ function readVote(): number {
     throw new Error(`VOTE=${value} with CHECK=${CHECK} — the interaction is unmeasured, run one at a time`);
   }
   return votes;
+}
+
+function readRewrite(): boolean {
+  const value = process.env.REWRITE;
+  if (value !== undefined && value !== 'on' && value !== 'off') {
+    throw new Error(`REWRITE="${value}" — on or off`);
+  }
+  if (value === 'off') return false;
+  // The bake-off variants are frozen at the D9 configuration, which predates
+  // this axis — the default must not reach into them.
+  if (BAKEOFF) {
+    if (value === 'on') {
+      throw new Error('REWRITE=on with EVAL_PICKERS=1 — the bake-off variants are frozen at the D9 configuration');
+    }
+    return false;
+  }
+  if (CHECK !== 'off') {
+    throw new Error(
+      `CHECK=${CHECK} needs REWRITE=off said explicitly — a check rewrite skips the dialect repairs, so the default cannot silently apply`,
+    );
+  }
+  return true;
 }
 
 function readRepair(): boolean {
@@ -304,6 +338,10 @@ type QuestionResult = {
   // What the check actually did on this question — 'skipped' when the trigger
   // never fired. Always 'skipped' when check is off.
   checkAction: CheckAction;
+  rewrite: string;
+  // Which dialect repairs actually fired on this question (comma list, empty
+  // when none did) — attribution without a re-run.
+  rewritesFired: string;
   vote: number;
   // Attempts in the winning group; null when voting is off, 0 when no attempt
   // executed cleanly and the last failure shipped.
@@ -355,6 +393,7 @@ async function runQuestion(record: GoldRecord, picker: PickerName): Promise<Ques
     evidence: record.evidence,
     schemaText,
     repair: REPAIR,
+    rewrite: REWRITE,
   };
   const voted = VOTE > 1 ? await voteAnswer({ ...answerParams, votes: VOTE }) : null;
   const generated = voted ?? (await answerQuestion(answerParams));
@@ -410,6 +449,8 @@ async function runQuestion(record: GoldRecord, picker: PickerName): Promise<Ques
     pickerContext: PICKER_CONTEXT.join(','),
     check: CHECK,
     checkAction: answer.checkAction,
+    rewrite: REWRITE ? 'on' : 'off',
+    rewritesFired: answer.rewrites.join(','),
     vote: VOTE,
     voteAgreement: voted === null ? null : voted.voteAgreement,
     model: MODEL,
@@ -429,6 +470,7 @@ const runName = [
   ...(PICKER_CONTEXT.length > 0 ? [`pickerContext=${PICKER_CONTEXT.join(',')}`] : []),
   ...(CHECK !== 'off' ? [`check=${CHECK} ${CHECK_PROMPT_VERSION}`] : []),
   ...(VOTE > 1 ? [`vote=${VOTE}`] : []),
+  ...(REWRITE ? ['rewrite=on'] : []),
   `effort=${EFFORT}`,
   MODEL,
 ].join(' | ');

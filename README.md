@@ -2,7 +2,7 @@
 
 Ask a Postgres database a question in English; get SQL and rows back.
 
-**61.0% correct on [BIRD Mini-Dev](https://github.com/bird-bench/mini_dev)** —
+**62.4% correct on [BIRD Mini-Dev](https://github.com/bird-bench/mini_dev)** —
 against the **36.0%** GPT-4-turbo baseline BIRD publishes for the same 500
 questions, and measured in a harder setting than that baseline uses.
 
@@ -17,10 +17,10 @@ single-change experiments ran on the full 500 questions on 2026-07-31 alone, and
 nine of them are labelled *rejected* or *tie* in the log.
 
 **The pipeline.** Eleven real databases live in one Postgres instance. An LLM
-picks the relevant tables out of the 75, a second call writes the SQL from those
-tables' schemas plus five real sample rows each, the query runs under a
-`SELECT`-only role, and on a Postgres error the error text is fed back for a
-retry. Model: `claude-sonnet-5`, pinned for every number here.
+picks the relevant tables out of the 75; a second call writes the SQL from those
+tables' schemas plus five real sample rows each; the question is asked five
+times and the answer the most attempts agree on ships; every query runs under a
+`SELECT`-only role. Model: `claude-sonnet-5`, pinned for every number here.
 
 ## Results
 
@@ -33,6 +33,8 @@ is alien species).
 | Baseline: all 75 tables in the prompt | **57.4%** | 100%¹ | $15.70 |
 | + LLM table selection (~2 tables sent) | **59.2%** | 86.0% | $6.31 |
 | + five real sample rows per table | **61.0%²** | 85.4% | $7.34 |
+| + a counting-convention prompt rule | **61.6%³** | 84.6% | $7.44 |
+| + best-of-5 by execution agreement | **62.4%³** | 85.4% | $18.85 |
 
 Noise: **±2.5 points**, from 3 repeat runs of one configuration — the model has
 no determinism knob, so every comparison is read against that band. Denominator:
@@ -59,6 +61,12 @@ are comparable; the divergences that remain are listed in
 ² Read against a same-day re-run of the selection configuration (57.8%, inside
 the band of the 59.2% above): +3.2, past ±2.5. Run-to-run wobble is exactly why
 every step reads against a same-day control, never against a stored number.
+
+³ +0.6 and +0.8 — each inside the ±2.5 band, logged as **ties** in
+[RUNS.md](RUNS.md). They ride the headline because together they are the best
+configuration measured, not because either step is proven on its own: one
+500-question trial each cannot separate them from noise, and the honest
+decomposition of 62.4 is "+3.2 from sample rows, the rest unproven".
 
 ## What the table actually says
 
@@ -220,8 +228,9 @@ npm run demo        # http://localhost:3000
 ```
 
 Question in; picked tables, SQL, rows, and attempt count out — the
-table-selection configuration plus the self-repair loop from finding 3. Sample
-rows, the headline row, are not on the product path yet. Answers flagged **low confidence** (empty
+table-selection configuration plus the self-repair loop from finding 3. The
+headline configuration's sample rows, counting rule, and best-of-5 are not on
+the product path yet. Answers flagged **low confidence** (empty
 result, or a query that needed repair) were right 2.5% of the time on the
 measured run; everything else 63.7%. That heuristic was validated against a
 finished run before shipping — signals that didn't separate (thinking depth,
@@ -243,7 +252,8 @@ npm run validate-gold             # execute all 500 reference queries -> gold/
 npm run eval:easy                 # easy setting, all 500
 PICKER=none npm run eval:hard     # hard baseline (all 75 tables)
 PICKER=llm  npm run eval:hard     # hard + table selection
-TAG=rows PICKER=llm SQL_CONTEXT=rows npm run eval:exp   # + sample rows (the headline row)
+TAG=rows PICKER=llm SQL_CONTEXT=rows npm run eval:exp   # + sample rows
+TAG=vote5 PICKER=llm SQL_CONTEXT=rows VOTE=5 npm run eval:exp  # + best-of-5 (the headline row)
 PICKER=llm  npm run eval:hard:repair   # hard + selection + self-repair
 
 npm run diff -- runs/<before>.json runs/<after>.json   # what a change broke

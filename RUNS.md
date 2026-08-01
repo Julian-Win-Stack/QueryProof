@@ -1102,3 +1102,84 @@ note:          +3.2 vs Batch G's 65.6% — past the band by 0.7 points, the
 export:        runs/2026-08-01-141455-exp-union-full.json
                (smoke: runs/2026-08-01-141430-exp-union-smoke-full.json, LIMIT=3, void)
 ```
+
+## 2026-08-01 — v5 bundle: aggregation rules + probe + repair ⭐ new best
+
+```
+approach:      mode=hard picker=llm check=probe repair=on union=on prompt=v5 pickerPrompt=picker-v1 sqlContext=rows rewrite=on model=claude-sonnet-5 effort=medium
+question set:  full (500 validated)
+accuracy:      72.4% (362/500)
+table recall:  93.4%
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       kept
+note:          +3.6 vs the union run's 68.8% — past the band. One combined
+               run of every fix left with a shared mechanism, each with its
+               targets named in advance (the cluster analysis): v5 = v4 plus
+               three prompt rules (percentage over the whole population ×100,
+               compute the hint's formula literally, aggregate at the unit
+               the question names); CHECK=probe with its trigger widened to a
+               single-cell zero (a COUNT that matched nothing is [[0]], not
+               []); REPAIR=on. Wiring change underneath: the check path now
+               applies the dialect repairs to the SQL it adopts, so CHECK
+               composes with REWRITE instead of throwing.
+
+               Target attribution, 19 named in advance, 10 won: probe 5/5
+               (0125 0229 0316 0337 0365 — every hint-literal mismatch),
+               percentage 4/8 (0080 0345 0374 0196), formula 1/3 (0283),
+               grain 0/2, repair 0/1. Probe overall: fired 21 times, +8/−4
+               against the union run (bonus rescues 0015 0041 0090; loss
+               0218 is gold's scalar-NULL convention — probing an
+               empty-looking answer that was right, the known risk). Repair
+               retried 15 questions.
+
+               Where the +18 net came from — 32 gained, 14 lost, and the 32
+               classify exactly:
+                 10  named targets (0080 0125 0196 0229 0283 0316 0337 0345
+                     0365 0374)
+                  3  probe bonus — fired on questions never named, fixed them
+                     (0015 0041 0090)
+                  3  repair rescue — crashed, retried, right (0141 0144 0178)
+                  3  churn back — the exact questions Batch G lost as random
+                     churn, returned on their own (0433 0443 0451)
+                 13  unattributed — generation churn and v5 side effects,
+                     inseparable without repeat trials (0087 0105 0111 0169
+                     0188 0202 0222 0227 0336 0358 0364 0442 0445)
+               The 14 losses are the same wobble in the other direction. So
+               16 of 32 gains are causally attributable (targets + probe +
+               repair); the margin +3.6 > the ±2.5 band is what makes the
+               headline claim, the attribution is what makes it explainable.
+               0 voids. $9.53 (repair + probe add ~$0.8 over the union run's
+               $8.71).
+
+               generate-sql.ts imports v5 as of this run. Julian promoted
+               the bundle to the default the same day: CHECK and REPAIR now
+               default on for hard mode outside the bake-off, CHECK=off
+               REPAIR=off reproduces the 68.8 or anything earlier.
+export:        runs/2026-08-01-150902-exp-v5-bundle-full.json
+               (smoke: runs/2026-08-01-150837-exp-smoke-v5-full.json, LIMIT=3, void)
+```
+
+## 2026-08-01 — Default set to the 72.4% configuration (wiring smoke, LIMIT=3)
+
+```
+approach:      mode=hard picker=llm limit=3, nothing else set
+verdict:       void
+note:          Not a measurement — the smoke that proves the new default
+               resolves. Default is now the v5 bundle: prompt v5, llm picker,
+               five sample rows, dialect rewrites, evidence-union additions,
+               probe, repair. Three code changes carry it: generate-sql.ts
+               imports prompts/v5 (was v4), CHECK defaults to probe and
+               REPAIR to on for hard mode outside the bake-off, with
+               CHECK=off REPAIR=off turning them back off.
+
+               With nothing set but PICKER, the suite name came back
+               "repair=on | prompt=v5 | union=on | sqlContext=rows |
+               check=probe check-v1 | rewrite=on" — stamped on every row.
+               3/3 scored.
+
+               Reproduction rule from here: any pre-bundle number needs
+               CHECK=off REPAIR=off, and the 68.8/65.6 rows also need the
+               generate-sql import switched back to v4 (61.0 to v1). v1–v4
+               stay in src/prompts/ as the evidence behind their entries.
+export:        runs/2026-08-01-152040-exp-default-check-v5-full.json
+```

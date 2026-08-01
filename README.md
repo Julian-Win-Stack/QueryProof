@@ -2,7 +2,7 @@
 
 Ask a Postgres database a question in English; get SQL and rows back.
 
-**68.8% correct on [BIRD Mini-Dev](https://github.com/bird-bench/mini_dev)** —
+**72.4% correct on [BIRD Mini-Dev](https://github.com/bird-bench/mini_dev)** —
 against the **36.0%** GPT-4-turbo baseline BIRD publishes for the same 500
 questions, and measured in a harder setting than that baseline uses.
 
@@ -50,8 +50,11 @@ disconnected join path needs; a second call writes the SQL from those tables'
 schemas plus five real sample rows each, under a prompt that pins the SELECT
 list to exactly what the question asks; two deterministic dialect repairs run
 over the SQL before it executes (`NULLS LAST` onto bare `DESC`, `::text` onto a
-date column that failed under `LIKE`); every query runs under a `SELECT`-only
-role. Model: `claude-sonnet-5`, pinned for every number here.
+date column that failed under `LIKE`); a query that comes back empty triggers
+one probe of the column's actual stored values and a rewrite; a query that
+errors gets up to two repair retries with the error fed back; every query runs
+under a `SELECT`-only role. Model: `claude-sonnet-5`, pinned for every number
+here.
 
 ## Results
 
@@ -66,6 +69,7 @@ is alien species).
 | + five real sample rows per table | **61.0%²** | 85.4% | $7.34 |
 | + projection prompt rule + two dialect rewrites | **65.6%³** | 85.6% | $7.56 |
 | + code adds the tables the question's hint names | **68.8%⁴** | 93.6% | $8.71 |
+| + aggregation prompt rules + probe on empty + error repair | **72.4%⁵** | 93.4% | $9.53 |
 
 Noise: **±2.5 points**, from 3 repeat runs of one configuration — the model has
 no determinism knob, so every comparison is read against that band. Denominator:
@@ -84,7 +88,9 @@ winners — full 500 questions each, ~$130 and one day total. Two beat the band:
 sample rows and self-check (**61.4%** — tied with sample rows, and the two
 *don't stack*: 60.0% together, so the simpler one ships). The other ten are
 `rejected`, `tie`, or `void` in [RUNS.md](RUNS.md), each with its verdict, its
-mechanism numbers, and its committed export.
+mechanism numbers, and its committed export. One of the ten came back:
+probe-on-empty tied as a blind sweep, then shipped in the 72.4% bundle once
+failure analysis named the exact questions it would fire on — see footnote ⁵.
 
 **The easy setting** — the question names its database, which is how BIRD's
 published baselines are measured — scores **58.4%**. That is the fairest
@@ -113,6 +119,19 @@ do the lookup instead, and repair join paths missing their middle table.
 Missing-table failures fell 49 → 23. Before any money was spent, the idea was
 verified free: applied to the stored picks of three finished runs, it recalled
 15 of the 16 ([RUNS.md](RUNS.md), 2026-08-01).
+
+⁵ +3.6 against the row above, past the band. One combined run of every
+remaining fix with a shared mechanism, its target questions named *before* the
+run: three prompt rules (build a percentage over the whole population, compute
+the hint's formula literally, aggregate at the unit the question names), a
+probe that reads a column's actual stored values when a query returns nothing
+— the hint says `'Brasil'`, the data stores `'Brazil'` — and up to two retries
+on a Postgres error. Of the 32 questions gained, 16 are causally attributable:
+10 named targets (the probe went **5 for 5** on its cluster), 3 probe bonuses,
+3 repair rescues; the rest, and the 14 lost, are the run-to-run shimmer the
+band exists for. Probe measured a *tie* standalone in the Batch E sweep — it
+shipped only after failure analysis showed the five hint-value mismatches were
+exactly its trigger ([RUNS.md](RUNS.md), v5 bundle).
 
 ## What the table actually says
 
@@ -149,7 +168,10 @@ Five findings, all against intuition, all measured:
    of 11 retried questions became *correct*; the rest moved from "crashes" to
    "runs and returns the wrong rows". Executability was never the bottleneck
    (~2% of questions), so the loop is nearly free ($0.07) and nearly useless.
-   Reported as the negative result it is.
+   Reported as the negative result it is — and shipped anyway in the 72.4%
+   configuration, where being nearly free is the point: it rescued 3 of the 15
+   questions it retried there, and a loop that only fires on a crash cannot
+   cost a right answer.
 
 4. **The model needs the data, not the documentation.** Five real rows under
    each `CREATE TABLE`: **+3.2**, the only prompt change that ever cleared the
@@ -308,8 +330,8 @@ npm run demo        # http://localhost:3000
 
 Question in; picked tables, SQL, rows, and attempt count out — the
 table-selection configuration plus the self-repair loop from finding 3. The
-headline configuration's sample rows, projection prompt, dialect rewrites, and
-table-addition code are not on the product path yet. Answers flagged **low confidence** (empty
+headline configuration's sample rows, aggregation prompt, dialect rewrites,
+table-addition code, and empty-result probe are not on the product path yet. Answers flagged **low confidence** (empty
 result, or a query that needed repair) were right 2.5% of the time on the
 measured run; everything else 63.7%. That heuristic was validated against a
 finished run before shipping — signals that didn't separate (thinking depth,
@@ -330,13 +352,16 @@ reports zero variance, which would fake the noise floor the numbers depend on.
 npm run validate-gold             # execute all 500 reference queries -> gold/
 PICKER=llm npm run eval:hard            # the headline configuration — table
                                         # selection + hint-named table additions,
-                                        # sample rows, dialect rewrites: 68.8%
-UNION=off PICKER=llm npm run eval:hard  # without the table-addition code: 65.6%
+                                        # sample rows, dialect rewrites, probe,
+                                        # repair: 72.4%
+CHECK=off REPAIR=off PICKER=llm npm run eval:hard  # without probe + repair
+                                        # (the 68.8% row, prompt v4 import)
+CHECK=off REPAIR=off UNION=off PICKER=llm npm run eval:hard  # also without the
+                                        # table-addition code (65.6%, v4 import)
 
-SQL_CONTEXT=off REWRITE=off PICKER=none npm run eval:hard  # baseline (all 75 tables)
-UNION=off SQL_CONTEXT=off REWRITE=off PICKER=llm npm run eval:hard  # + table selection only
-UNION=off REWRITE=off PICKER=llm npm run eval:hard  # + sample rows (the 61.0% row, prompt v1 import)
-UNION=off PICKER=llm npm run eval:hard:repair       # + self-repair
+CHECK=off REPAIR=off SQL_CONTEXT=off REWRITE=off PICKER=none npm run eval:hard  # baseline (all 75 tables)
+CHECK=off REPAIR=off UNION=off SQL_CONTEXT=off REWRITE=off PICKER=llm npm run eval:hard  # + table selection only
+CHECK=off REPAIR=off UNION=off REWRITE=off PICKER=llm npm run eval:hard  # + sample rows (61.0%, prompt v1 import)
 npm run eval:easy                                   # easy setting, all 500
 
 npm run diff -- runs/<before>.json runs/<after>.json   # what a change broke
@@ -344,14 +369,16 @@ npm run replay -- runs/<file>.json                     # rewrites on stored SQL
 npm run rescore -- runs/<file>.json                    # re-grade a stored run
 ```
 
-Sample rows, the dialect rewrites, and the table-addition code are all on by
-default — the headline configuration is what runs when nothing is specified.
-**Reproducing older numbers means switching things off: `SQL_CONTEXT=off` for
-any number measured before 2026-07-31, `REWRITE=off` for any number before
-2026-08-01, and `UNION=off` for every row except the 68.8% headline** — the
-61.0% row additionally needs `src/generate-sql.ts` importing
-prompt v1, the same one-line switch every prompt change goes through. Every run
-stamps its full configuration into its own name, so a run can never be silently
+Sample rows, the dialect rewrites, the table-addition code, the empty-result
+probe, and error repair are all on by default — the headline configuration is
+what runs when nothing is specified. **Reproducing older numbers means
+switching things off: `SQL_CONTEXT=off` for any number measured before
+2026-07-31, `REWRITE=off` for any number before 2026-08-01, `UNION=off` for
+every row below 68.8%, and `CHECK=off REPAIR=off` for every row except the
+72.4% headline** — the 68.8% and 65.6% rows additionally need
+`src/generate-sql.ts` importing prompt v4, and the 61.0% row prompt v1, the
+same one-line switch every prompt change goes through. Every run stamps its
+full configuration into its own name, so a run can never be silently
 mislabeled — but the stamp catches the mistake afterwards rather than
 preventing it.
 

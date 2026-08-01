@@ -10,6 +10,37 @@ right. This is the work list. It is deliberately not the full failure set.
 > result, not proof — those need repeat runs before they count as fixed. The
 > text below this note still describes the 61.0% run the list was built from;
 > entries are never rewritten, only stamped.
+>
+> **Second stamp added 2026-08-01, evening** — the v5-bundle run
+> (`runs/2026-08-01-150902-exp-v5-bundle-full.json`, 72.4%, now the default):
+> **59 of the 99 passing, 40 still failing.** Which fix won which question is
+> in the RUNS.md entry for each run — Batch G (projection prompt + dialect
+> rewrites), the union run (evidence-column tables + FK bridge), and the v5
+> bundle (percentage/formula/grain prompt rules + probe on empty results +
+> repair on errors, with the bundle entry classifying all 32 of its gains by
+> source).
+>
+> The 40 still failing, classified by why (2026-08-01 analysis, this session's
+> verdicts):
+>
+> - **Known mechanism, not yet converted** — the bundle aimed at these and
+>   missed: percentage rule misses (0281, 0353, 0391, 0480), formula rule
+>   misses (0462, 0466), grain rule misses (0013, 0323), repair miss (0029).
+> - **Prompt rule exists but the model ignores it ~10% of the time** — wrong
+>   column order or a dropped column despite v4/v5's projection rules: 0036,
+>   0109, 0199, 0459. Re-rolls each run; no code fix known.
+> - **Gold's output conventions, a guessing game** — rank columns the question
+>   never asks for (0249, 0441), ids vs names (0273), text label vs boolean
+>   (0308).
+> - **Counting convention** — gold counts join rows where the question asks
+>   for entities (0120, 0361); adopting it is prompt v3, measured a tie
+>   (2 gains, equal losses). Deliberately not re-bought.
+> - **Twin columns / English ambiguity — coin flips**: 0023, 0058, 0127,
+>   0366, 0367, 0369, 0447.
+> - **Join-semantics contradictions** — gold wants INNER on one question and
+>   LEFT on its mirror (0351, 0446), plus one-offs 0372, 0432, 0494.
+> - **Residue, no shared cause**: 0075, 0138, 0152, 0218, 0225, 0236, 0319,
+>   0449, 0461.
 
 ## Read this first
 
@@ -81,6 +112,7 @@ The values are right. The number or order of returned columns is not — usually
 ### bird-0005 — debit_card_specializing, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What was the gas consumption peak month for SME customers in 2013?
 
@@ -128,6 +160,7 @@ SELECT ym."date" FROM "yearmonth" ym JOIN "customers" c ON ym."customerid" = c."
 ### bird-0029 — debit_card_specializing, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** For all the people who paid more than 29.00 per unit of product id No.5. Give their consumption status in the August of 2012.
 
@@ -183,6 +216,7 @@ SELECT y.customerid, y.date, y.consumption FROM "yearmonth" y WHERE y.date = '20
 ### bird-0036 — student_club, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Was each expense in October Meeting on October 8, 2019 approved?
 
@@ -234,6 +268,7 @@ SELECT e.expense_id, e.expense_description, e.approved FROM "expense" e WHERE e.
 ### bird-0052 — student_club, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Among all the closed events, which event has the highest spend-to-budget ratio?
 
@@ -292,6 +327,7 @@ SELECT e.event_name FROM event e JOIN budget b ON e.event_id = b.link_to_event W
 ### bird-0055 — student_club, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** List the name of students that have attended more than 7 events.
 
@@ -362,6 +398,7 @@ SELECT m.first_name, m.last_name FROM member m JOIN attendance a ON m.member_id 
 ### bird-0068 — student_club, simple
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** List out the full name and total cost that member id "rec4BLdZHS2Blfp4v" incurred?
 
@@ -420,6 +457,7 @@ SELECT m.first_name, m.last_name, SUM(e.cost) AS total_cost FROM "member" m JOIN
 ### bird-0102 — thrombosis_prediction, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Please provide the diagnosis of patients with ALT glutamic pylvic transaminase beyond the normal range by ascending order of their date of birth.
 
@@ -490,6 +528,7 @@ SELECT p.diagnosis FROM patient p JOIN laboratory l ON p.id = l.id WHERE l.gpt >
 ### bird-0109 — thrombosis_prediction, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What are the patient's diagnosis for those who has lower red blood blood cell? State their ID and age.
 
@@ -545,6 +584,7 @@ SELECT DISTINCT p."id", p.diagnosis, EXTRACT(YEAR FROM CURRENT_TIMESTAMP) - EXTR
 ### bird-0146 — european_football_2, simple
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Which player is older, Aaron Lennon or Abdelaziz Barrada?
 
@@ -592,6 +632,7 @@ SELECT player_name, birthday FROM "player" WHERE player_name IN ('Aaron Lennon',
 ### bird-0175 — european_football_2, simple
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Which top 4 leagues had the most games in the 2015-2016 season?
 
@@ -645,6 +686,7 @@ SELECT l.name, COUNT(m.id) AS game_count FROM "match" m JOIN "league" l ON m.lea
 ### bird-0187 — formula_1, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** For all the drivers who finished the game in race No. 592, who is the oldest?
 
@@ -703,6 +745,7 @@ SELECT d.forename, d.surname FROM results r JOIN drivers d ON r.driverid = d.dri
 ### bird-0188 — formula_1, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Who was the player that got the lap time of 0:01:27 in the race No. 161? Show his introduction website.
 
@@ -758,6 +801,7 @@ SELECT d.url FROM laptimes l JOIN drivers d ON l.driverid = d.driverid WHERE l.r
 ### bird-0196 — formula_1, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** For the drivers who took part in the race in 1983/7/16, what's their race completion rate?
 
@@ -805,6 +849,7 @@ SELECT CAST(COUNT(CASE WHEN r."time" IS NOT NULL THEN r."driverid" END) AS FLOAT
 ### bird-0199 — formula_1, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What is the best lap time recorded? List the driver and race with such recorded lap time.
 
@@ -852,6 +897,7 @@ SELECT d.forename, d.surname, r.name, l.milliseconds FROM laptimes l JOIN driver
 ### bird-0203 — formula_1, simple
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** How old is the youngest Japanese driver? What is his name?
 
@@ -899,6 +945,7 @@ SELECT forename, surname, EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM do
 ### bird-0273 — superhero, challenging
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** List the eyes, hair and skin colour of all female superheroes published by Dark Horse Comics.
 
@@ -954,6 +1001,7 @@ SELECT s.superhero_name, ec.colour AS eye_colour, hc.colour AS hair_colour, sc.c
 ### bird-0288 — superhero, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What is the publisher for Hawkman, Karate Kid and Speedy?
 
@@ -1005,6 +1053,7 @@ SELECT s.superhero_name, p.publisher_name FROM superhero s JOIN publisher p ON s
 ### bird-0297 — codebase_community, simple
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Which user has a higher reputation, Harlan or Jarrod Dixon?
 
@@ -1052,6 +1101,7 @@ SELECT displayname, reputation FROM users WHERE displayname IN ('Harlan','Jarrod
 ### bird-0308 — codebase_community, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** User No.23853 gave a comment to a post at 9:08:18 on 2013/7/12, was that post well-finished?
 
@@ -1099,6 +1149,7 @@ SELECT p.id, p.closeddate IS NULL AS well_finished FROM comments c JOIN posts p 
 ### bird-0326 — codebase_community, challenging
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Among posts by Harvey Motulsky and Noah Snyder, which one has higher popularity?
 
@@ -1146,6 +1197,7 @@ SELECT u.displayname, SUM(p.viewcount) AS total_viewcount FROM posts p JOIN user
 ### bird-0362 — card_games, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Among the Artifact cards, which are black color and comes with foreign languague translation?
 
@@ -1216,6 +1268,7 @@ SELECT DISTINCT c."name" FROM "cards" c JOIN "foreign_data" f ON c."uuid" = f."u
 ### bird-0389 — card_games, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Please list the Italian text ruling of all the cards in the set Coldsnap.
 
@@ -1287,6 +1340,7 @@ SELECT fd.text FROM cards c JOIN sets s ON c.setcode = s.code JOIN foreign_data 
 ### bird-0424 — toxicology, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Is the molecule with the most double bonds carcinogenic?
 
@@ -1345,6 +1399,7 @@ SELECT m.label FROM molecule m JOIN bond b ON m.molecule_id = b.molecule_id WHER
 ### bird-0428 — toxicology, challenging
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What are the elements of the atoms of TR144_8_19?
 
@@ -1406,6 +1461,7 @@ SELECT "element" FROM "atom" WHERE "atom_id" IN ('TR144_8', 'TR144_19')
 ### bird-0441 — california_schools, simple
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Rank schools by their average score in Writing where the score is greater than 499, showing their charter numbers.
 
@@ -1476,6 +1532,7 @@ SELECT s."charternum", sc."avgscrwrite", RANK() OVER (ORDER BY sc."avgscrwrite" 
 ### bird-0448 — california_schools, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What is the eligible free rate of the 10th and 11th schools with the highest enrolment for students in grades 1 through 12?
 
@@ -1525,6 +1582,7 @@ SELECT "School Name", "Free Meal Count (K-12)" / "Enrollment (K-12)" AS eligible
 ### bird-0458 — california_schools, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What is the ratio of merged Unified School District schools in Orange County to merged Elementary School District schools?
 
@@ -1583,6 +1641,7 @@ SELECT CAST(SUM(CASE WHEN doc='54' THEN 1 ELSE 0 END) AS FLOAT) / NULLIF(SUM(CAS
 ### bird-0459 — california_schools, simple
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What is the postal street address for the school with the 7th highest Math average? Indicate the school's name.
 
@@ -1641,6 +1700,7 @@ SELECT s.street, s.school FROM schools s JOIN satscores t ON s.cdscode = t.cds W
 ### bird-0474 — financial, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Among the accounts who have loan validity more than 12 months, list out the accounts that have the highest approved amount and have account opening date in 1993.
 
@@ -1702,6 +1762,7 @@ A correct source existed and was available in the prompt. The query went somewhe
 ### bird-0014 — debit_card_specializing, simple
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Please list the product description of the products consumed in September, 2013.
 
@@ -1768,6 +1829,7 @@ SELECT DISTINCT p."description" FROM "transactions_1k" t JOIN "products" p ON t.
 ### bird-0023 — debit_card_specializing, simple
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What's the nationality of the customer who spent 548.4 in 2012/8/24?
 
@@ -1826,6 +1888,7 @@ SELECT DISTINCT g.country FROM transactions_1k t JOIN gasstations g ON t.gasstat
 ### bird-0039 — student_club, simple
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What was the notes of the fundraising on 2019/9/14?
 
@@ -1884,6 +1947,7 @@ SELECT "notes" FROM "income" WHERE "source" = 'Fundraising' AND "date_received" 
 ### bird-0041 — student_club, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What is the status of the event which bought "Post Cards, Posters" on 2019/8/20?
 
@@ -1931,6 +1995,7 @@ SELECT "status" FROM "event" WHERE "notes" ILIKE '%Post Cards, Posters%'
 ### bird-0058 — student_club, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Based on the total cost for all event, what is the percentage of cost for Yearly Kickoff event?
 
@@ -1989,6 +2054,7 @@ SELECT 100.0 * SUM(CASE WHEN e.event_name = 'Yearly Kickoff' THEN ex.cost ELSE 0
 ### bird-0087 — thrombosis_prediction, simple
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What are the symptoms observed by the youngest patient to ever did a medical examination? Identify their diagnosis.
 
@@ -2047,6 +2113,7 @@ SELECT e.symptoms, p.diagnosis FROM patient p JOIN examination e ON p.id = e.id 
 ### bird-0127 — thrombosis_prediction, challenging
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** For the patients with a normal range of creatinine phosphokinase, how many of them have a positive measure of degree of coagulation?
 
@@ -2094,6 +2161,7 @@ SELECT COUNT(DISTINCT id) FROM laboratory WHERE cpk < 250
 ### bird-0206 — formula_1, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** State the race and year of race in which Michael Schumacher had his fastest lap.
 
@@ -2141,6 +2209,7 @@ SELECT r."name", r."year" FROM results res JOIN drivers d ON res."driverid" = d.
 ### bird-0227 — formula_1, challenging
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** From 2000 to 2005, what percentage of drivers who were born before 1985 and the lap numbers were over 50?
 
@@ -2188,6 +2257,7 @@ SELECT (COUNT(DISTINCT CASE WHEN EXTRACT(YEAR FROM d.dob) < 1985 AND l.lap > 50 
 ### bird-0314 — codebase_community, simple
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Name the user that commented 'thank you user93!'
 
@@ -2246,6 +2316,7 @@ SELECT u."displayname" FROM "comments" c JOIN "users" u ON c."userid" = u."id" W
 ### bird-0336 — codebase_community, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What is the percentage of posts whose owners had a reputation of over 1000 in 2011?
 
@@ -2304,6 +2375,7 @@ SELECT (COUNT(*) FILTER (WHERE EXTRACT(YEAR FROM p.creaiondate) = 2011 AND u.rep
 ### bird-0356 — card_games, simple
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What is the rule of playing card "Benalish Knight"?
 
@@ -2373,6 +2445,7 @@ SELECT l.format FROM legalities l JOIN cards c ON l.uuid = c.uuid WHERE c.name =
 ### bird-0366 — card_games, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Lists all types of cards in German.
 
@@ -2443,6 +2516,7 @@ SELECT DISTINCT c."subtypes", c."supertypes" FROM "cards" c JOIN "foreign_data" 
 ### bird-0367 — card_games, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** How many unknown power cards contain info about the triggered ability
 
@@ -2490,6 +2564,7 @@ SELECT COUNT(*) FROM "cards" WHERE ("power" IS NULL OR "power" = '*') AND "text"
 ### bird-0369 — card_games, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What is the foreign name of the card in French of type Creature, normal layout and black border color, by artist Matthew D. Wilson?
 
@@ -2556,6 +2631,7 @@ SELECT fd.name FROM "cards" c JOIN "foreign_data" fd ON c."uuid" = fd."uuid" WHE
 ### bird-0388 — card_games, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What is the Italian flavor text of the card "Ancestor's Chosen"?
 
@@ -2616,6 +2692,7 @@ SELECT fd."flavortext" FROM "foreign_data" fd JOIN "cards" c ON fd."uuid" = c."u
 ### bird-0447 — california_schools, challenging
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Consider the average difference between K-12 enrollment and 15-17 enrollment of schools that are locally funded, list the names and DOC type of schools which has a difference above this average.
 
@@ -2686,6 +2763,7 @@ SELECT s.school, s.doc FROM schools s JOIN frpm f ON s.cdscode = f.cdscode WHERE
 ### bird-0462 — california_schools, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Which schools served a grade span of Kindergarten to 9th grade in the county of Los Angeles and what is its Percent (%) Eligible FRPM (Ages 5-17)?
 
@@ -2734,6 +2812,7 @@ SELECT s."school", f."Percent (%) Eligible FRPM (Ages 5-17)" FROM "frpm" f JOIN 
 ### bird-0466 — california_schools, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What is the Percent (%) Eligible Free (K-12) in the school administered by an administrator whose first name is Alusine. List the district code of the school.
 
@@ -2784,6 +2863,7 @@ A condition the question states was dropped, or one it never asked for was added
 ### bird-0090 — thrombosis_prediction, challenging
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** How many underage patients were examined during the course of the three-year period from 1990 to 1993?
 
@@ -2842,6 +2922,7 @@ SELECT COUNT(DISTINCT p.id) FROM "patient" p JOIN "examination" e ON p.id = e.id
 ### bird-0111 — thrombosis_prediction, challenging
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Name the ID and age of patient with two or more laboratory examinations which show their hematoclit level exceeded the normal range.
 
@@ -2905,6 +2986,7 @@ SELECT p."id", EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p."birthday")
 ### bird-0152 — european_football_2, simple
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Give the name of the league had the most matches in the 2008/2009 season?
 
@@ -2955,6 +3037,7 @@ SELECT l.name FROM "match" m JOIN "league" l ON m.league_id = l.id WHERE m.seaso
 ### bird-0177 — european_football_2, simple
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Please name one player whose overall strength is the greatest.
 
@@ -3002,6 +3085,7 @@ SELECT p.player_name FROM player p JOIN player_attributes pa ON p.player_api_id 
 ### bird-0225 — formula_1, simple
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What is the fastest lap number of the champion in 2009?
 
@@ -3072,6 +3156,7 @@ SELECT r."fastestlap" FROM "results" r JOIN "races" ra ON r."raceid" = ra."racei
 ### bird-0235 — formula_1, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** On what year did the youngest driver had his first qualifying race? Also state the name, date and time of the race.
 
@@ -3130,6 +3215,7 @@ SELECT r.year, r.name, r.date, r.time FROM races r JOIN qualifying q ON r.raceid
 ### bird-0236 — formula_1, challenging
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** List down top 3 German drivers who has the shortest average pit stop duration and were born between 1980-1985.
 
@@ -3180,6 +3266,7 @@ SELECT d.forename, d.surname, AVG(p.milliseconds) AS avg_duration FROM drivers d
 ### bird-0249 — superhero, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Rank heroes published by Marvel Comics by their height in descending order.
 
@@ -3250,6 +3337,7 @@ SELECT s.superhero_name, s.height_cm, RANK() OVER (ORDER BY s.height_cm DESC NUL
 ### bird-0281 — superhero, challenging
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** How many percent of female heroes were published by Marvel Comics?
 
@@ -3308,6 +3396,7 @@ SELECT SUM(CASE WHEN p.publisher_name = 'Marvel Comics' THEN 1 ELSE 0 END) * 100
 ### bird-0327 — codebase_community, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** State all the tags used by Mark Meckes in his posts that doesn't have comments.
 
@@ -3371,6 +3460,7 @@ SELECT DISTINCT p.tags FROM posts p JOIN users u ON p.owneruserid = u.id WHERE u
 ### bird-0374 — card_games, simple
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What proportion of cards do not have a text box with a normal layout?
 
@@ -3418,6 +3508,7 @@ SELECT (SUM(CASE WHEN "istextless"=1 AND "layout"='normal' THEN 1 ELSE 0 END)::f
 ### bird-0449 — california_schools, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What is the eligible free or reduced price meal rate for the top 5 schools in grades 1-12 with the highest free or reduced price meal count of the schools with the ownership code 66?
 
@@ -3473,6 +3564,7 @@ SELECT f."School Name", f."FRPM Count (K-12)" / f."Enrollment (K-12)" AS frpm_ra
 ### bird-0454 — california_schools, simple
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** List the names of virtual schools that are among the top 5 in their respective counties based on average reading scores.
 
@@ -3528,6 +3620,7 @@ SELECT school_name FROM (SELECT s.school AS school_name, s.county, sc.avgscrread
 ### bird-0456 — california_schools, simple
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Which state special schools have the highest number of enrollees from grades 1 through 12?
 
@@ -3577,6 +3670,7 @@ SELECT s.school, f."Enrollment (K-12)" FROM schools s JOIN frpm f ON s.cdscode =
 ### bird-0488 — financial, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** In the branch where the second-highest number of crimes were committed in 1995 occurred, how many male clients are there?
 
@@ -3635,6 +3729,7 @@ SELECT COUNT(*) FROM client c WHERE c.gender = 'M' AND c.district_id = (SELECT d
 ### bird-0494 — financial, challenging
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What was the growth rate of the total amount of loans across all accounts for a male client between 1996 and 1997?
 
@@ -3685,6 +3780,7 @@ Per join row instead of per entity, DISTINCT where the reference counts every ro
 ### bird-0013 — debit_card_specializing, simple
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What is the highest monthly consumption in the year 2012?
 
@@ -3732,6 +3828,7 @@ SELECT MAX(CAST(consumption AS float)) FROM yearmonth WHERE SUBSTRING(CAST(date 
 ### bird-0075 — student_club, challenging
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Give the full name and contact number of members who had to spend more than average on each expense.
 
@@ -3781,6 +3878,7 @@ SELECT m.first_name, m.last_name, m.phone FROM "member" m JOIN "expense" e ON e.
 ### bird-0120 — thrombosis_prediction, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** How many patients with a abnormal C-reactive protein don't have their data recorded?
 
@@ -3839,6 +3937,7 @@ SELECT COUNT(*) FROM "patient" p JOIN "laboratory" l ON p."id" = l."id" WHERE l.
 ### bird-0138 — european_football_2, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** List the top 10 players' names whose heights are above 180 in descending order of average heading accuracy.
 
@@ -3894,6 +3993,7 @@ SELECT p.player_name, AVG(pa.heading_accuracy) AS avg_heading_accuracy FROM play
 ### bird-0218 — formula_1, challenging
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** How much faster in percentage is the champion than the driver who finished the race last in the 2008 Australian Grand Prix?
 
@@ -3952,6 +4052,7 @@ SELECT (MAX(CASE WHEN r.position = (SELECT MAX(position) FROM results r2 JOIN ra
 ### bird-0283 — superhero, simple
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Calculate the average height for all superhero.
 
@@ -3999,6 +4100,7 @@ SELECT AVG(height_cm) FROM superhero
 ### bird-0319 — codebase_community, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Calculate the average view count of each post tagged as 'humor' and list the title and the comment of each post.
 
@@ -4054,6 +4156,7 @@ SELECT p.title, c.text AS comment, AVG(p.viewcount) OVER () AS avg_view_count FR
 ### bird-0323 — codebase_community, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What is the average of the up votes and the average user age for users creating more than 10 posts?
 
@@ -4116,6 +4219,7 @@ SELECT AVG(sub.upvotes) AS avg_upvotes, AVG(sub.age) AS avg_age FROM (SELECT u.i
 ### bird-0345 — codebase_community, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Among the comments with scores between 5 to 10, what is the percentage of the users with 0 up votes?
 
@@ -4174,6 +4278,7 @@ SELECT 100.0 * COUNT(*) FILTER (WHERE u.upvotes = 0) / COUNT(*) FROM comments c 
 ### bird-0361 — card_games, simple
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** How many of the banned cards are white border?
 
@@ -4232,6 +4337,7 @@ SELECT COUNT(*) FROM cards c JOIN legalities l ON c.uuid = l.uuid WHERE l.status
 ### bird-0391 — card_games, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What is the percentage of the cards with a converted mana cost of 7 in the set Coldsnap?
 
@@ -4290,6 +4396,7 @@ SELECT (SUM(CASE WHEN c.convertedmanacost = 7 THEN 1 ELSE 0 END)::float / COUNT(
 ### bird-0461 — california_schools, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** How many students from the ages of 5 to 17 are enrolled at the State Special School school in Fremont for the 2014-2015 academic year?
 
@@ -4350,6 +4457,7 @@ SELECT f."Enrollment (Ages 5-17)" FROM frpm f JOIN schools s ON f.cdscode = s.cd
 ### bird-0480 — financial, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** For loan amount less than USD100,000, what is the percentage of accounts that is still running with no issue.
 
@@ -4411,6 +4519,7 @@ Joined on keys that do not reference each other, or skipped a table that has to 
 ### bird-0057 — student_club, simple
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Which event has the lowest cost?
 
@@ -4469,6 +4578,7 @@ SELECT e.event_name FROM event e JOIN budget b ON b.link_to_event = e.event_id J
 ### bird-0274 — superhero, challenging
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Which superhero has the same eyes, hair and skin colour? Indicate the publisher of the superhero.
 
@@ -4539,6 +4649,7 @@ SELECT s.superhero_name, p.publisher_name FROM superhero s JOIN publisher p ON s
 ### bird-0351 — card_games, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Find all cards illustrated by Stephen Daniel and describe the text of the ruling of these cards. State if these cards have missing or degraded properties and values.
 
@@ -4609,6 +4720,7 @@ SELECT c.id, r.text, c.hascontentwarning FROM cards c JOIN rulings r ON c.uuid =
 ### bird-0353 — card_games, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Calculate the percentage of the cards availabe in Chinese Simplified.
 
@@ -4656,6 +4768,7 @@ SELECT (SUM(CASE WHEN language = 'Chinese Simplified' THEN 1 ELSE 0 END)::numeri
 ### bird-0372 — card_games, challenging
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What percentage of cards without power are in French?
 
@@ -4714,6 +4827,7 @@ SELECT (COUNT(*) FILTER (WHERE f.language = 'French' AND (c.power IS NULL OR c.p
 ### bird-0432 — toxicology, challenging
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What is the composition of element chlorine in percentage among the single bond molecules?
 
@@ -4772,6 +4886,7 @@ SELECT 100.0 * SUM(CASE WHEN a.element = 'cl' THEN 1 ELSE 0 END) / COUNT(a.atom_
 ### bird-0446 — california_schools, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What is the average score in writing for the schools that were opened after 1991 or closed before 2000? List the school names along with the score. Also, list the communication number of the schools if there is any.
 
@@ -4827,6 +4942,7 @@ SELECT s.school, sc.avgscrwrite, s.phone FROM schools s JOIN satscores sc ON s.c
 ### bird-0493 — financial, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What percentage of clients who opened their accounts in the district with an average salary of over 10000 are women?
 
@@ -4885,6 +5001,7 @@ SELECT 100.0 * SUM(CASE WHEN c.gender = 'F' THEN 1 ELSE 0 END) / COUNT(*) AS per
 ### bird-0497 — financial, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Name the account numbers of female clients who are oldest and have lowest average salary?
 
@@ -4950,6 +5067,7 @@ The right column, the wrong spelling of the value. Casing, format, or a label wh
 ### bird-0063 — student_club, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Indicate the cost of posters for 'September Speaker' event.
 
@@ -5008,6 +5126,7 @@ SELECT b.spent FROM "budget" b JOIN "event" e ON b.link_to_event = e.event_id WH
 ### bird-0080 — thrombosis_prediction, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What is the ratio of outpatient to inpatient followed up treatment among all the 'SLE' diagnosed patient?
 
@@ -5055,6 +5174,7 @@ SELECT CAST(COUNT(CASE WHEN "admission" = '-' THEN 1 END) AS FLOAT) / NULLIF(COU
 ### bird-0125 — thrombosis_prediction, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Among the patients who has a normal level of anti-centromere and a normal level of anti-SSB, how many of them are male?
 
@@ -5102,6 +5222,7 @@ SELECT COUNT(DISTINCT p.id) FROM "patient" p JOIN "laboratory" l ON p.id = l.id 
 ### bird-0229 — formula_1, simple
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** List out the code for drivers who have nationality in America.
 
@@ -5168,6 +5289,7 @@ SELECT "code" FROM "drivers" WHERE "nationality" = 'American'
 ### bird-0316 — codebase_community, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Who is the owner of the post titled 'Open source tools for visualizing multi-dimensional data?'
 
@@ -5226,6 +5348,7 @@ SELECT u."displayname" FROM "posts" p JOIN "users" u ON p."owneruserid" = u."id"
 ### bird-0337 — codebase_community, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Identify the total views on the post 'Computer Game Datasets'. Name the user who posted it last time.
 
@@ -5284,6 +5407,7 @@ SELECT p.viewcount, u.displayname FROM posts p LEFT JOIN users u ON p.lasteditor
 ### bird-0365 — card_games, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** How many Brazilian Portuguese translated sets are inside the Commander block?
 
@@ -5345,6 +5469,7 @@ Postgres rejected it.
 ### bird-0045 — student_club, simple
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** State the date Connor Hilton paid his/her dues.
 
@@ -5404,6 +5529,7 @@ SELECT i.date_received FROM income i JOIN member m ON i.link_to_member = m.membe
 ### bird-0084 — thrombosis_prediction, simple
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** For patients with severe degree of thrombosis, list their ID, sex and disease the patient is diagnosed with.
 
@@ -5465,6 +5591,7 @@ SELECT DISTINCT p.id, p.sex, p.diagnosis FROM patient p JOIN examination e ON p.
 ### bird-0093 — thrombosis_prediction, challenging
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** For the patient who was born on 1959/2/18, what is the decrease rate for his/her total cholesterol from November to December in 1981?
 
@@ -5522,6 +5649,7 @@ SELECT (SUM(CASE WHEN l.date::text LIKE '1981-11-%' THEN l."T-CHO" END) - SUM(CA
 ### bird-0096 — thrombosis_prediction, challenging
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** List all patients who were followed up at the outpatient clinic who underwent a laboratory test in October 1991 and had a total blood bilirubin level within the normal range.
 
@@ -5587,6 +5715,7 @@ SELECT DISTINCT p."id" FROM "patient" p JOIN "laboratory" l ON p."id" = l."id" W
 ### bird-0099 — thrombosis_prediction, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** What percentage of patients who were born in 1980 and were diagnosed with RA are women?
 
@@ -5644,6 +5773,7 @@ SELECT (SUM(CASE WHEN sex='F' THEN 1 ELSE 0 END)::float / COUNT(sex)) * 100 FROM
 ### bird-0266 — superhero, moderate
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
+**Status: passing in the 2026-08-01 `v5-bundle` run (72.4%).**
 
 **Question.** Provide the hair colour of the human superhero who is 185 cm tall.
 

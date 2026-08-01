@@ -67,12 +67,47 @@ test('off never calls the model', async () => {
   assert.equal(d.completed.length, 0);
 });
 
-test('probe skips unless the query ran and returned zero rows', async () => {
-  for (const execution of [okOneRow, failed]) {
+test('probe skips everything except an empty-looking result', async () => {
+  const nullScalar: ExecutionResult = { ok: true, rows: [[null]], columns: ['sum'], ms: 1 };
+  const twoCellZeros: ExecutionResult = { ok: true, rows: [[0, 0]], columns: ['a', 'b'], ms: 1 };
+  for (const execution of [okOneRow, failed, nullScalar, twoCellZeros]) {
     const d = deps([], []);
     const checked = await applyCheck('probe', params(), answerWith(execution), d);
     assert.equal(checked.checkAction, 'skipped');
     assert.equal(d.completed.length, 0);
+  }
+});
+
+test('probe fires on a single-cell zero — a COUNT whose filter matched nothing', async () => {
+  // pg returns COUNT (bigint) as the string '0', plain integer zeros as 0.
+  for (const zero of [0, '0']) {
+    const countZero: ExecutionResult = { ok: true, rows: [[zero]], columns: ['count'], ms: 1 };
+    const d = deps(['SELECT DISTINCT "x" FROM "t"', 'SELECT 2'], [okOneRow, okOneRow]);
+    const checked = await applyCheck('probe', params(), answerWith(countZero), d);
+    assert.equal(checked.checkAction, 'probed');
+    assert.equal(checked.sql, 'SELECT 2');
+  }
+});
+
+test('a probe rewrite gets the dialect repairs only when rewrite is on', async () => {
+  const cases = [
+    { rewrite: true, sql: 'SELECT "x" FROM "t" ORDER BY "x" DESC NULLS LAST', fired: ['nulls-last'] },
+    { rewrite: undefined, sql: 'SELECT "x" FROM "t" ORDER BY "x" DESC', fired: [] },
+  ];
+  for (const expected of cases) {
+    const d = deps(
+      ['SELECT DISTINCT "x" FROM "t"', 'SELECT "x" FROM "t" ORDER BY "x" DESC'],
+      [okOneRow, okOneRow],
+    );
+    const checked = await applyCheck(
+      'probe',
+      { ...params(), rewrite: expected.rewrite },
+      answerWith(okEmpty),
+      d,
+    );
+    assert.equal(checked.sql, expected.sql);
+    assert.equal(d.executed[1], expected.sql);
+    assert.deepEqual(checked.rewrites, expected.fired);
   }
 });
 

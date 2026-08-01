@@ -48,16 +48,19 @@ has to be said, never defaulted into, and an unknown value throws (D22).
 
 ## The default configuration
 
-Set 2026-08-01, twice in one day: Batch G in the morning, the cluster-1
-promotion in the evening. **Prompt v4, LLM table picker, five sample rows per
-table, dialect rewrites on, evidence-union table additions on, everything else
-off.** That is the 68.8% run — the best measured configuration, and now what
-runs when nothing is specified.
+Set 2026-08-01, three promotions in one day: Batch G in the morning, the
+cluster-1 union in the evening, the v5 bundle after it. **Prompt v5, LLM table
+picker, five sample rows per table, dialect rewrites on, evidence-union table
+additions on, probe on, repair on, everything else off.** That is the 72.4%
+run — the best measured configuration, and now what runs when nothing is
+specified.
 
 ```
-prompt       v4        src/generate-sql.ts imports it; the one switch point.
-                       v4 = v1 + projection discipline: SELECT exactly the
-                       asked-for columns, in the question's order
+prompt       v5        src/generate-sql.ts imports it; the one switch point.
+                       v5 = v4 + three aggregation-shape rules (percentage
+                       over the whole population ×100, compute the hint's
+                       formula literally, aggregate at the named unit);
+                       v4 = v1 + projection discipline
 REWRITE      on        deterministic dialect repairs (src/rewrites.ts, D24):
                        NULLS LAST onto every bare DESC, ::text onto a date
                        column that 42883'd under LIKE. +7/500 exactly, zero
@@ -67,27 +70,34 @@ UNION        on        post-picker table additions in code (src/pickers/union.ts
                        plus a foreign-key bridge when the picked tables do not
                        connect. Default applies only where it can — hard mode,
                        llm picker, outside the bake-off; off everywhere else
+CHECK        probe     on an empty result or a single-cell zero, read the
+                       column's stored values, retry (src/check.ts). Went 5/5
+                       on its named targets in the bundle run. Default applies
+                       to hard mode outside the bake-off; off elsewhere
+REPAIR       on        up to 2 retries on a Postgres error. Same default scope
+                       as CHECK. Rescued 3 in the bundle run
 SQL_CONTEXT  rows      five real rows per table
 picker       llm       stated explicitly in hard mode, never defaulted
-repair       off       ties on accuracy; the demo turns it on for its own reasons
-EXPAND / PICKER_CONTEXT / CHECK / VOTE   off
+EXPAND / PICKER_CONTEXT / VOTE   off
 MODEL        claude-sonnet-5     EFFORT medium
 ```
 
 Four things follow from this, and each one has bitten:
 
-- **`SQL_CONTEXT` defaults to `rows`, `REWRITE` and `UNION` default to `on`.**
-  Reproducing a pre-2026-07-31 number needs `SQL_CONTEXT=off`; reproducing any
-  pre-Batch-G number needs `REWRITE=off`; reproducing Batch G's 65.6% or
-  anything earlier needs `UNION=off`. Run names stamp all three either way, so
-  no run is ever mislabeled — but a baseline re-run without the `off`s is
-  measuring the wrong thing.
-- **v4 is the default; v1, v2 and v3 stay in `src/prompts/`** as the evidence
-  behind their RUNS.md entries. Reproducing the 61.0 run needs the
-  `generate-sql.ts` import switched back to v1 *and* `REWRITE=off`.
-- **`CHECK` runs must say `REWRITE=off` explicitly** — a check rewrite skips
-  the dialect repairs, so the eval throws rather than letting the default
-  silently apply to half the answer.
+- **`SQL_CONTEXT` defaults to `rows`; `REWRITE`, `UNION`, `CHECK` and `REPAIR`
+  default to on.** Reproducing a pre-2026-07-31 number needs `SQL_CONTEXT=off`;
+  any pre-Batch-G number needs `REWRITE=off`; Batch G's 65.6% needs `UNION=off`;
+  the union run's 68.8% or anything earlier needs `CHECK=off REPAIR=off`. Run
+  names stamp all of them either way, so no run is ever mislabeled — but a
+  baseline re-run without the `off`s is measuring the wrong thing.
+- **v5 is the default; v1–v4 stay in `src/prompts/`** as the evidence behind
+  their RUNS.md entries. Reproducing the 68.8 run needs the `generate-sql.ts`
+  import switched back to v4 *and* `CHECK=off REPAIR=off`; the 61.0 run needs
+  v1, `REWRITE=off`, `UNION=off`, `CHECK=off`, `REPAIR=off`.
+- **`CHECK` composes with `REWRITE` since the v5 bundle (2026-08-01)** — a
+  check-produced rewrite goes through the same dialect repairs in
+  `src/check.ts`, so the combined stamp holds. (Before this, the eval threw
+  unless a CHECK run said `REWRITE=off` explicitly.)
 - **The demo is not this configuration.** `app/api/ask/route.ts` hardcodes its
   own: picker on, repair on, **no sample rows, no rewrites**. So the product
   path is not the headline number and has never been measured as it ships.

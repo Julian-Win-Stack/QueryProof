@@ -11,7 +11,9 @@
 //   EVAL_PICKERS=1       the D9 bake-off: keyword vs llm as evalite.each
 //                        variants, one run, dev slice only.
 //   REPAIR=on|off        Phase 7 self-repair: up to 2 retries on a Postgres
-//                        error, hard mode only. Defaults to off.
+//                        error, hard mode only. Defaults to on for hard mode
+//                        outside the bake-off since the v5 bundle (72.4%,
+//                        2026-08-01); REPAIR=off reproduces earlier numbers.
 //   EVAL_DEV=1           filter to the frozen 100-id dev slice
 //   LIMIT=N              first N questions only — wiring smoke, never evidence
 //   TRIALS / CONCURRENCY read in evalite.config.ts
@@ -25,7 +27,11 @@
 //                        empty. SQL_CONTEXT=off is how a pre-2026-07-31
 //                        baseline is reproduced.
 //   PICKER_CONTEXT=values,desc          extras in the picker prompt
-//   CHECK=off|probe|self post-execution check (src/check.ts)
+//   CHECK=off|probe|self post-execution check (src/check.ts). Defaults to
+//                        probe for hard mode outside the bake-off since the
+//                        v5 bundle (72.4%, 2026-08-01); CHECK=off reproduces
+//                        earlier numbers. probe fires on an empty result or a
+//                        single-cell zero, reads the stored values, retries.
 // All five throw inside the bake-off — its variants are frozen at the D9
 // configuration.
 //
@@ -42,9 +48,10 @@
 //                        Defaults to on — the best measured configuration
 //                        (Batch G, 65.6%) — so REWRITE=off is how any earlier
 //                        number is reproduced. Off inside the bake-off, whose
-//                        variants are frozen at the D9 configuration. CHECK
-//                        runs must say REWRITE=off — a check rewrite skips the
-//                        dialect repairs, so the combined stamp would lie.
+//                        variants are frozen at the D9 configuration. Composes
+//                        with CHECK since the v5 bundle (2026-08-01): a
+//                        check-produced rewrite goes through the same dialect
+//                        repairs in src/check.ts, so the combined stamp holds.
 //
 // Cluster-1 axis (2026-08-01):
 //   UNION=on|off         deterministic post-picker additions
@@ -234,7 +241,11 @@ function readContext<Kind extends string>(name: string, known: Kind[], fallback:
 
 function readCheck(): CheckMode {
   const value = process.env.CHECK;
-  if (value === undefined || value === 'off') return 'off';
+  // Unset follows the published configuration (v5 bundle, 72.4%): probe on the
+  // headline path, off everywhere it was never measured — easy mode, the
+  // bake-off. CHECK=off reproduces the 68.8% union run or anything earlier.
+  if (value === undefined) return MODE === 'hard' && !BAKEOFF ? 'probe' : 'off';
+  if (value === 'off') return 'off';
   if (value !== 'probe' && value !== 'self') throw new Error(`CHECK="${value}" — off, probe or self`);
   requireOutsideBakeoff(`CHECK=${value}`);
   return value;
@@ -268,17 +279,16 @@ function readRewrite(): boolean {
     }
     return false;
   }
-  if (CHECK !== 'off') {
-    throw new Error(
-      `CHECK=${CHECK} needs REWRITE=off said explicitly — a check rewrite skips the dialect repairs, so the default cannot silently apply`,
-    );
-  }
   return true;
 }
 
 function readRepair(): boolean {
   const value = process.env.REPAIR;
-  if (value === undefined || value === 'off') return false;
+  // Unset follows the published configuration (v5 bundle, 72.4%): on for the
+  // headline path, off in easy mode and the bake-off, which predate it.
+  // REPAIR=off reproduces the 68.8% union run or anything earlier.
+  if (value === undefined) return MODE === 'hard' && !BAKEOFF;
+  if (value === 'off') return false;
   if (value !== 'on') throw new Error(`REPAIR="${value}" — on or off`);
   if (MODE !== 'hard' || BAKEOFF) {
     throw new Error('REPAIR=on is the Phase 7 row: EVAL_MODE=hard, outside the bake-off');
@@ -447,7 +457,7 @@ async function runQuestion(record: GoldRecord, picker: PickerName): Promise<Ques
   const generated = voted ?? (await answerQuestion(answerParams));
   const answer = await applyCheck(
     CHECK,
-    { question: record.question, evidence: record.evidence, schemaText },
+    { question: record.question, evidence: record.evidence, schemaText, rewrite: REWRITE },
     generated,
   );
   const execution = answer.execution;

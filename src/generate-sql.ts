@@ -3,7 +3,12 @@
 // and what happens to the SQL is decided after.
 
 import { completeJson, type Usage } from './model.ts';
-import { buildUserMessage, PROMPT_VERSION, SYSTEM, type FailedAttempt } from './prompts/v1.ts';
+import { buildUserMessage, PROMPT_VERSION, SYSTEM, type FailedAttempt } from './prompts/v3.ts';
+
+// The one place the active SQL prompt is chosen. Everything that stamps a
+// version — the eval's run name included — reads it from here, so switching
+// the import above can never leave a run labeled with the wrong prompt.
+export { PROMPT_VERSION };
 
 const SQL_SCHEMA = {
   type: 'object',

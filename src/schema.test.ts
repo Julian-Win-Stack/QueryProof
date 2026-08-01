@@ -55,6 +55,29 @@ test('a foreign key renders as the join it licenses', () => {
   );
 });
 
+test('extras append under their table only, and an absent entry changes nothing', () => {
+  const tables: Table[] = [
+    {
+      name: 'races',
+      columns: [{ name: 'year', type: 'bigint', nullable: true }],
+      primaryKey: [],
+      foreignKeys: [],
+    },
+    {
+      name: 'race',
+      columns: [{ name: 'code', type: 'text', nullable: true }],
+      primaryKey: [],
+      foreignKeys: [],
+    },
+  ];
+  const extras = new Map([['races', "-- values of \"year\": '2009', '2010'"]]);
+
+  const rendered = renderSchema(tables, extras);
+
+  assert.match(rendered, /"year" bigint\n\);\n-- values of "year": '2009', '2010'/);
+  assert.equal(rendered, `${renderSchema([tables[0]])}\n-- values of "year": '2009', '2010'\n\n${renderSchema([tables[1]])}`);
+});
+
 test('a table without a primary key renders no PRIMARY KEY line', () => {
   // Seven of the 75 tables have none, and PRIMARY KEY () is a syntax error the
   // model would copy out of the schema text.

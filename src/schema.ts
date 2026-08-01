@@ -140,9 +140,17 @@ function tableOrThrow(tables: Map<string, Table>, name: string): Table {
 
 // Takes tables already chosen: EASY passes a db_id's tables, the baseline passes
 // all 75, a picker passes its shortlist. Selection is what Part IV measures, so
-// it stays in the caller rather than branching in here.
-export function renderSchema(tables: Table[]): string {
-  return tables.map(renderTable).join('\n\n');
+// it stays in the caller rather than branching in here. extras is the
+// SQL_CONTEXT experiments — comment lines per table name, absent for every
+// published number.
+export function renderSchema(tables: Table[], extras?: Map<string, string>): string {
+  return tables
+    .map((table) => {
+      const block = renderTable(table);
+      const extra = extras?.get(table.name);
+      return extra === undefined ? block : `${block}\n${extra}`;
+    })
+    .join('\n\n');
 }
 
 function renderTable(table: Table): string {

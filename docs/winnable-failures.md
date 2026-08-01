@@ -3,6 +3,14 @@
 Every question the default configuration gets wrong **and** could plausibly get
 right. This is the work list. It is deliberately not the full failure set.
 
+> **Status lines added 2026-08-01.** Every entry now opens with its result in
+> the newest run — `runs/2026-08-01-141455-exp-union-full.json`, the 68.8%
+> configuration: **49 of the 99 passing, 50 still failing.** A "passing" stamp
+> on an entry marked *answered differently across identical runs* is one run's
+> result, not proof — those need repeat runs before they count as fixed. The
+> text below this note still describes the 61.0% run the list was built from;
+> entries are never rewritten, only stamped.
+
 ## Read this first
 
 The system answers 500 questions. It gets **304 right**. Of the 196 it gets
@@ -20,7 +28,7 @@ Of the 99 here:
 
 - **59 already have a query that worked.** Some other configuration of this
   same system produced SQL that matched the reference. Those entries include it
-  under "A query that did match". Diffing our SQL against that one is the fastest
+  under "A query that did match". Diffing our SQL against that one is the **fastest**
   way in.
 - **58 fail every single time.** The rest are answered differently across
   identical runs, so a fix must be verified over several runs, not one.
@@ -72,6 +80,8 @@ The values are right. The number or order of returned columns is not — usually
 
 ### bird-0005 — debit_card_specializing, moderate
 
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** What was the gas consumption peak month for SME customers in 2013?
 
 **Evidence given with it.** Year 2013 can be presented as Between 201301 And 201312; The first 4 strings of the Date values in the yearmonth table can represent year; The 5th and 6th string of the date can refer to month.
@@ -116,6 +126,8 @@ SELECT ym."date" FROM "yearmonth" ym JOIN "customers" c ON ym."customerid" = c."
 ---
 
 ### bird-0029 — debit_card_specializing, moderate
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** For all the people who paid more than 29.00 per unit of product id No.5. Give their consumption status in the August of 2012.
 
@@ -170,6 +182,8 @@ SELECT y.customerid, y.date, y.consumption FROM "yearmonth" y WHERE y.date = '20
 
 ### bird-0036 — student_club, moderate
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** Was each expense in October Meeting on October 8, 2019 approved?
 
 **Evidence given with it.** event_name = 'October Meeting' where event_date = '2019-10-08'; approved = True means expenses was approved; approved = False means expenses was not approved
@@ -218,6 +232,8 @@ SELECT e.expense_id, e.expense_description, e.approved FROM "expense" e WHERE e.
 ---
 
 ### bird-0052 — student_club, moderate
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** Among all the closed events, which event has the highest spend-to-budget ratio?
 
@@ -274,6 +290,8 @@ SELECT e.event_name FROM event e JOIN budget b ON e.event_id = b.link_to_event W
 ---
 
 ### bird-0055 — student_club, moderate
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** List the name of students that have attended more than 7 events.
 
@@ -343,6 +361,8 @@ SELECT m.first_name, m.last_name FROM member m JOIN attendance a ON m.member_id 
 
 ### bird-0068 — student_club, simple
 
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** List out the full name and total cost that member id "rec4BLdZHS2Blfp4v" incurred?
 
 **Evidence given with it.** full name refers to first_name, last name
@@ -398,6 +418,8 @@ SELECT m.first_name, m.last_name, SUM(e.cost) AS total_cost FROM "member" m JOIN
 ---
 
 ### bird-0102 — thrombosis_prediction, moderate
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** Please provide the diagnosis of patients with ALT glutamic pylvic transaminase beyond the normal range by ascending order of their date of birth.
 
@@ -467,6 +489,8 @@ SELECT p.diagnosis FROM patient p JOIN laboratory l ON p.id = l.id WHERE l.gpt >
 
 ### bird-0109 — thrombosis_prediction, moderate
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** What are the patient's diagnosis for those who has lower red blood blood cell? State their ID and age.
 
 **Evidence given with it.** patient's diagnosis refers to Diagnosis; lower red blood cell refers to RBC < 3.5; age = SUBTRACT(year(current_timestamp), year(Birthday));
@@ -520,6 +544,8 @@ SELECT DISTINCT p."id", p.diagnosis, EXTRACT(YEAR FROM CURRENT_TIMESTAMP) - EXTR
 
 ### bird-0146 — european_football_2, simple
 
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** Which player is older, Aaron Lennon or Abdelaziz Barrada?
 
 **Evidence given with it.** The larger the birthday value, the younger the person is, and vice versa;
@@ -564,6 +590,8 @@ SELECT player_name, birthday FROM "player" WHERE player_name IN ('Aaron Lennon',
 ---
 
 ### bird-0175 — european_football_2, simple
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** Which top 4 leagues had the most games in the 2015-2016 season?
 
@@ -615,6 +643,8 @@ SELECT l.name, COUNT(m.id) AS game_count FROM "match" m JOIN "league" l ON m.lea
 ---
 
 ### bird-0187 — formula_1, moderate
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** For all the drivers who finished the game in race No. 592, who is the oldest?
 
@@ -672,6 +702,8 @@ SELECT d.forename, d.surname FROM results r JOIN drivers d ON r.driverid = d.dri
 
 ### bird-0188 — formula_1, moderate
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** Who was the player that got the lap time of 0:01:27 in the race No. 161? Show his introduction website.
 
 **Evidence given with it.** player and driver are synonyms; the lap time of 0:0M:SS refers to lapTime.time LIKE 'M:SS%';race number refers to raceId; introduction website of the drivers refers to url;
@@ -725,6 +757,8 @@ SELECT d.url FROM laptimes l JOIN drivers d ON l.driverid = d.driverid WHERE l.r
 
 ### bird-0196 — formula_1, moderate
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** For the drivers who took part in the race in 1983/7/16, what's their race completion rate?
 
 **Evidence given with it.** DIVIDE(COUNT(driverid when time has value ), (COUNT(driverid )) as percentage; in 1983/7/16 refers to when date = '1983-07-16'
@@ -769,6 +803,8 @@ SELECT CAST(COUNT(CASE WHEN r."time" IS NOT NULL THEN r."driverid" END) AS FLOAT
 ---
 
 ### bird-0199 — formula_1, moderate
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** What is the best lap time recorded? List the driver and race with such recorded lap time.
 
@@ -815,6 +851,8 @@ SELECT d.forename, d.surname, r.name, l.milliseconds FROM laptimes l JOIN driver
 
 ### bird-0203 — formula_1, simple
 
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** How old is the youngest Japanese driver? What is his name?
 
 **Evidence given with it.** date of birth refers to drivers.dob; The larger the birthday value, the younger the person is, and vice versa; Japanese refers to nationality = 'Japanese'; age = YEAR(CURRENT_TIMESTAMP) - YEAR(dob);
@@ -859,6 +897,8 @@ SELECT forename, surname, EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM do
 ---
 
 ### bird-0273 — superhero, challenging
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** List the eyes, hair and skin colour of all female superheroes published by Dark Horse Comics.
 
@@ -913,6 +953,8 @@ SELECT s.superhero_name, ec.colour AS eye_colour, hc.colour AS hair_colour, sc.c
 
 ### bird-0288 — superhero, moderate
 
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** What is the publisher for Hawkman, Karate Kid and Speedy?
 
 **Evidence given with it.** publisher refers to publisher_name; Hawkman refers to superhero_name = 'Hawkman'; Karate Kid refers to superhero_name = 'Karate Kid'; Speedy refers to superhero_name = 'Speedy';
@@ -962,6 +1004,8 @@ SELECT s.superhero_name, p.publisher_name FROM superhero s JOIN publisher p ON s
 
 ### bird-0297 — codebase_community, simple
 
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** Which user has a higher reputation, Harlan or Jarrod Dixon?
 
 **Evidence given with it.** "Harlan" and "Jarrod Dixon" are both DisplayName; highest reputation refers to Max(Reputation)
@@ -1006,6 +1050,8 @@ SELECT displayname, reputation FROM users WHERE displayname IN ('Harlan','Jarrod
 ---
 
 ### bird-0308 — codebase_community, moderate
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** User No.23853 gave a comment to a post at 9:08:18 on 2013/7/12, was that post well-finished?
 
@@ -1052,6 +1098,8 @@ SELECT p.id, p.closeddate IS NULL AS well_finished FROM comments c JOIN posts p 
 
 ### bird-0326 — codebase_community, challenging
 
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** Among posts by Harvey Motulsky and Noah Snyder, which one has higher popularity?
 
 **Evidence given with it.** Has higher popularity means the post has higher view count ; calculation = MAX(SUM(ViewCount)) where DisplayName = 'Harvey Motulsky' OR DisplayName = 'Noah Snyder';
@@ -1096,6 +1144,8 @@ SELECT u.displayname, SUM(p.viewcount) AS total_viewcount FROM posts p JOIN user
 ---
 
 ### bird-0362 — card_games, moderate
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** Among the Artifact cards, which are black color and comes with foreign languague translation?
 
@@ -1164,6 +1214,8 @@ SELECT DISTINCT c."name" FROM "cards" c JOIN "foreign_data" f ON c."uuid" = f."u
 ---
 
 ### bird-0389 — card_games, moderate
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** Please list the Italian text ruling of all the cards in the set Coldsnap.
 
@@ -1234,6 +1286,8 @@ SELECT fd.text FROM cards c JOIN sets s ON c.setcode = s.code JOIN foreign_data 
 
 ### bird-0424 — toxicology, moderate
 
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** Is the molecule with the most double bonds carcinogenic?
 
 **Evidence given with it.** double bond refers to bond_type = ' = '; label = '+' mean molecules are carcinogenic
@@ -1289,6 +1343,8 @@ SELECT m.label FROM molecule m JOIN bond b ON m.molecule_id = b.molecule_id WHER
 ---
 
 ### bird-0428 — toxicology, challenging
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** What are the elements of the atoms of TR144_8_19?
 
@@ -1348,6 +1404,8 @@ SELECT "element" FROM "atom" WHERE "atom_id" IN ('TR144_8', 'TR144_19')
 ---
 
 ### bird-0441 — california_schools, simple
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** Rank schools by their average score in Writing where the score is greater than 499, showing their charter numbers.
 
@@ -1417,6 +1475,8 @@ SELECT s."charternum", sc."avgscrwrite", RANK() OVER (ORDER BY sc."avgscrwrite" 
 
 ### bird-0448 — california_schools, moderate
 
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** What is the eligible free rate of the 10th and 11th schools with the highest enrolment for students in grades 1 through 12?
 
 **Evidence given with it.** K-12 refers to students in grades 1 through 12; Eligible free rate for K-12 = `Free Meal Count (K-12)` / `Enrollment (K-12)`
@@ -1463,6 +1523,8 @@ SELECT "School Name", "Free Meal Count (K-12)" / "Enrollment (K-12)" AS eligible
 ---
 
 ### bird-0458 — california_schools, moderate
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** What is the ratio of merged Unified School District schools in Orange County to merged Elementary School District schools?
 
@@ -1520,6 +1582,8 @@ SELECT CAST(SUM(CASE WHEN doc='54' THEN 1 ELSE 0 END) AS FLOAT) / NULLIF(SUM(CAS
 
 ### bird-0459 — california_schools, simple
 
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** What is the postal street address for the school with the 7th highest Math average? Indicate the school's name.
 
 **Evidence given with it.** Postal street and mailing street are synonyms.
@@ -1575,6 +1639,8 @@ SELECT s.street, s.school FROM schools s JOIN satscores t ON s.cdscode = t.cds W
 ---
 
 ### bird-0474 — financial, moderate
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** Among the accounts who have loan validity more than 12 months, list out the accounts that have the highest approved amount and have account opening date in 1993.
 
@@ -1634,6 +1700,8 @@ SELECT a.account_id FROM account a JOIN loan l ON a.account_id = l.account_id WH
 A correct source existed and was available in the prompt. The query went somewhere else — most often when a word in the question ("fundraising", "cost") names a value in one table and a column in another.
 
 ### bird-0014 — debit_card_specializing, simple
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** Please list the product description of the products consumed in September, 2013.
 
@@ -1699,6 +1767,8 @@ SELECT DISTINCT p."description" FROM "transactions_1k" t JOIN "products" p ON t.
 
 ### bird-0023 — debit_card_specializing, simple
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** What's the nationality of the customer who spent 548.4 in 2012/8/24?
 
 **Evidence given with it.** '2012/8/24' can be represented by '2012-08-24'; spent 548.4 refers to price = '548.4'
@@ -1754,6 +1824,8 @@ SELECT DISTINCT g.country FROM transactions_1k t JOIN gasstations g ON t.gasstat
 ---
 
 ### bird-0039 — student_club, simple
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** What was the notes of the fundraising on 2019/9/14?
 
@@ -1811,6 +1883,8 @@ SELECT "notes" FROM "income" WHERE "source" = 'Fundraising' AND "date_received" 
 
 ### bird-0041 — student_club, moderate
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** What is the status of the event which bought "Post Cards, Posters" on 2019/8/20?
 
 **Evidence given with it.** 'Post Cards, Posters' is an expense description; on 2019/8/20 refers to expense_date = '2019-8-20'; status of event refers to event_status
@@ -1855,6 +1929,8 @@ SELECT "status" FROM "event" WHERE "notes" ILIKE '%Post Cards, Posters%'
 ---
 
 ### bird-0058 — student_club, moderate
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** Based on the total cost for all event, what is the percentage of cost for Yearly Kickoff event?
 
@@ -1912,6 +1988,8 @@ SELECT 100.0 * SUM(CASE WHEN e.event_name = 'Yearly Kickoff' THEN ex.cost ELSE 0
 
 ### bird-0087 — thrombosis_prediction, simple
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** What are the symptoms observed by the youngest patient to ever did a medical examination? Identify their diagnosis.
 
 **Evidence given with it.** The larger the birthday value, the younger the person is, and vice versa; symptoms observed refers to the symptoms is not NULL
@@ -1968,6 +2046,8 @@ SELECT e.symptoms, p.diagnosis FROM patient p JOIN examination e ON p.id = e.id 
 
 ### bird-0127 — thrombosis_prediction, challenging
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** For the patients with a normal range of creatinine phosphokinase, how many of them have a positive measure of degree of coagulation?
 
 **Evidence given with it.** normal range of creatinine phosphokinase refers to CPK < 250; positive measure of degree of coagulation refers to KCT = '+' or RVVT = '+' or LAC = '+' ;
@@ -2012,6 +2092,8 @@ SELECT COUNT(DISTINCT id) FROM laboratory WHERE cpk < 250
 ---
 
 ### bird-0206 — formula_1, moderate
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** State the race and year of race in which Michael Schumacher had his fastest lap.
 
@@ -2058,6 +2140,8 @@ SELECT r."name", r."year" FROM results res JOIN drivers d ON res."driverid" = d.
 
 ### bird-0227 — formula_1, challenging
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** From 2000 to 2005, what percentage of drivers who were born before 1985 and the lap numbers were over 50?
 
 **Evidence given with it.** born before 1985 refers to year(dob)<1985; in 2000 to 2005 refers to year between 2000 and 2005; percentage = Divide(COUNT(driverId where year (dob) <1985 and laps >50),COUNT(DriverID where year between 2000 and 2005) *100;
@@ -2102,6 +2186,8 @@ SELECT (COUNT(DISTINCT CASE WHEN EXTRACT(YEAR FROM d.dob) < 1985 AND l.lap > 50 
 ---
 
 ### bird-0314 — codebase_community, simple
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** Name the user that commented 'thank you user93!'
 
@@ -2159,6 +2245,8 @@ SELECT u."displayname" FROM "comments" c JOIN "users" u ON c."userid" = u."id" W
 
 ### bird-0336 — codebase_community, moderate
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** What is the percentage of posts whose owners had a reputation of over 1000 in 2011?
 
 **Evidence given with it.** percentage = DIVIDE(COUNT(Id where YEAR(CreationDate) = 2011 and Reputation > 1000), COUNT(Id) ) * 100;
@@ -2214,6 +2302,8 @@ SELECT (COUNT(*) FILTER (WHERE EXTRACT(YEAR FROM p.creaiondate) = 2011 AND u.rep
 ---
 
 ### bird-0356 — card_games, simple
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** What is the rule of playing card "Benalish Knight"?
 
@@ -2281,6 +2371,8 @@ SELECT l.format FROM legalities l JOIN cards c ON l.uuid = c.uuid WHERE c.name =
 ---
 
 ### bird-0366 — card_games, moderate
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** Lists all types of cards in German.
 
@@ -2350,6 +2442,8 @@ SELECT DISTINCT c."subtypes", c."supertypes" FROM "cards" c JOIN "foreign_data" 
 
 ### bird-0367 — card_games, moderate
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** How many unknown power cards contain info about the triggered ability
 
 **Evidence given with it.** unknown power cards refers to power is null or power = '*';contain info about the triggered ability refers to text contains 'triggered ability'
@@ -2394,6 +2488,8 @@ SELECT COUNT(*) FROM "cards" WHERE ("power" IS NULL OR "power" = '*') AND "text"
 ---
 
 ### bird-0369 — card_games, moderate
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** What is the foreign name of the card in French of type Creature, normal layout and black border color, by artist Matthew D. Wilson?
 
@@ -2459,6 +2555,8 @@ SELECT fd.name FROM "cards" c JOIN "foreign_data" fd ON c."uuid" = fd."uuid" WHE
 
 ### bird-0388 — card_games, moderate
 
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** What is the Italian flavor text of the card "Ancestor's Chosen"?
 
 **Evidence given with it.** Italian refers to language = 'Italian'; flavor text refers to flavorText; "Ancestor''s Chosen" refers to name = 'Ancestor''s Chosen'
@@ -2516,6 +2614,8 @@ SELECT fd."flavortext" FROM "foreign_data" fd JOIN "cards" c ON fd."uuid" = c."u
 ---
 
 ### bird-0447 — california_schools, challenging
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** Consider the average difference between K-12 enrollment and 15-17 enrollment of schools that are locally funded, list the names and DOC type of schools which has a difference above this average.
 
@@ -2585,6 +2685,8 @@ SELECT s.school, s.doc FROM schools s JOIN frpm f ON s.cdscode = f.cdscode WHERE
 
 ### bird-0462 — california_schools, moderate
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** Which schools served a grade span of Kindergarten to 9th grade in the county of Los Angeles and what is its Percent (%) Eligible FRPM (Ages 5-17)?
 
 **Evidence given with it.** Percent (%) Eligible FRPM (Ages 5-17) can be acquired by `FRPM Count (Ages 5-17)` / `Enrollment (Ages 5-17)` * 100
@@ -2630,6 +2732,8 @@ SELECT s."school", f."Percent (%) Eligible FRPM (Ages 5-17)" FROM "frpm" f JOIN 
 ---
 
 ### bird-0466 — california_schools, moderate
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** What is the Percent (%) Eligible Free (K-12) in the school administered by an administrator whose first name is Alusine. List the district code of the school.
 
@@ -2678,6 +2782,8 @@ SELECT f."District Code", f."Percent (%) Eligible Free (K-12)" FROM frpm f JOIN 
 A condition the question states was dropped, or one it never asked for was added.
 
 ### bird-0090 — thrombosis_prediction, challenging
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** How many underage patients were examined during the course of the three-year period from 1990 to 1993?
 
@@ -2734,6 +2840,8 @@ SELECT COUNT(DISTINCT p.id) FROM "patient" p JOIN "examination" e ON p.id = e.id
 ---
 
 ### bird-0111 — thrombosis_prediction, challenging
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** Name the ID and age of patient with two or more laboratory examinations which show their hematoclit level exceeded the normal range.
 
@@ -2796,6 +2904,8 @@ SELECT p."id", EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM p."birthday")
 
 ### bird-0152 — european_football_2, simple
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** Give the name of the league had the most matches in the 2008/2009 season?
 
 **Evidence given with it.** league that had the most matches in the 2008/2009 season refers to MAX(league_name WHERE season = '2008/2009');
@@ -2844,6 +2954,8 @@ SELECT l.name FROM "match" m JOIN "league" l ON m.league_id = l.id WHERE m.seaso
 
 ### bird-0177 — european_football_2, simple
 
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** Please name one player whose overall strength is the greatest.
 
 **Evidence given with it.** overall strength is the greatest refers to MAX(overall_rating)
@@ -2888,6 +3000,8 @@ SELECT p.player_name FROM player p JOIN player_attributes pa ON p.player_api_id 
 ---
 
 ### bird-0225 — formula_1, simple
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** What is the fastest lap number of the champion in 2009?
 
@@ -2957,6 +3071,8 @@ SELECT r."fastestlap" FROM "results" r JOIN "races" ra ON r."raceid" = ra."racei
 
 ### bird-0235 — formula_1, moderate
 
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** On what year did the youngest driver had his first qualifying race? Also state the name, date and time of the race.
 
 **Evidence given with it.** date of birth refers to drivers.dob; The larger the birthday value, the younger the person is, and vice versa; first qualifying race refers to MIN(races.date);
@@ -3013,6 +3129,8 @@ SELECT r.year, r.name, r.date, r.time FROM races r JOIN qualifying q ON r.raceid
 
 ### bird-0236 — formula_1, challenging
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** List down top 3 German drivers who has the shortest average pit stop duration and were born between 1980-1985.
 
 **Evidence given with it.** Full name of the driver refers to drivers.forename and drivers.surname; born between 1980-1985 refers to 1980< year(dob)>1985; Average pitstop duration refers to Divide(SUM(duration),COUNT(duration)); shortest average refers to Min(avg(duration));
@@ -3060,6 +3178,8 @@ SELECT d.forename, d.surname, AVG(p.milliseconds) AS avg_duration FROM drivers d
 ---
 
 ### bird-0249 — superhero, moderate
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** Rank heroes published by Marvel Comics by their height in descending order.
 
@@ -3129,6 +3249,8 @@ SELECT s.superhero_name, s.height_cm, RANK() OVER (ORDER BY s.height_cm DESC NUL
 
 ### bird-0281 — superhero, challenging
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** How many percent of female heroes were published by Marvel Comics?
 
 **Evidence given with it.** percent = MULTIPLY(DIVIDE(SUM(gender = 'Female' WHERE publisher_name = 'Marvel Comics'), COUNT(publisher_name = 'Marvel Comics')), 100); female heroes refers to gender = 'Female'; Marvel Comics refers to publisher_name = 'Marvel Comics';
@@ -3184,6 +3306,8 @@ SELECT SUM(CASE WHEN p.publisher_name = 'Marvel Comics' THEN 1 ELSE 0 END) * 100
 ---
 
 ### bird-0327 — codebase_community, moderate
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** State all the tags used by Mark Meckes in his posts that doesn't have comments.
 
@@ -3246,6 +3370,8 @@ SELECT DISTINCT p.tags FROM posts p JOIN users u ON p.owneruserid = u.id WHERE u
 
 ### bird-0374 — card_games, simple
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** What proportion of cards do not have a text box with a normal layout?
 
 **Evidence given with it.** do not have a text box refers to isTextless = 1; proportion refers to DIVIDE(COUNT(Textless = 1 and layout = 'normal'),COUNT(Textless))*100
@@ -3290,6 +3416,8 @@ SELECT (SUM(CASE WHEN "istextless"=1 AND "layout"='normal' THEN 1 ELSE 0 END)::f
 ---
 
 ### bird-0449 — california_schools, moderate
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** What is the eligible free or reduced price meal rate for the top 5 schools in grades 1-12 with the highest free or reduced price meal count of the schools with the ownership code 66?
 
@@ -3344,6 +3472,8 @@ SELECT f."School Name", f."FRPM Count (K-12)" / f."Enrollment (K-12)" AS frpm_ra
 
 ### bird-0454 — california_schools, simple
 
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** List the names of virtual schools that are among the top 5 in their respective counties based on average reading scores.
 
 **Evidence given with it.** Exclusively virtual refers to Virtual = 'F'; respective counties means PARTITION BY County
@@ -3397,6 +3527,8 @@ SELECT school_name FROM (SELECT s.school AS school_name, s.county, sc.avgscrread
 
 ### bird-0456 — california_schools, simple
 
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** Which state special schools have the highest number of enrollees from grades 1 through 12?
 
 **Evidence given with it.** State Special Schools refers to DOC = 31; Grades 1 through 12 means K-12
@@ -3443,6 +3575,8 @@ SELECT s.school, f."Enrollment (K-12)" FROM schools s JOIN frpm f ON s.cdscode =
 ---
 
 ### bird-0488 — financial, moderate
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** In the branch where the second-highest number of crimes were committed in 1995 occurred, how many male clients are there?
 
@@ -3500,6 +3634,8 @@ SELECT COUNT(*) FROM client c WHERE c.gender = 'M' AND c.district_id = (SELECT d
 
 ### bird-0494 — financial, challenging
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** What was the growth rate of the total amount of loans across all accounts for a male client between 1996 and 1997?
 
 **Evidence given with it.** Growth rate = (sum of amount_1997 - sum of amount_1996) / (sum of amount_1996) * 100%; Male refers to gender = 'M'
@@ -3548,6 +3684,8 @@ Per join row instead of per entity, DISTINCT where the reference counts every ro
 
 ### bird-0013 — debit_card_specializing, simple
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** What is the highest monthly consumption in the year 2012?
 
 **Evidence given with it.** cast the consumption into float when perform calculation; The first 4 strings of the Date values in the yearmonth table can represent year; The 5th and 6th string of the date can refer to month.
@@ -3592,6 +3730,8 @@ SELECT MAX(CAST(consumption AS float)) FROM yearmonth WHERE SUBSTRING(CAST(date 
 ---
 
 ### bird-0075 — student_club, challenging
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** Give the full name and contact number of members who had to spend more than average on each expense.
 
@@ -3639,6 +3779,8 @@ SELECT m.first_name, m.last_name, m.phone FROM "member" m JOIN "expense" e ON e.
 ---
 
 ### bird-0120 — thrombosis_prediction, moderate
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** How many patients with a abnormal C-reactive protein don't have their data recorded?
 
@@ -3696,6 +3838,8 @@ SELECT COUNT(*) FROM "patient" p JOIN "laboratory" l ON p."id" = l."id" WHERE l.
 
 ### bird-0138 — european_football_2, moderate
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** List the top 10 players' names whose heights are above 180 in descending order of average heading accuracy.
 
 **Evidence given with it.** heights are above 180 refers to Player.height > 180; average heading accuracy = DIVIDE(SUM(heading_accuracy), COUNT(player_fifa_api_id));
@@ -3748,6 +3892,8 @@ SELECT p.player_name, AVG(pa.heading_accuracy) AS avg_heading_accuracy FROM play
 ---
 
 ### bird-0218 — formula_1, challenging
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** How much faster in percentage is the champion than the driver who finished the race last in the 2008 Australian Grand Prix?
 
@@ -3805,6 +3951,8 @@ SELECT (MAX(CASE WHEN r.position = (SELECT MAX(position) FROM results r2 JOIN ra
 
 ### bird-0283 — superhero, simple
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** Calculate the average height for all superhero.
 
 **Evidence given with it.** average = DIVIDE(SUM(height_cm), COUNT(all heros));
@@ -3849,6 +3997,8 @@ SELECT AVG(height_cm) FROM superhero
 ---
 
 ### bird-0319 — codebase_community, moderate
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** Calculate the average view count of each post tagged as 'humor' and list the title and the comment of each post.
 
@@ -3902,6 +4052,8 @@ SELECT p.title, c.text AS comment, AVG(p.viewcount) OVER () AS avg_view_count FR
 ---
 
 ### bird-0323 — codebase_community, moderate
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** What is the average of the up votes and the average user age for users creating more than 10 posts?
 
@@ -3963,6 +4115,8 @@ SELECT AVG(sub.upvotes) AS avg_upvotes, AVG(sub.age) AS avg_age FROM (SELECT u.i
 
 ### bird-0345 — codebase_community, moderate
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** Among the comments with scores between 5 to 10, what is the percentage of the users with 0 up votes?
 
 **Evidence given with it.** percentage = DIVIDE(COUNT(UserId where UpVotes = 0 and Score BETWEEN 5 and 10))*100, (COUNT(UserId where Score BETWEEN 5 and 10));
@@ -4018,6 +4172,8 @@ SELECT 100.0 * COUNT(*) FILTER (WHERE u.upvotes = 0) / COUNT(*) FROM comments c 
 ---
 
 ### bird-0361 — card_games, simple
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** How many of the banned cards are white border?
 
@@ -4075,6 +4231,8 @@ SELECT COUNT(*) FROM cards c JOIN legalities l ON c.uuid = l.uuid WHERE l.status
 
 ### bird-0391 — card_games, moderate
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** What is the percentage of the cards with a converted mana cost of 7 in the set Coldsnap?
 
 **Evidence given with it.** converted mana cost of 7 refers to convertedManaCost = 7; card set Coldsnap refers to name = 'Coldsnap'; percentage = DIVIDE(SUM(convertedManaCost = 7), SUM(convertedManaCost))*100
@@ -4130,6 +4288,8 @@ SELECT (SUM(CASE WHEN c.convertedmanacost = 7 THEN 1 ELSE 0 END)::float / COUNT(
 ---
 
 ### bird-0461 — california_schools, moderate
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** How many students from the ages of 5 to 17 are enrolled at the State Special School school in Fremont for the 2014-2015 academic year?
 
@@ -4188,6 +4348,8 @@ SELECT f."Enrollment (Ages 5-17)" FROM frpm f JOIN schools s ON f.cdscode = s.cd
 ---
 
 ### bird-0480 — financial, moderate
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** For loan amount less than USD100,000, what is the percentage of accounts that is still running with no issue.
 
@@ -4248,6 +4410,8 @@ Joined on keys that do not reference each other, or skipped a table that has to 
 
 ### bird-0057 — student_club, simple
 
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** Which event has the lowest cost?
 
 **Evidence given with it.** event refers to event_name; lowest cost means MIN(cost)
@@ -4303,6 +4467,8 @@ SELECT e.event_name FROM event e JOIN budget b ON b.link_to_event = e.event_id J
 ---
 
 ### bird-0274 — superhero, challenging
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** Which superhero has the same eyes, hair and skin colour? Indicate the publisher of the superhero.
 
@@ -4372,6 +4538,8 @@ SELECT s.superhero_name, p.publisher_name FROM superhero s JOIN publisher p ON s
 
 ### bird-0351 — card_games, moderate
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** Find all cards illustrated by Stephen Daniel and describe the text of the ruling of these cards. State if these cards have missing or degraded properties and values.
 
 **Evidence given with it.** cards have missing or degraded properties and value refers to hasContentWarning = 1; 'Stephen Daniele' is artist; Find all cards refers to return card id
@@ -4440,6 +4608,8 @@ SELECT c.id, r.text, c.hascontentwarning FROM cards c JOIN rulings r ON c.uuid =
 
 ### bird-0353 — card_games, moderate
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** Calculate the percentage of the cards availabe in Chinese Simplified.
 
 **Evidence given with it.** Chinese Simplified' is the language; percentage = Divide(Sum(id where language = 'Chinese Simplified'), Count(id)) *100
@@ -4484,6 +4654,8 @@ SELECT (SUM(CASE WHEN language = 'Chinese Simplified' THEN 1 ELSE 0 END)::numeri
 ---
 
 ### bird-0372 — card_games, challenging
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** What percentage of cards without power are in French?
 
@@ -4541,6 +4713,8 @@ SELECT (COUNT(*) FILTER (WHERE f.language = 'French' AND (c.power IS NULL OR c.p
 
 ### bird-0432 — toxicology, challenging
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** What is the composition of element chlorine in percentage among the single bond molecules?
 
 **Evidence given with it.** element chlorine refers to element = 'cl'; single bond refers to bond_type = '-'; percentage = DIVIDE(SUM(element = 'cl'), COUNT(atom_id)) as percent where bond_type = '-'
@@ -4597,6 +4771,8 @@ SELECT 100.0 * SUM(CASE WHEN a.element = 'cl' THEN 1 ELSE 0 END) / COUNT(a.atom_
 
 ### bird-0446 — california_schools, moderate
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** What is the average score in writing for the schools that were opened after 1991 or closed before 2000? List the school names along with the score. Also, list the communication number of the schools if there is any.
 
 **Evidence given with it.** Communication number refers to phone number.
@@ -4649,6 +4825,8 @@ SELECT s.school, sc.avgscrwrite, s.phone FROM schools s JOIN satscores sc ON s.c
 ---
 
 ### bird-0493 — financial, moderate
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** What percentage of clients who opened their accounts in the district with an average salary of over 10000 are women?
 
@@ -4705,6 +4883,8 @@ SELECT 100.0 * SUM(CASE WHEN c.gender = 'F' THEN 1 ELSE 0 END) / COUNT(*) AS per
 ---
 
 ### bird-0497 — financial, moderate
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** Name the account numbers of female clients who are oldest and have lowest average salary?
 
@@ -4769,6 +4949,8 @@ The right column, the wrong spelling of the value. Casing, format, or a label wh
 
 ### bird-0063 — student_club, moderate
 
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** Indicate the cost of posters for 'September Speaker' event.
 
 **Evidence given with it.** 'Posters' is the expense description; 'September Speaker' is an event name
@@ -4825,6 +5007,8 @@ SELECT b.spent FROM "budget" b JOIN "event" e ON b.link_to_event = e.event_id WH
 
 ### bird-0080 — thrombosis_prediction, moderate
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** What is the ratio of outpatient to inpatient followed up treatment among all the 'SLE' diagnosed patient?
 
 **Evidence given with it.** 'SLE' diagnosed patient means Diagnosis = 'SLE'; inpatient refers to Admission = '+'; outpatient refers to Admission = '-'; calculation =  DIVIDE(COUNT(ID) where Diagnosis = 'SLE' and Admission = '+', COUNT(ID) where Diagnosis = 'SLE' and Admission = '-')
@@ -4870,6 +5054,8 @@ SELECT CAST(COUNT(CASE WHEN "admission" = '-' THEN 1 END) AS FLOAT) / NULLIF(COU
 
 ### bird-0125 — thrombosis_prediction, moderate
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** Among the patients who has a normal level of anti-centromere and a normal level of anti-SSB, how many of them are male?
 
 **Evidence given with it.** normal level of anti-centromere refers to CENTROMEA IN('-', '+-'); normal level of anti-SSB refers to SSB IN('-', '+-'); male refers to Sex = 'M'; Should consider DISTINCT in the final result;
@@ -4914,6 +5100,8 @@ SELECT COUNT(DISTINCT p.id) FROM "patient" p JOIN "laboratory" l ON p.id = l.id 
 ---
 
 ### bird-0229 — formula_1, simple
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** List out the code for drivers who have nationality in America.
 
@@ -4979,6 +5167,8 @@ SELECT "code" FROM "drivers" WHERE "nationality" = 'American'
 
 ### bird-0316 — codebase_community, moderate
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** Who is the owner of the post titled 'Open source tools for visualizing multi-dimensional data?'
 
 **Evidence given with it.** 'Open source tools for visualizing multi-dimensional data' is the Title of Post; owner refers to DisplayName;
@@ -5035,6 +5225,8 @@ SELECT u."displayname" FROM "posts" p JOIN "users" u ON p."owneruserid" = u."id"
 
 ### bird-0337 — codebase_community, moderate
 
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** Identify the total views on the post 'Computer Game Datasets'. Name the user who posted it last time.
 
 **Evidence given with it.** total views refer to ViewCount; Name the user refers to DisplayName; post 'Computer Game Datasets' refers to Text = 'Computer Game Datasets';
@@ -5090,6 +5282,8 @@ SELECT p.viewcount, u.displayname FROM posts p LEFT JOIN users u ON p.lasteditor
 ---
 
 ### bird-0365 — card_games, moderate
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** How many Brazilian Portuguese translated sets are inside the Commander block?
 
@@ -5150,6 +5344,8 @@ Postgres rejected it.
 
 ### bird-0045 — student_club, simple
 
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** State the date Connor Hilton paid his/her dues.
 
 **Evidence given with it.** Connor Hilton is the full name; full name refers to first_name, last_name; date the dues was paid refers to date_received where source = 'Dues';
@@ -5206,6 +5402,8 @@ SELECT i.date_received FROM income i JOIN member m ON i.link_to_member = m.membe
 ---
 
 ### bird-0084 — thrombosis_prediction, simple
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** For patients with severe degree of thrombosis, list their ID, sex and disease the patient is diagnosed with.
 
@@ -5266,6 +5464,8 @@ SELECT DISTINCT p.id, p.sex, p.diagnosis FROM patient p JOIN examination e ON p.
 
 ### bird-0093 — thrombosis_prediction, challenging
 
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** For the patient who was born on 1959/2/18, what is the decrease rate for his/her total cholesterol from November to December in 1981?
 
 **Evidence given with it.** born on 1959/2/18 refers to Birthday = '1959-02-18'; calculation = DIVISION(SUBTRACT(SUM(Birthday = '1959-02-18' and Date like '1981-11-%' THEN `T-CHO`), SUM(Birthday = '1959-02-18' and Date like '1981-12-%' THEN `T-CHO`)), SUM(Birthday = '1959-02-18' and Date like '1981-12-%' THEN `T-CHO`))
@@ -5320,6 +5520,8 @@ SELECT (SUM(CASE WHEN l.date::text LIKE '1981-11-%' THEN l."T-CHO" END) - SUM(CA
 ---
 
 ### bird-0096 — thrombosis_prediction, challenging
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** List all patients who were followed up at the outpatient clinic who underwent a laboratory test in October 1991 and had a total blood bilirubin level within the normal range.
 
@@ -5384,6 +5586,8 @@ SELECT DISTINCT p."id" FROM "patient" p JOIN "laboratory" l ON p."id" = l."id" W
 
 ### bird-0099 — thrombosis_prediction, moderate
 
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
+
 **Question.** What percentage of patients who were born in 1980 and were diagnosed with RA are women?
 
 **Evidence given with it.** born in 1980 refers to YEAR(BIRTHDAY) = '1980'; 'RA' refers to Diagnosis='RA' ; women refers to SEX = 'F'; calculation = DIVIDE(SUM(SEX = 'F'), COUNT(SEX)) * 100
@@ -5438,6 +5642,8 @@ SELECT (SUM(CASE WHEN sex='F' THEN 1 ELSE 0 END)::float / COUNT(sex)) * 100 FROM
 ---
 
 ### bird-0266 — superhero, moderate
+
+**Status: passing in the 2026-08-01 `union` run (68.8%).**
 
 **Question.** Provide the hair colour of the human superhero who is 185 cm tall.
 

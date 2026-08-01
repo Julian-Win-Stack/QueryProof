@@ -14,6 +14,7 @@
     "eval:hard:dev": "EVAL_MODE=hard EVAL_DEV=1 evalite run evals/main.eval.ts --outputPath=runs/$(date +%Y-%m-%d-%H%M%S)-hard-${PICKER:-unset}-dev.json",
     "eval:hard:repair": "EVAL_MODE=hard REPAIR=on evalite run evals/main.eval.ts --outputPath=runs/$(date +%Y-%m-%d-%H%M%S)-hard-${PICKER:-unset}-repair-full.json",
     "eval:pickers": "EVAL_MODE=hard EVAL_DEV=1 EVAL_PICKERS=1 evalite run evals/main.eval.ts --outputPath=runs/$(date +%Y-%m-%d-%H%M%S)-pickers-dev.json",
+    "eval:exp": "EVAL_MODE=hard evalite run evals/main.eval.ts --outputPath=runs/$(date +%Y-%m-%d-%H%M%S)-exp-${TAG:?set TAG to name the run file}-full.json",
     "triage": "tsx scripts/triage.ts",
     "rescore": "tsx --env-file-if-exists=.env scripts/rescore.ts",
     "diff": "tsx --env-file-if-exists=.env scripts/diff-runs.ts",

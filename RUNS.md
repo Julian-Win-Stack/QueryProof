@@ -486,3 +486,362 @@ note:          v1 with two rules added: return exactly the columns asked for,
                behind this entry.
 export:        runs/2026-07-31-122519-hard-none-dev.json
 ```
+
+## 2026-07-31 — Batch E wiring smokes (LIMIT=3), six runs
+
+```
+approach:      mode=hard picker=llm limit=3, one smoke per new experiment axis:
+               PICKER_PROMPT=picker-v2 | EXPAND=on | SQL_CONTEXT=rows,values,desc |
+               PICKER_CONTEXT=values,desc | CHECK=probe | CHECK=self
+accuracy:      wiring smokes — numbers meaningless by construction (LIMIT stamps the run name)
+verdict:       void
+note:          Every axis stamps the suite name and every exported row; 0 voids,
+               18/18 questions scored. EXPAND visibly fires (4 tables sent vs
+               the picker's 1-2). CHECK=self confirmed all 3; CHECK=probe never
+               triggered on 3 questions (no empty result among them) — its flow
+               is covered by src/check.test.ts. Extras cost, measured while
+               building: SQL-prompt rows ~10.0k / values ~3.4k / desc ~11.8k
+               tokens across all 75 tables (per-question cost scales with
+               tables sent); picker extras add ~3.0k (values) and ~11.3k (desc)
+               tokens to every picker call — desc-picker will run ~$17, not the
+               ~$9 estimated.
+export:        runs/2026-07-31-1513*-exp-smoke-*.json (six files)
+```
+
+---
+
+## 2026-07-31 — Batch E: test everything, one change per run
+
+Ten single-change runs against a same-day control, all full-500, all read
+against the published ±2.5 band. Verdict rule pre-registered before any run:
+kept only if the change beats the control by more than the band. The eleven
+runs below cost $105 against the ~$86 estimate; the overage is desc-picker
+($21 measured vs $9 estimated) and the voided first control (~$6).
+
+## 2026-07-31 — Batch E control, first attempt: voided, store collision
+
+```
+approach:      mode=hard picker=llm repair=off prompt=v1 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium concurrency=25
+question set:  full (500 validated)
+accuracy:      none — the export is empty
+verdict:       void
+note:          Ran concurrently with the picker-v2 run to halve wall-clock.
+               Both processes share .evalite/evalite.db, both were assigned
+               run id 25, and this one's export lost the race: suites: [].
+               The model calls happened (~$6) and are unrecoverable as
+               evidence. evalite's store is single-process — every later run
+               in the batch ran sequentially. The picker-v2 run that shared
+               the store carries its full 500 rows, every row stamped with
+               its own config, and survives (next entry).
+export:        runs/2026-07-31-151521-hard-llm-full.json (empty by design of the failure)
+```
+
+## 2026-07-31 — Batch E run 1: picker-v2, the over-include rule
+
+```
+approach:      mode=hard picker=llm repair=off prompt=v1 pickerPrompt=picker-v2 model=claude-sonnet-5 effort=medium concurrency=25
+question set:  full (500 validated)
+accuracy:      58.4% (292/500)
+table recall:  87.0%
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       rejected
+note:          Replaced "Fewer is better when you are confident" with "Include
+               every table that might be needed — a missing table makes the
+               query impossible, an extra one only costs tokens." The picker
+               ignored it: 2.11 tables sent on average vs the control's 2.10,
+               recall 87.0% vs 86.2%. Accuracy +0.6 vs control — a tie. Diff:
+               18 gained, 15 lost — ordinary variance, not a mechanism. The
+               under-selection is not steered by that prompt line; whatever
+               sets the picker's appetite, it is not being told which way to
+               err. Pre-registered verdict rule from PLAN-picker-v2.md
+               applied; the plan file is deleted with this entry. $6.36.
+export:        runs/2026-07-31-151524-exp-picker-v2-full.json
+```
+
+## 2026-07-31 — Batch E run 0: the control ⭐ every Batch E number reads against this
+
+```
+approach:      mode=hard picker=llm repair=off prompt=v1 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium concurrency=50
+question set:  full (500 validated)
+accuracy:      57.8% (289/500)
+table recall:  86.2%
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       kept
+note:          Same configuration as README row 2, re-run same-day so every
+               Batch E delta is measured against today's model behavior, not
+               yesterday's. Against the stored re-scored 59.2%: -1.4 points,
+               inside the band — no drift. Triage: 57 table missing / 4 never
+               valid / 69 comparator suspect / 81 valid but wrong. 0 voids.
+               Avg 2.10 tables sent. $6.33.
+export:        runs/2026-07-31-151918-hard-llm-full.json
+```
+
+## 2026-07-31 — Batch E run 2: join-partner expansion
+
+```
+approach:      mode=hard picker=llm expand=on repair=off prompt=v1 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium concurrency=50
+question set:  full (500 validated)
+accuracy:      58.2% (291/500)
+table recall:  95.0%
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       rejected
+note:          After the picker chooses, add every table sharing a distinctive
+               column name (shared by ≤4 tables); 5.63 tables sent on average.
+               Recall jumped 86.2% -> 95.0% — the offline prediction (94.8%)
+               was exact — and accuracy moved +0.4, a tie. This is the
+               pre-registered negative shape: the missing-table failures were
+               hard for reasons beyond the missing table. Triage says where
+               the gain went: table missing 57 -> 19, but comparator suspect
+               69 -> 95 and valid-but-wrong 81 -> 88 — handed the right
+               tables plus extras, the model writes join-multiplied or
+               wrong-join queries at almost the same rate it used to write
+               impossible ones. Recall was never the binding constraint. $6.97.
+export:        runs/2026-07-31-152021-exp-expand-full.json
+```
+
+## 2026-07-31 — Batch E run 3: five sample rows per table ⭐ beat the band
+
+```
+approach:      mode=hard picker=llm sqlContext=rows repair=off prompt=v1 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium concurrency=50
+question set:  full (500 validated)
+accuracy:      61.0% (305/500)
+table recall:  85.4%
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       kept
+note:          Five real rows per table, every column cast to text so dates
+               and codes are spelled exactly as a correct literal would spell
+               them, appended as comments under each CREATE TABLE. +3.2 vs
+               control — past the band, barely. Diff: 34 gained, 18 lost.
+               Comparator-suspect failures (right shape, wrong values)
+               69 -> 59 — seeing real values fixes value-blindness, which the
+               failure analysis predicted was the second-largest lever. One
+               trial; the margin over the band is 0.7 points, so a repeat
+               would be cheap insurance before promoting to the README. $7.34.
+export:        runs/2026-07-31-152120-exp-rows-full.json
+```
+
+## 2026-07-31 — Batch E run 4: distinct-value lists in the SQL prompt
+
+```
+approach:      mode=hard picker=llm sqlContext=values repair=off prompt=v1 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium concurrency=50
+question set:  full (500 validated)
+accuracy:      59.2% (296/500)
+table recall:  86.4%
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       rejected
+note:          Every text column with ≤20 distinct values gets them listed
+               under its CREATE TABLE. +1.4 vs control — a tie. The weaker
+               sibling of run 3: value lists only cover short-list columns
+               (114 of 329 text columns), while sample rows show every column
+               including the long-tail ones the failures actually filter on.
+               Rows subsume values; no reason to ship both. $6.58.
+export:        runs/2026-07-31-152223-exp-values-sql-full.json
+```
+
+## 2026-07-31 — Batch E run 5: distinct-value lists in the picker prompt
+
+```
+approach:      mode=hard picker=llm pickerContext=values repair=off prompt=v1 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium concurrency=50
+question set:  full (500 validated)
+accuracy:      58.6% (293/500)
+table recall:  88.8%
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       rejected
+note:          Same value lists, shown to the picker instead. Recall +2.6,
+               accuracy +0.8 — both inside noise, at nearly double the cost
+               ($11.91 vs $6.33; the lists add ~3k input tokens to every
+               picker call). $11.91.
+export:        runs/2026-07-31-152329-exp-values-picker-full.json
+```
+
+## 2026-07-31 — Batch E run 6: BIRD column descriptions in the SQL prompt
+
+```
+approach:      mode=hard picker=llm sqlContext=desc repair=off prompt=v1 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium concurrency=50
+question set:  full (500 validated)
+accuracy:      58.6% (293/500)
+table recall:  85.6%
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       rejected
+note:          The number D5 owed. BIRD's database_description CSVs (first
+               sentence, 160-char cap, name-echo descriptions dropped) as
+               comments under each CREATE TABLE. +0.8 vs control — a tie,
+               confirming D5's hypothesis: descriptions say what a column
+               means, the failures need what a column holds. Only ~2% of
+               descriptions name actual values. Run 3 is the same token
+               budget spent on the thing that works. $7.15.
+export:        runs/2026-07-31-152439-exp-desc-sql-full.json
+```
+
+## 2026-07-31 — Batch E run 7: BIRD descriptions in the picker prompt — voided
+
+```
+approach:      mode=hard picker=llm pickerContext=desc repair=off prompt=v1 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium concurrency=50
+question set:  full (500 validated), 465 scored
+accuracy:      57.6% (268/465) — never comparable: 35 voids
+verdict:       void
+note:          Descriptions add ~11.3k input tokens to every picker call; at
+               concurrency 50 that blew through the 5M/min input-token
+               ceiling and 35 questions 429'd past all five SDK retries
+               (D12b: any void voids the run). $20.97 spent — the batch
+               estimate said $9; the smoke-measured projection ($17) was
+               known before launch and accepted, the voids were not. A clean
+               re-run needs CONCURRENCY≈15 and ~$21 more; not taken, because
+               the scored subset sits dead on the control and both sibling
+               experiments (runs 5, 6) were ties — the expected information
+               value does not cover the cost. Julian's call if the number is
+               wanted anyway.
+export:        runs/2026-07-31-152536-exp-desc-picker-full.json
+```
+
+## 2026-07-31 — Batch E run 8: probe-on-empty
+
+```
+approach:      mode=hard picker=llm check=probe check-v1 repair=off prompt=v1 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium concurrency=50
+question set:  full (500 validated)
+accuracy:      60.2% (301/500)
+table recall:  85.6%
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       rejected
+note:          When a query runs and returns zero rows, the model writes one
+               exploratory query, sees its result, and rewrites. Fired on 26
+               of 500; 12 of the 26 ended correct — a 46% rescue rate on a
+               bucket that historically scores ~2.5%. But the bucket is too
+               small: +2.4 vs control, inside the band by 0.1 points. The
+               mechanism works and the trigger is starved — exactly the
+               inverse of self-repair, which had a big trigger and no
+               mechanism. Cheapest experiment of the batch (+$0.17 over
+               control). $6.50.
+export:        runs/2026-07-31-152651-exp-probe-full.json
+```
+
+## 2026-07-31 — Batch E run 9: self-check every result ⭐ beat the band
+
+```
+approach:      mode=hard picker=llm check=self check-v1 repair=off prompt=v1 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium concurrency=50
+question set:  full (500 validated)
+accuracy:      61.4% (307/500)
+table recall:  86.0%
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       kept
+note:          Every executed result goes back to the model — confirm or
+               rewrite. Julian's idea, and the batch's best number: +3.6 vs
+               control. It rewrote 83 of 490 ok results; 45% of rewrites
+               ended correct. Diff: 35 gained, 16 lost — the 16 are answers
+               it talked itself out of. Confirmed answers score 66% vs the
+               run's 61.4% overall, so its own confidence carries signal.
+               +$1.96 per run over control. One trial, 1.1 points past the
+               band — same repeat-trial caveat as run 3. $8.29.
+export:        runs/2026-07-31-152802-exp-self-full.json
+```
+
+## 2026-07-31 — Batch E run 10: stack the winners (rows + self-check)
+
+```
+approach:      mode=hard picker=llm sqlContext=rows check=self check-v1 repair=off prompt=v1 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium concurrency=50
+question set:  full (500 validated)
+accuracy:      60.0% (300/500)
+table recall:  85.0%
+noise band:    ±2.5 points (dev band, 3 trials, re-derived 2026-07-31)
+verdict:       rejected
+note:          The two band-beating changes together, and the batch's most
+               instructive negative: 60.0 lands below rows alone (61.0) and
+               self-check alone (61.4), +2.2 over control — a tie. The
+               winners did not compose. Plausible mechanism: with sample rows
+               in the prompt the first answer is already better, so the
+               self-check's rewrites skew toward breaking good answers
+               (63 rewrites, 43% correct — its lowest hit rate). All three
+               numbers (61.0 / 61.4 / 60.0) are mutually inside the band, so
+               the honest reading is: at least one of these helps by a
+               little, and one 500-question trial each cannot say which.
+               Repeat trials on rows and self alone are the next experiment
+               worth money. Diff vs control: 36 gained, 24 lost. $10.18.
+export:        runs/2026-07-31-153049-exp-stack-full.json
+```
+
+---
+
+# Batch F — 2026-07-31, sequential build toward the final number
+
+Two moves, one run each, every run adding one change on top of the last so the
+final number decomposes into attributable steps: run A adds a counting-
+convention rule to the SQL prompt on the rows base; run B adds best-of-N with
+an execution-based majority vote. No repeat trials — every number reads against
+the existing ±2.5 band, as all Batch E numbers did.
+
+## 2026-07-31 — Batch F run A wiring smoke (LIMIT=3)
+
+```
+approach:      mode=hard picker=llm sqlContext=rows limit=3, prompt=v3
+verdict:       void
+note:          Wiring only. prompt=v3 stamps the suite name and every exported
+               row; 3/3 scored, 0 voids. The stamp now reads from
+               generate-sql.ts (the single prompt switch point) instead of a
+               second import in the eval file — two imports that must agree
+               was how a run could get mislabeled.
+export:        runs/2026-07-31-180141-exp-smoke-runa-full.json
+```
+
+## 2026-07-31 — Batch F run A: counting rule (prompt v3) on the rows base
+
+```
+approach:      mode=hard picker=llm sqlContext=rows repair=off prompt=v3 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium concurrency=50
+question set:  full (500 validated)
+accuracy:      61.6% (308/500)
+table recall:  84.6%
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       rejected
+note:          v3 = v1 plus one rule: when counting over a join, count the
+               matching rows; DISTINCT only when the question asks for unique
+               entities. Written for the 17 rows-run failures where generated
+               SQL used COUNT(DISTINCT) and gold counts plain rows. The model
+               complied — COUNT(DISTINCT) answers fell 44 -> 27, and none of
+               the 6 measured at-risk answers (gold itself DISTINCT, question
+               silent) was lost. But only 2 of the 17 targets converted: the
+               regex signature overstated the class, and most of those 17 are
+               wrong in more ways than the counting convention. +0.6 vs the
+               rows run (61.0) — a tie; +3.8 vs control is the rows base
+               carrying it. Churn vs rows: 23 gained, 20 lost. The rule is
+               harmless but unearned; run B builds on the rows base with
+               prompt v1 unless Julian keeps v3. $7.44.
+export:        runs/2026-07-31-180211-exp-rows-v3-full.json
+```
+
+## 2026-07-31 — Batch F run B wiring smoke (LIMIT=3)
+
+```
+approach:      mode=hard picker=llm sqlContext=rows vote=5 limit=3, prompt=v3
+verdict:       void
+note:          Wiring only. vote=5 stamps the suite name; voteAgreement,
+               attempts=5 and the 5x usage sum land on every exported row.
+export:        runs/2026-07-31-181031-exp-smoke-runb-full.json
+```
+
+## 2026-07-31 — Batch F run B: best-of-5 by execution agreement
+
+```
+approach:      mode=hard picker=llm sqlContext=rows vote=5 repair=off prompt=v3 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium concurrency=50
+question set:  full (500 validated)
+accuracy:      62.4% (312/500)
+table recall:  85.4%
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       rejected
+note:          Five attempts per question, run sequentially; result sets
+               grouped by the row comparator; the largest group ships, ties to
+               the first seen, errors cannot vote. +0.8 vs run A (61.6) — a
+               tie at 2.5x the cost ($18.85 vs $7.44). Why the 71.8%
+               cross-run union did not transfer: 397 of 500 questions were
+               unanimous 5/5 — at effort=medium the model repeats the same
+               reading almost every time, so on 79% of the set there was
+               nothing to arbitrate, and 110 of those unanimous questions are
+               unanimously wrong. The union came from *different
+               configurations* disagreeing, never from repetition of one.
+               Two findings worth keeping: never-valid failures fell to 0
+               (one clean attempt outvotes any error), and agreement is a
+               real confidence signal — 72.3% correct when unanimous vs ~25%
+               when split — which the product path could surface. If voting
+               is ever revisited, diversity per attempt (different context
+               per candidate) is the measured direction; N samples of one
+               config is now a dead end. Diff vs run A: 17 gained, 13 lost.
+export:        runs/2026-07-31-181111-exp-vote5-full.json
+```

@@ -3,9 +3,24 @@
 // SQL generation — never scraped from prose.
 
 import { completeJson, type Usage } from '../model.ts';
-import { buildPickerMessage, PICKER_PROMPT_VERSION, PICKER_SYSTEM } from '../prompts/picker-v1.ts';
+import * as pickerV1 from '../prompts/picker-v1.ts';
 import type { Table } from '../schema.ts';
 import { PICKER_TABLE_CAP } from './keyword.ts';
+
+// The prompt is a parameter so the picker-v1 vs picker-v2 experiment is a
+// different argument, not a different picker. Callers that say nothing get v1
+// — the version behind the published numbers.
+export type PickerPrompt = {
+  version: string;
+  system: string;
+  buildMessage: (params: { question: string; catalogText: string }) => string;
+};
+
+export const PICKER_V1: PickerPrompt = {
+  version: pickerV1.PICKER_PROMPT_VERSION,
+  system: pickerV1.PICKER_SYSTEM,
+  buildMessage: pickerV1.buildPickerMessage,
+};
 
 // No maxItems: the API rejects it on array schemas ("property 'maxItems' is
 // not supported"), so the cap lives in the prompt and in resolveNames.
@@ -25,20 +40,31 @@ export type LlmPick = {
   ms: number;
 };
 
-export async function llmPick(question: string, tables: Table[]): Promise<LlmPick> {
+export async function llmPick(
+  question: string,
+  tables: Table[],
+  prompt: PickerPrompt = PICKER_V1,
+  // Extra lines per table name (value lists, descriptions) — the
+  // PICKER_CONTEXT experiments. Absent for every published number.
+  extraLines?: Map<string, string>,
+): Promise<LlmPick> {
   const catalogText = tables
-    .map((table) => `${table.name}: ${table.columns.map((column) => column.name).join(', ')}`)
+    .map((table) => {
+      const line = `${table.name}: ${table.columns.map((column) => column.name).join(', ')}`;
+      const extra = extraLines?.get(table.name);
+      return extra === undefined ? line : `${line}\n${extra}`;
+    })
     .join('\n');
 
   const reply = await completeJson({
-    system: PICKER_SYSTEM,
-    user: buildPickerMessage({ question, catalogText }),
+    system: prompt.system,
+    user: prompt.buildMessage({ question, catalogText }),
     schema: SHORTLIST_SCHEMA,
   });
 
   return {
     tables: resolveNames(readNames(reply.json), tables),
-    promptVersion: PICKER_PROMPT_VERSION,
+    promptVersion: prompt.version,
     usage: reply.usage,
     ms: reply.ms,
   };

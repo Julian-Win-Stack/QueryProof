@@ -16,6 +16,22 @@
 //   LIMIT=N              first N questions only — wiring smoke, never evidence
 //   TRIALS / CONCURRENCY read in evalite.config.ts
 //
+// Batch E experiment axes (2026-07-31), each defaulting to the published
+// configuration so an unset variable can never change a number:
+//   PICKER_PROMPT=picker-v1|picker-v2   which prompt the llm picker runs
+//   EXPAND=on|off        join-partner expansion after the llm picker
+//   SQL_CONTEXT=rows,values,desc        extras in the SQL prompt (comma list)
+//   PICKER_CONTEXT=values,desc          extras in the picker prompt
+//   CHECK=off|probe|self post-execution check (src/check.ts)
+// All five throw inside the bake-off — its variants are frozen at the D9
+// configuration.
+//
+// Batch F axis (2026-07-31):
+//   VOTE=N               best-of-N by execution agreement (src/vote.ts): N
+//                        attempts per question, largest group of same-rows
+//                        results wins. 2-9; unset or "off" means one attempt.
+//                        Throws with CHECK — that interaction is unmeasured.
+//
 // EVAL_MODE and EVAL_DEV, not the MODE and DEV the plan wrote: vite owns both
 // names and sets them inside every worker (MODE="test", DEV="1"), so a run
 // configured with them silently reads vite's values — the first eval:easy run
@@ -32,15 +48,27 @@ import { readFileSync } from 'node:fs';
 import { evalite } from 'evalite';
 
 import { answerQuestion } from '../src/answer.ts';
+import { applyCheck, type CheckAction, type CheckMode } from '../src/check.ts';
 import { compareRows } from '../src/compare-rows.ts';
 import { executeReadOnly } from '../src/execute-readonly.ts';
 import { EFFORT, MODEL, usdCost } from '../src/model.ts';
+import { expandWithJoinPartners } from '../src/pickers/expand.ts';
 import { keywordPick } from '../src/pickers/keyword.ts';
-import { llmPick } from '../src/pickers/llm.ts';
+import { llmPick, PICKER_V1, type PickerPrompt } from '../src/pickers/llm.ts';
+import {
+  buildPickerExtras,
+  buildSqlExtras,
+  PICKER_CONTEXT_KINDS,
+  SQL_CONTEXT_KINDS,
+  type PickerContextKind,
+  type SqlContextKind,
+} from '../src/schema-extras.ts';
 import { loadSchema, renderSchema, tablesForDbId, type Table } from '../src/schema.ts';
 import { extractGoldTables, recallHit } from '../src/table-recall.ts';
-import { PICKER_PROMPT_VERSION } from '../src/prompts/picker-v1.ts';
-import { PROMPT_VERSION } from '../src/prompts/v1.ts';
+import { voteAnswer } from '../src/vote.ts';
+import { CHECK_PROMPT_VERSION } from '../src/prompts/check-v1.ts';
+import * as pickerV2 from '../src/prompts/picker-v2.ts';
+import { PROMPT_VERSION } from '../src/generate-sql.ts';
 
 const GOLD_PATH = new URL('../gold/validated.json', import.meta.url);
 const SLICE_PATH = new URL('./dev-slice.json', import.meta.url);
@@ -79,6 +107,84 @@ const LIMIT = process.env.LIMIT ? Number(process.env.LIMIT) : undefined;
 // which is how the first eval:easy run got voided.
 const PICKER: PickerName = readPicker();
 const REPAIR: boolean = readRepair();
+
+// Batch E axes. Every reader throws on an unknown value, and every non-default
+// value throws unless the configuration it modifies is actually in play — a
+// variable that silently does nothing is how a run gets mislabeled.
+const PICKER_PROMPT: PickerPrompt = readPickerPrompt();
+const EXPAND: boolean = readExpand();
+const SQL_CONTEXT: SqlContextKind[] = readContext('SQL_CONTEXT', SQL_CONTEXT_KINDS);
+const PICKER_CONTEXT: PickerContextKind[] = readContext('PICKER_CONTEXT', PICKER_CONTEXT_KINDS);
+const CHECK: CheckMode = readCheck();
+const VOTE: number = readVote();
+
+function requireLlmPicker(name: string): void {
+  if (MODE !== 'hard' || PICKER !== 'llm' || BAKEOFF) {
+    throw new Error(`${name} modifies the llm picker: EVAL_MODE=hard PICKER=llm, outside the bake-off`);
+  }
+}
+
+function requireOutsideBakeoff(name: string): void {
+  if (BAKEOFF) {
+    throw new Error(`${name} with EVAL_PICKERS=1 — the bake-off variants are frozen at the D9 configuration`);
+  }
+}
+
+function readPickerPrompt(): PickerPrompt {
+  const value = process.env.PICKER_PROMPT;
+  if (value === undefined || value === 'picker-v1') return PICKER_V1;
+  if (value !== 'picker-v2') throw new Error(`PICKER_PROMPT="${value}" — picker-v1 or picker-v2`);
+  requireLlmPicker('PICKER_PROMPT=picker-v2');
+  return {
+    version: pickerV2.PICKER_PROMPT_VERSION,
+    system: pickerV2.PICKER_SYSTEM,
+    buildMessage: pickerV2.buildPickerMessage,
+  };
+}
+
+function readExpand(): boolean {
+  const value = process.env.EXPAND;
+  if (value === undefined || value === 'off') return false;
+  if (value !== 'on') throw new Error(`EXPAND="${value}" — on or off`);
+  requireLlmPicker('EXPAND=on');
+  return true;
+}
+
+function readContext<Kind extends string>(name: string, known: Kind[]): Kind[] {
+  const value = process.env[name];
+  if (value === undefined || value === '') return [];
+  const kinds = value.split(',').map((part) => part.trim());
+  for (const kind of kinds) {
+    if (!known.some((candidate) => candidate === kind)) {
+      throw new Error(`${name}="${value}" — a comma list from: ${known.join(', ')}`);
+    }
+  }
+  if (name === 'PICKER_CONTEXT') requireLlmPicker('PICKER_CONTEXT');
+  else requireOutsideBakeoff(name);
+  return kinds as Kind[];
+}
+
+function readCheck(): CheckMode {
+  const value = process.env.CHECK;
+  if (value === undefined || value === 'off') return 'off';
+  if (value !== 'probe' && value !== 'self') throw new Error(`CHECK="${value}" — off, probe or self`);
+  requireOutsideBakeoff(`CHECK=${value}`);
+  return value;
+}
+
+function readVote(): number {
+  const value = process.env.VOTE;
+  if (value === undefined || value === 'off') return 1;
+  const votes = Number(value);
+  if (!Number.isInteger(votes) || votes < 2 || votes > 9) {
+    throw new Error(`VOTE="${value}" — an integer from 2 to 9, or off`);
+  }
+  requireOutsideBakeoff(`VOTE=${value}`);
+  if (CHECK !== 'off') {
+    throw new Error(`VOTE=${value} with CHECK=${CHECK} — the interaction is unmeasured, run one at a time`);
+  }
+  return votes;
+}
 
 function readRepair(): boolean {
   const value = process.env.REPAIR;
@@ -138,6 +244,13 @@ function limited(records: GoldRecord[]): GoldRecord[] {
 
 const allTables = loadSchema();
 
+// Built once per process, for the whole catalog; null when the axis is off so
+// the published configurations never touch the extra queries.
+const sqlExtras: Promise<Map<string, string>> | null =
+  SQL_CONTEXT.length > 0 ? allTables.then((tables) => buildSqlExtras(tables, SQL_CONTEXT)) : null;
+const pickerExtras: Promise<Map<string, string>> | null =
+  PICKER_CONTEXT.length > 0 ? allTables.then((tables) => buildPickerExtras(tables, PICKER_CONTEXT)) : null;
+
 // Everything a failure needs to be diagnosed without a re-run (Phase 5b).
 // Rows never land here — validated.json stores no result fingerprint, and an
 // export carrying full result sets would dwarf the store.
@@ -171,6 +284,17 @@ type QuestionResult = {
   repair: string;
   promptVersion: string;
   pickerPromptVersion: string;
+  expand: string;
+  sqlContext: string;
+  pickerContext: string;
+  check: string;
+  // What the check actually did on this question — 'skipped' when the trigger
+  // never fired. Always 'skipped' when check is off.
+  checkAction: CheckAction;
+  vote: number;
+  // Attempts in the winning group; null when voting is off, 0 when no attempt
+  // executed cleanly and the last failure shipped.
+  voteAgreement: number | null;
   model: string;
   effort: string;
 };
@@ -192,9 +316,14 @@ async function selectTables(record: GoldRecord, picker: PickerName): Promise<Sel
   if (picker === 'none') return { tables: catalog, ...free };
   if (picker === 'keyword') return { tables: keywordPick(record.question, catalog), ...free };
 
-  const picked = await llmPick(record.question, catalog);
+  const picked = await llmPick(
+    record.question,
+    catalog,
+    PICKER_PROMPT,
+    pickerExtras === null ? undefined : await pickerExtras,
+  );
   return {
-    tables: picked.tables,
+    tables: EXPAND ? expandWithJoinPartners(picked.tables, catalog) : picked.tables,
     pickerTokensIn: picked.usage.inputTokens,
     pickerTokensOut: picked.usage.outputTokens,
     pickerUsd: usdCost(picked.usage),
@@ -207,12 +336,20 @@ async function runQuestion(record: GoldRecord, picker: PickerName): Promise<Ques
   const catalog = await allTables;
   const selection = await selectTables(record, picker);
 
-  const answer = await answerQuestion({
+  const schemaText = renderSchema(selection.tables, sqlExtras === null ? undefined : await sqlExtras);
+  const answerParams = {
     question: record.question,
     evidence: record.evidence,
-    schemaText: renderSchema(selection.tables),
+    schemaText,
     repair: REPAIR,
-  });
+  };
+  const voted = VOTE > 1 ? await voteAnswer({ ...answerParams, votes: VOTE }) : null;
+  const generated = voted ?? (await answerQuestion(answerParams));
+  const answer = await applyCheck(
+    CHECK,
+    { question: record.question, evidence: record.evidence, schemaText },
+    generated,
+  );
   const execution = answer.execution;
 
   // Gold SQL failing is infrastructure — every gold query was validated
@@ -255,6 +392,13 @@ async function runQuestion(record: GoldRecord, picker: PickerName): Promise<Ques
     repair: REPAIR ? 'on' : 'off',
     promptVersion: answer.promptVersion,
     pickerPromptVersion: selection.pickerPromptVersion,
+    expand: EXPAND ? 'on' : 'off',
+    sqlContext: SQL_CONTEXT.join(','),
+    pickerContext: PICKER_CONTEXT.join(','),
+    check: CHECK,
+    checkAction: answer.checkAction,
+    vote: VOTE,
+    voteAgreement: voted === null ? null : voted.voteAgreement,
     model: MODEL,
     effort: EFFORT,
   };
@@ -266,7 +410,12 @@ const runName = [
   `picker=${BAKEOFF ? 'bakeoff' : PICKER}`,
   ...(REPAIR ? ['repair=on'] : []),
   `prompt=${PROMPT_VERSION}`,
-  ...(BAKEOFF || PICKER === 'llm' ? [`pickerPrompt=${PICKER_PROMPT_VERSION}`] : []),
+  ...(BAKEOFF || PICKER === 'llm' ? [`pickerPrompt=${PICKER_PROMPT.version}`] : []),
+  ...(EXPAND ? ['expand=on'] : []),
+  ...(SQL_CONTEXT.length > 0 ? [`sqlContext=${SQL_CONTEXT.join(',')}`] : []),
+  ...(PICKER_CONTEXT.length > 0 ? [`pickerContext=${PICKER_CONTEXT.join(',')}`] : []),
+  ...(CHECK !== 'off' ? [`check=${CHECK} ${CHECK_PROMPT_VERSION}`] : []),
+  ...(VOTE > 1 ? [`vote=${VOTE}`] : []),
   `effort=${EFFORT}`,
   MODEL,
 ].join(' | ');

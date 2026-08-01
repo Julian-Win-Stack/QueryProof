@@ -845,3 +845,34 @@ note:          Five attempts per question, run sequentially; result sets
                config is now a dead end. Diff vs run A: 17 gained, 13 lost.
 export:        runs/2026-07-31-181111-exp-vote5-full.json
 ```
+
+---
+
+## 2026-07-31 — Default set to the 61.0% configuration (wiring smoke, LIMIT=3)
+
+```
+approach:      mode=hard picker=llm limit=3, nothing else set
+verdict:       void
+note:          Not a measurement — the smoke that proves the new default
+               resolves. Julian set the project default to the best measured
+               configuration: prompt v1, llm picker, five sample rows per
+               table, everything else off. Two code changes carry it:
+               generate-sql.ts imports prompts/v1 (was v3), and SQL_CONTEXT
+               now defaults to "rows" instead of empty, with SQL_CONTEXT=off
+               to turn it back off.
+
+               With no axis set, the suite name came back
+               "prompt=v1 | sqlContext=rows", repair/check/vote all off —
+               the intended default, and stamped on every row, so no run can
+               read as a baseline when it is not one. 3/3 scored, 0 voids.
+
+               The consequence to remember: every number measured before
+               2026-07-31 was taken without sample rows, so reproducing one
+               now requires SQL_CONTEXT=off. The stamp makes a mistake here
+               visible after the fact; it does not prevent it.
+
+               v3 stays in src/prompts/ as the evidence behind its own entry
+               above. It was never promoted — a tie whose rule converted 2 of
+               the 17 failures it was written for.
+export:        runs/2026-07-31-204731-exp-default-check-full.json
+```

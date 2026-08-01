@@ -354,3 +354,13 @@ defending it out loud to an interviewer who has not read the code.
 - **Short.** He asked for the answer, not the reasoning behind the answer. One
   recommendation, not a survey of options. If a caveat is worth stating, it is
   worth stating in one sentence.
+- **Simple words, one idea per sentence.** No stacked tables, no nested
+  percentages, no ladders of hypothetical scenarios. If an answer needs a second
+  table before it makes sense, it is the wrong answer — cut it until one reading
+  is enough. Every time he has said "I don't get it", the cause was an answer
+  carrying too much at once, not a hard idea.
+- **Never state a number without what it is out of.** A rate for a subset,
+  written as if it were the headline, reads as a contradiction and destroys
+  trust in every other number in the answer. Say "281 of the 397" before saying
+  "71%". Check the figure against a file or a command that just ran — never
+  against memory of an earlier turn.

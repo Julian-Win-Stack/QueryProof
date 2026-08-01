@@ -1,0 +1,356 @@
+{
+  "run": {
+    "id": 38,
+    "runType": "full",
+    "createdAt": "2026-08-01 01:10:32"
+  },
+  "suites": [
+    {
+      "id": 41,
+      "name": "hard | slice=full | limit=3 | picker=llm | prompt=v3 | pickerPrompt=picker-v1 | sqlContext=rows | vote=5 | effort=medium | claude-sonnet-5",
+      "filepath": "/Users/phyonyanwinn/Project/ProJect/QueryProof/evals/main.eval.ts",
+      "duration": 0,
+      "status": "success",
+      "variantName": null,
+      "variantGroup": null,
+      "createdAt": "2026-08-01 01:10:32",
+      "averageScore": 1,
+      "evals": [
+        {
+          "id": 9743,
+          "duration": 14523,
+          "input": {
+            "id": "bird-0000",
+            "db_id": "debit_card_specializing",
+            "difficulty": "simple",
+            "question": "What is the ratio of customers who pay in EUR against customers who pay in CZK?",
+            "evidence": "ratio of customers who pay in EUR against customers who pay in CZK = count(Currency = 'EUR') / count(Currency = 'CZK').",
+            "sql": "SELECT CAST(SUM(CASE WHEN Currency = 'EUR' THEN 1 ELSE 0 END) AS REAL) / NULLIF(SUM(CASE WHEN Currency = 'CZK' THEN 1 ELSE 0 END), 0) FROM customers",
+            "rowCount": 1,
+            "columns": [
+              "?column?"
+            ],
+            "ms": 8
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT COUNT(*) FILTER (WHERE currency = 'EUR')::float / NULLIF(COUNT(*) FILTER (WHERE currency = 'CZK'), 0) AS ratio FROM \"customers\"",
+            "attempts": 5,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "customers"
+            ],
+            "tablesGoldNeeded": [
+              "customers"
+            ],
+            "recallHit": true,
+            "tokensIn": 3350,
+            "tokensOut": 521,
+            "thinkingTokens": 72,
+            "pickerTokensIn": 4476,
+            "pickerTokensOut": 13,
+            "pickerMs": 2193,
+            "usd": 0.020992,
+            "modelMs": 12248,
+            "executionMs": 44,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "v3",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "vote": 5,
+            "voteAgreement": 5,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT CAST(SUM(CASE WHEN Currency = 'EUR' THEN 1 ELSE 0 END) AS REAL) / NULLIF(SUM(CASE WHEN Currency = 'CZK' THEN 1 ELSE 0 END), 0) FROM customers",
+          "status": "success",
+          "colOrder": 0,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0000 (simple)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT COUNT(*) FILTER (WHERE currency = 'EUR')::float / NULLIF(COUNT(*) FILTER (WHERE currency = 'CZK'), 0) AS ratio FROM \"customers\""
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "1 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "5"
+            },
+            {
+              "label": "tokens",
+              "value": "3350 in, 521 out"
+            }
+          ],
+          "createdAt": "2026-08-01 01:10:32",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 18303,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-01 01:10:46"
+            },
+            {
+              "id": 18304,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-01 01:10:46"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 9744,
+          "duration": 16007,
+          "input": {
+            "id": "bird-0001",
+            "db_id": "debit_card_specializing",
+            "difficulty": "moderate",
+            "question": "In 2012, who had the least consumption in LAM?",
+            "evidence": "Year 2012 can be presented as Between 201201 And 201212; The first 4 strings of the Date values in the yearmonth table can represent year.",
+            "sql": "SELECT T1.CustomerID FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID WHERE T1.Segment = 'LAM' AND SUBSTR(T2.Date, 1, 4) = '2012' GROUP BY T1.CustomerID ORDER BY SUM(T2.Consumption) ASC NULLS FIRST LIMIT 1",
+            "rowCount": 1,
+            "columns": [
+              "customerid"
+            ],
+            "ms": 195
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT y.customerid FROM yearmonth y JOIN customers c ON y.customerid = c.customerid WHERE c.segment = 'LAM' AND y.date BETWEEN '201201' AND '201212' GROUP BY y.customerid ORDER BY SUM(y.consumption) ASC LIMIT 1",
+            "attempts": 5,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "yearmonth",
+              "customers"
+            ],
+            "tablesGoldNeeded": [
+              "customers",
+              "yearmonth"
+            ],
+            "recallHit": true,
+            "tokensIn": 3965,
+            "tokensOut": 728,
+            "thinkingTokens": 120,
+            "pickerTokensIn": 4466,
+            "pickerTokensOut": 40,
+            "pickerMs": 2597,
+            "usd": 0.024542,
+            "modelMs": 13062,
+            "executionMs": 293,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "v3",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "vote": 5,
+            "voteAgreement": 5,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT T1.CustomerID FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID WHERE T1.Segment = 'LAM' AND SUBSTR(T2.Date, 1, 4) = '2012' GROUP BY T1.CustomerID ORDER BY SUM(T2.Consumption) ASC NULLS FIRST LIMIT 1",
+          "status": "success",
+          "colOrder": 1,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0001 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT y.customerid FROM yearmonth y JOIN customers c ON y.customerid = c.customerid WHERE c.segment = 'LAM' AND y.date BETWEEN '201201' AND '201212' GROUP BY y.customerid ORDER BY SUM(y.consumption) ASC LIMIT 1"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "2 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "5"
+            },
+            {
+              "label": "tokens",
+              "value": "3965 in, 728 out"
+            }
+          ],
+          "createdAt": "2026-08-01 01:10:32",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 18305,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-01 01:10:48"
+            },
+            {
+              "id": 18306,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-01 01:10:48"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 9745,
+          "duration": 17491,
+          "input": {
+            "id": "bird-0002",
+            "db_id": "debit_card_specializing",
+            "difficulty": "moderate",
+            "question": "What was the average monthly consumption of customers in SME for the year 2013?",
+            "evidence": "Average Monthly consumption = AVG(Consumption) / 12; Year 2013 can be presented as Between 201301 And 201312; The first 4 strings of the Date values in the yearmonth table can represent year.",
+            "sql": "SELECT AVG(T2.Consumption) / NULLIF(12, 0) FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID WHERE SUBSTR(T2.Date, 1, 4) = '2013' AND T1.Segment = 'SME'",
+            "rowCount": 1,
+            "columns": [
+              "?column?"
+            ],
+            "ms": 21
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT AVG(y.consumption)/12 FROM \"yearmonth\" y JOIN \"customers\" c ON y.customerid = c.customerid WHERE c.segment = 'SME' AND y.date BETWEEN '201301' AND '201312'",
+            "attempts": 5,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "yearmonth",
+              "customers"
+            ],
+            "tablesGoldNeeded": [
+              "customers",
+              "yearmonth"
+            ],
+            "recallHit": true,
+            "tokensIn": 4110,
+            "tokensOut": 690,
+            "thinkingTokens": 207,
+            "pickerTokensIn": 4472,
+            "pickerTokensOut": 19,
+            "pickerMs": 5080,
+            "usd": 0.024253999999999998,
+            "modelMs": 12101,
+            "executionMs": 251,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "v3",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "vote": 5,
+            "voteAgreement": 5,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT AVG(T2.Consumption) / NULLIF(12, 0) FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID WHERE SUBSTR(T2.Date, 1, 4) = '2013' AND T1.Segment = 'SME'",
+          "status": "success",
+          "colOrder": 2,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0002 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT AVG(y.consumption)/12 FROM \"yearmonth\" y JOIN \"customers\" c ON y.customerid = c.customerid WHERE c.segment = 'SME' AND y.date BETWEEN '201301' AND '201312'"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "2 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "5"
+            },
+            {
+              "label": "tokens",
+              "value": "4110 in, 690 out"
+            }
+          ],
+          "createdAt": "2026-08-01 01:10:32",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 18307,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-01 01:10:49"
+            },
+            {
+              "id": 18308,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-01 01:10:49"
+            }
+          ],
+          "traces": []
+        }
+      ]
+    }
+  ]
+}

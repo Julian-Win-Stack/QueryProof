@@ -758,3 +758,90 @@ note:          The two band-beating changes together, and the batch's most
                worth money. Diff vs control: 36 gained, 24 lost. $10.18.
 export:        runs/2026-07-31-153049-exp-stack-full.json
 ```
+
+---
+
+# Batch F — 2026-07-31, sequential build toward the final number
+
+Two moves, one run each, every run adding one change on top of the last so the
+final number decomposes into attributable steps: run A adds a counting-
+convention rule to the SQL prompt on the rows base; run B adds best-of-N with
+an execution-based majority vote. No repeat trials — every number reads against
+the existing ±2.5 band, as all Batch E numbers did.
+
+## 2026-07-31 — Batch F run A wiring smoke (LIMIT=3)
+
+```
+approach:      mode=hard picker=llm sqlContext=rows limit=3, prompt=v3
+verdict:       void
+note:          Wiring only. prompt=v3 stamps the suite name and every exported
+               row; 3/3 scored, 0 voids. The stamp now reads from
+               generate-sql.ts (the single prompt switch point) instead of a
+               second import in the eval file — two imports that must agree
+               was how a run could get mislabeled.
+export:        runs/2026-07-31-180141-exp-smoke-runa-full.json
+```
+
+## 2026-07-31 — Batch F run A: counting rule (prompt v3) on the rows base
+
+```
+approach:      mode=hard picker=llm sqlContext=rows repair=off prompt=v3 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium concurrency=50
+question set:  full (500 validated)
+accuracy:      61.6% (308/500)
+table recall:  84.6%
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       rejected
+note:          v3 = v1 plus one rule: when counting over a join, count the
+               matching rows; DISTINCT only when the question asks for unique
+               entities. Written for the 17 rows-run failures where generated
+               SQL used COUNT(DISTINCT) and gold counts plain rows. The model
+               complied — COUNT(DISTINCT) answers fell 44 -> 27, and none of
+               the 6 measured at-risk answers (gold itself DISTINCT, question
+               silent) was lost. But only 2 of the 17 targets converted: the
+               regex signature overstated the class, and most of those 17 are
+               wrong in more ways than the counting convention. +0.6 vs the
+               rows run (61.0) — a tie; +3.8 vs control is the rows base
+               carrying it. Churn vs rows: 23 gained, 20 lost. The rule is
+               harmless but unearned; run B builds on the rows base with
+               prompt v1 unless Julian keeps v3. $7.44.
+export:        runs/2026-07-31-180211-exp-rows-v3-full.json
+```
+
+## 2026-07-31 — Batch F run B wiring smoke (LIMIT=3)
+
+```
+approach:      mode=hard picker=llm sqlContext=rows vote=5 limit=3, prompt=v3
+verdict:       void
+note:          Wiring only. vote=5 stamps the suite name; voteAgreement,
+               attempts=5 and the 5x usage sum land on every exported row.
+export:        runs/2026-07-31-181031-exp-smoke-runb-full.json
+```
+
+## 2026-07-31 — Batch F run B: best-of-5 by execution agreement
+
+```
+approach:      mode=hard picker=llm sqlContext=rows vote=5 repair=off prompt=v3 pickerPrompt=picker-v1 model=claude-sonnet-5 effort=medium concurrency=50
+question set:  full (500 validated)
+accuracy:      62.4% (312/500)
+table recall:  85.4%
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       rejected
+note:          Five attempts per question, run sequentially; result sets
+               grouped by the row comparator; the largest group ships, ties to
+               the first seen, errors cannot vote. +0.8 vs run A (61.6) — a
+               tie at 2.5x the cost ($18.85 vs $7.44). Why the 71.8%
+               cross-run union did not transfer: 397 of 500 questions were
+               unanimous 5/5 — at effort=medium the model repeats the same
+               reading almost every time, so on 79% of the set there was
+               nothing to arbitrate, and 110 of those unanimous questions are
+               unanimously wrong. The union came from *different
+               configurations* disagreeing, never from repetition of one.
+               Two findings worth keeping: never-valid failures fell to 0
+               (one clean attempt outvotes any error), and agreement is a
+               real confidence signal — 72.3% correct when unanimous vs ~25%
+               when split — which the product path could surface. If voting
+               is ever revisited, diversity per attempt (different context
+               per candidate) is the measured direction; N samples of one
+               config is now a dead end. Diff vs run A: 17 gained, 13 lost.
+export:        runs/2026-07-31-181111-exp-vote5-full.json
+```

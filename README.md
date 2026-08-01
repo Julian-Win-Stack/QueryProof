@@ -2,7 +2,7 @@
 
 Ask a Postgres database a question in English; get SQL and rows back.
 
-**59.2% correct on [BIRD Mini-Dev](https://github.com/bird-bench/mini_dev)** —
+**61.0% correct on [BIRD Mini-Dev](https://github.com/bird-bench/mini_dev)** —
 against the **36.0%** GPT-4-turbo baseline BIRD publishes for the same 500
 questions, and measured in a harder setting than that baseline uses.
 
@@ -12,13 +12,15 @@ SQL*. No LLM judges anything, anywhere.
 Any accuracy number is easy to produce and hard to trust. What this repo ships is
 the second part: a measured noise floor that every comparison is read against, an
 append-only log of every run including the ones that lost, and a classified
-breakdown of the failures that remain. Two of the three configurations below are
-ties — and are labelled as ties.
+breakdown of the failures that remain. Most of what was tried lost: twelve
+single-change experiments ran on the full 500 questions on 2026-07-31 alone, and
+nine of them are labelled *rejected* or *tie* in the log.
 
 **The pipeline.** Eleven real databases live in one Postgres instance. An LLM
-picks the relevant tables out of the 75, a second call writes the SQL, the query
-runs under a `SELECT`-only role, and on a Postgres error the error text is fed
-back for a retry. Model: `claude-sonnet-5`, pinned for every number here.
+picks the relevant tables out of the 75, a second call writes the SQL from those
+tables' schemas plus five real sample rows each, the query runs under a
+`SELECT`-only role, and on a Postgres error the error text is fed back for a
+retry. Model: `claude-sonnet-5`, pinned for every number here.
 
 ## Results
 
@@ -30,11 +32,21 @@ is alien species).
 |---|---|---|---|
 | Baseline: all 75 tables in the prompt | **57.4%** | 100%¹ | $15.70 |
 | + LLM table selection (~2 tables sent) | **59.2%** | 86.0% | $6.31 |
-| + self-repair (2 retries on SQL errors) | **58.8%** | 85.4% | $6.38 |
+| + five real sample rows per table | **61.0%²** | 85.4% | $7.34 |
 
 Noise: **±2.5 points**, from 3 repeat runs of one configuration — the model has
 no determinism knob, so every comparison is read against that band. Denominator:
 all 500 validated questions, 0 quarantined and 0 voided in every run above.
+
+Sample rows is one of twelve single-change experiments run on 2026-07-31 —
+value lists and BIRD's human-written column descriptions in both prompts, a
+picker prompt rewrite, join-partner expansion, probe-on-empty, self-check,
+best-of-5 voting, a counting-convention prompt rule, and a stack of the
+winners — full 500 questions each, ~$130 and one day total. Two beat the band:
+sample rows and self-check (**61.4%** — tied with sample rows, and the two
+*don't stack*: 60.0% together, so the simpler one ships). The other ten are
+`rejected`, `tie`, or `void` in [RUNS.md](RUNS.md), each with its verdict, its
+mechanism numbers, and its committed export.
 
 **The easy setting** — the question names its database, which is how BIRD's
 published baselines are measured — scores **58.4%**. That is the fairest
@@ -44,9 +56,13 @@ are comparable; the divergences that remain are listed in
 
 ¹ Structural: the baseline sends every table, so recall cannot miss.
 
+² Read against a same-day re-run of the selection configuration (57.8%, inside
+the band of the 59.2% above): +3.2, past ±2.5. Run-to-run wobble is exactly why
+every step reads against a same-day control, never against a stored number.
+
 ## What the table actually says
 
-Three findings, all against intuition, all measured:
+Five findings, all against intuition, all measured:
 
 1. **Not knowing the database costs nothing — if you send everything.** Hard
    baseline 57.4% vs easy 58.4%: a tie inside the noise band. The model locates
@@ -80,6 +96,28 @@ Three findings, all against intuition, all measured:
    "runs and returns the wrong rows". Executability was never the bottleneck
    (~2% of questions), so the loop is nearly free ($0.07) and nearly useless.
    Reported as the negative result it is.
+
+4. **The model needs the data, not the documentation.** Five real rows under
+   each `CREATE TABLE`: **+3.2**, the only prompt change that ever cleared the
+   band. BIRD's human-written column descriptions, a similar token budget:
+   +0.8, a tie. The failures were never about what a column *means* — they were
+   about what it *holds*. A query filtering `segment = 'premium'` scores zero
+   against a table that stores `'Premium'`, and no description says that; a
+   sample row does. Join-partner expansion made the same point from the other
+   side: it fixed table selection exactly as designed (missing-table failures
+   57 → 19) and accuracy did not move — the rescued questions just failed at
+   SQL-writing instead. Recall was never the binding constraint.
+
+5. **Self-agreement is not correctness.** Best-of-5 voting — answer five times,
+   execute all five, ship the majority result set — looked like the big lever:
+   across the day's runs, *some* configuration answered 71.8% of questions
+   correctly, so picking the right candidate per question had ~14 points of
+   headroom. Measured: **+0.8, a tie, at 2.5× the cost.** On 79% of questions
+   all five attempts returned identical rows — including 110 questions where
+   they were unanimously wrong. The diversity that built the 71.8% union came
+   from *different configurations* disagreeing, never from asking one
+   configuration five times. What the vote left behind is a confidence signal:
+   unanimous answers were right 72.3% of the time, split ones ~25%.
 
 ## Why the numbers can be trusted
 
@@ -131,6 +169,15 @@ count too and were never column-limited. The addressable share is 40 questions �
 **8% of the set**, not 34% of failures. Recorded as a measurement ceiling, not a
 tuning target ([RUNS.md](RUNS.md), 2026-07-31).
 
+The same lesson repeated from the other direction. The largest greppable
+signature in the remaining failures — 17 queries writing `COUNT(DISTINCT …)`
+where the reference counts every joined row — got its own one-sentence prompt
+rule. The model obeyed it: `COUNT(DISTINCT)` answers fell 44 → 27, and none of
+the six answers measured as at-risk flipped. The score still did not move,
+because only 2 of the 17 converted — the other 15 were also wrong somewhere
+else, and fixing the count exposed the next error. A signature you can grep for
+is a correlate, not a cause ([RUNS.md](RUNS.md), Batch F run A).
+
 ## Comparing two runs
 
 Accuracy says whether a change won. It cannot say what the change *broke* — a
@@ -172,12 +219,18 @@ Two rules make it trustworthy:
 npm run demo        # http://localhost:3000
 ```
 
-Question in; picked tables, SQL, rows, and attempt count out — the exact
-configuration measured in row three. Answers flagged **low confidence** (empty
+Question in; picked tables, SQL, rows, and attempt count out — the
+table-selection configuration plus the self-repair loop from finding 3. Sample
+rows, the headline row, are not on the product path yet. Answers flagged **low confidence** (empty
 result, or a query that needed repair) were right 2.5% of the time on the
 measured run; everything else 63.7%. That heuristic was validated against a
 finished run before shipping — signals that didn't separate (thinking depth,
 tables picked, result size) were cut.
+
+A stronger flag is measured and waiting: run the query five times and surface
+agreement — unanimous answers were right 72.3% of the time, split ones ~25%.
+Best-of-5 lost as an accuracy play (a tie at 2.5× the cost) and survives as a
+trust play.
 
 The demo routes through the [Respan](https://respan.ai) gateway for caching,
 fallback, and tracing. Eval runs deliberately do **not**: a cached repeat run
@@ -190,6 +243,7 @@ npm run validate-gold             # execute all 500 reference queries -> gold/
 npm run eval:easy                 # easy setting, all 500
 PICKER=none npm run eval:hard     # hard baseline (all 75 tables)
 PICKER=llm  npm run eval:hard     # hard + table selection
+TAG=rows PICKER=llm SQL_CONTEXT=rows npm run eval:exp   # + sample rows (the headline row)
 PICKER=llm  npm run eval:hard:repair   # hard + selection + self-repair
 
 npm run diff -- runs/<before>.json runs/<after>.json   # what a change broke

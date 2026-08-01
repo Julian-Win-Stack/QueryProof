@@ -328,26 +328,28 @@ reports zero variance, which would fake the noise floor the numbers depend on.
 
 ```bash
 npm run validate-gold             # execute all 500 reference queries -> gold/
-UNION=on PICKER=llm npm run eval:hard   # the headline configuration — table
+PICKER=llm npm run eval:hard            # the headline configuration — table
                                         # selection + hint-named table additions,
                                         # sample rows, dialect rewrites: 68.8%
-PICKER=llm  npm run eval:hard           # without the table-addition code: 65.6%
+UNION=off PICKER=llm npm run eval:hard  # without the table-addition code: 65.6%
 
 SQL_CONTEXT=off REWRITE=off PICKER=none npm run eval:hard  # baseline (all 75 tables)
-SQL_CONTEXT=off REWRITE=off PICKER=llm  npm run eval:hard  # + table selection only
-REWRITE=off PICKER=llm npm run eval:hard        # + sample rows (the 61.0% row, prompt v1 import)
-PICKER=llm  npm run eval:hard:repair            # + self-repair
-npm run eval:easy                               # easy setting, all 500
+UNION=off SQL_CONTEXT=off REWRITE=off PICKER=llm npm run eval:hard  # + table selection only
+UNION=off REWRITE=off PICKER=llm npm run eval:hard  # + sample rows (the 61.0% row, prompt v1 import)
+UNION=off PICKER=llm npm run eval:hard:repair       # + self-repair
+npm run eval:easy                                   # easy setting, all 500
 
 npm run diff -- runs/<before>.json runs/<after>.json   # what a change broke
 npm run replay -- runs/<file>.json                     # rewrites on stored SQL
 npm run rescore -- runs/<file>.json                    # re-grade a stored run
 ```
 
-Sample rows and the dialect rewrites are on by default; the table-addition
-code is not yet, so the headline row says `UNION=on` explicitly.
-**`SQL_CONTEXT=off` is required to reproduce any number measured before
-2026-07-31, and `REWRITE=off` for any number before 2026-08-01** — the 61.0% row additionally needs `src/generate-sql.ts` importing
+Sample rows, the dialect rewrites, and the table-addition code are all on by
+default — the headline configuration is what runs when nothing is specified.
+**Reproducing older numbers means switching things off: `SQL_CONTEXT=off` for
+any number measured before 2026-07-31, `REWRITE=off` for any number before
+2026-08-01, and `UNION=off` for every row except the 68.8% headline** — the
+61.0% row additionally needs `src/generate-sql.ts` importing
 prompt v1, the same one-line switch every prompt change goes through. Every run
 stamps its full configuration into its own name, so a run can never be silently
 mislabeled — but the stamp catches the mistake afterwards rather than

@@ -48,9 +48,11 @@ has to be said, never defaulted into, and an unknown value throws (D22).
 
 ## The default configuration
 
-Set 2026-08-01 (Batch G). **Prompt v4, LLM table picker, five sample rows per
-table, dialect rewrites on, everything else off.** That is the 65.6% run — the
-best measured configuration, and now what runs when nothing is specified.
+Set 2026-08-01, twice in one day: Batch G in the morning, the cluster-1
+promotion in the evening. **Prompt v4, LLM table picker, five sample rows per
+table, dialect rewrites on, evidence-union table additions on, everything else
+off.** That is the 68.8% run — the best measured configuration, and now what
+runs when nothing is specified.
 
 ```
 prompt       v4        src/generate-sql.ts imports it; the one switch point.
@@ -60,6 +62,11 @@ REWRITE      on        deterministic dialect repairs (src/rewrites.ts, D24):
                        NULLS LAST onto every bare DESC, ::text onto a date
                        column that 42883'd under LIKE. +7/500 exactly, zero
                        losses, measured by replay on frozen SQL
+UNION        on        post-picker table additions in code (src/pickers/union.ts):
+                       every table owning a column the question's hint names,
+                       plus a foreign-key bridge when the picked tables do not
+                       connect. Default applies only where it can — hard mode,
+                       llm picker, outside the bake-off; off everywhere else
 SQL_CONTEXT  rows      five real rows per table
 picker       llm       stated explicitly in hard mode, never defaulted
 repair       off       ties on accuracy; the demo turns it on for its own reasons
@@ -69,9 +76,10 @@ MODEL        claude-sonnet-5     EFFORT medium
 
 Four things follow from this, and each one has bitten:
 
-- **`SQL_CONTEXT` defaults to `rows` and `REWRITE` defaults to `on`.**
+- **`SQL_CONTEXT` defaults to `rows`, `REWRITE` and `UNION` default to `on`.**
   Reproducing a pre-2026-07-31 number needs `SQL_CONTEXT=off`; reproducing any
-  pre-Batch-G number needs `REWRITE=off`. Run names stamp both either way, so
+  pre-Batch-G number needs `REWRITE=off`; reproducing Batch G's 65.6% or
+  anything earlier needs `UNION=off`. Run names stamp all three either way, so
   no run is ever mislabeled — but a baseline re-run without the `off`s is
   measuring the wrong thing.
 - **v4 is the default; v1, v2 and v3 stay in `src/prompts/`** as the evidence
@@ -98,7 +106,8 @@ experiment axes `PICKER_PROMPT`, `EXPAND`, `SQL_CONTEXT`, `PICKER_CONTEXT`,
 `src/vote.ts` — the Batch G axis `REWRITE` — dialect repairs,
 `src/rewrites.ts`, default **on** — and the cluster-1 axis `UNION` —
 deterministic post-picker table additions from the evidence plus a foreign-key
-bridge, `src/pickers/union.ts`, default **off** — see the header of
+bridge, `src/pickers/union.ts`, default **on** where the llm picker is in
+play, off elsewhere — see the header of
 `evals/main.eval.ts`). evalite's CLI
 accepts no custom flags, so `npm run eval:dev -- --picker=llm` silently does
 nothing. Never add a second eval file to express a configuration. **Never name

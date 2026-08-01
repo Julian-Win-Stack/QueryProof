@@ -50,7 +50,11 @@
 //   UNION=on|off         deterministic post-picker additions
 //                        (src/pickers/union.ts): tables owning a column the
 //                        evidence names come in, then a foreign-key bridge
-//                        repairs a disconnected pick. Defaults to off.
+//                        repairs a disconnected pick. Defaults to on wherever
+//                        it can apply (hard mode, llm picker, outside the
+//                        bake-off) — the best measured configuration (68.8%,
+//                        2026-08-01) — so UNION=off is how the 65.6% Batch G
+//                        number or anything earlier is reproduced.
 //
 // EVAL_MODE and EVAL_DEV, not the MODE and DEV the plan wrote: vite owns both
 // names and sets them inside every worker (MODE="test", DEV="1"), so a run
@@ -196,7 +200,10 @@ function readPickerPrompt(): PickerPrompt {
 
 function readUnion(): boolean {
   const value = process.env.UNION;
-  if (value === undefined || value === 'off') return false;
+  // Unset follows the published configuration: on where the llm picker is in
+  // play, off everywhere the additions have no picker output to add to.
+  if (value === undefined) return MODE === 'hard' && PICKER === 'llm' && !BAKEOFF;
+  if (value === 'off') return false;
   if (value !== 'on') throw new Error(`UNION="${value}" — on or off`);
   requireLlmPicker('UNION=on');
   return true;

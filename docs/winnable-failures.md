@@ -1,4 +1,4 @@
-***# The 99 winnable failures
+# The 99 winnable failures
 
 Every question the default configuration gets wrong **and** could plausibly get
 right. This is the work list. It is deliberately not the full failure set.

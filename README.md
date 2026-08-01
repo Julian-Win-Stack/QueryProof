@@ -9,11 +9,14 @@ questions, and measured in a harder setting than that baseline uses.
 Correct means *the generated SQL ran and returned the same rows as the reference
 SQL*. No LLM judges anything, anywhere.
 
-> ### 97 of the 500 questions can never be scored correct
+> ### 115 of the 500 questions are out of reach
 >
-> **That is 19.4% of the benchmark, and it caps this project at 80.6%.** Not a
-> hard subset — impossible. The reference query is broken, or it answers in a
-> format the question never asks for, and no honest system can match it.
+> **That is 23.0% of the benchmark, and it caps this project at 77.0%.** 97 are
+> impossible — not a hard subset, impossible: the reference query is broken, or
+> it answers in a format the question never asks for, and no honest system can
+> match it. The other 18 are measured dead ends — each is matchable on its own,
+> but the v6 experiment measured that every rule fixing one breaks a mirror
+> question that reads the same way, so no configuration holds them.
 >
 > | Why | Questions | Example |
 > |---|---|---|
@@ -21,19 +24,22 @@ SQL*. No LLM judges anything, anywhere.
 > | It picks an unstated format | 30 | Asked which month peaked, the reference answers `04`. We answer `201304`. Same month. |
 > | The question is genuinely ambiguous | 11 | Two honest readings, different numbers; the reference picked one. |
 > | Other | 4 | |
+> | A fix loses as much as it wins — measured | 18 | The reference counts 258 ban rows where the question asks how many cards; twin questions count distinct. A rule picking either side trades wins for losses. |
 >
 > **Checked, not claimed.** Every one of the 500 questions was re-graded by
 > executing both queries. The 137 that no configuration ever solved were then
 > classified one by one. For the "reference is wrong" verdicts, independent
 > reviewers were sent to *refute* a sample — **12 of 14 survived**, and the two
-> that fell were reclassified as ambiguity, not error.
+> that fell were reclassified as ambiguity, not error. The 18 dead ends were
+> measured directly: the v6 run gave each mechanism its own targeted rule and
+> the per-question diff showed the losses ([RUNS.md](RUNS.md)).
 >
 > Independent work agrees. An audit of this same 500-question set found 18.3%
 > with wrong reference SQL; a CIDR 2026 paper puts annotation errors across
 > BIRD's dev set higher still.
 >
-> The remaining 99 winnable failures are listed one by one, with the reference
-> query, ours, and — for 59 of them — a query that did match, in
+> The remaining 22 winnable failures are listed one by one, with the reference
+> query, ours, and — for 10 of them — a query that did match, in
 > **[docs/winnable-failures.md](docs/winnable-failures.md)**.
 
 Any accuracy number is easy to produce and hard to trust. What this repo ships is
@@ -263,9 +269,10 @@ because only 2 of the 17 converted — the other 15 were also wrong somewhere
 else, and fixing the count exposed the next error. A signature you can grep for
 is a correlate, not a cause ([RUNS.md](RUNS.md), Batch F run A).
 
-**What finally moved it: reading all 99 remaining winnable failures by hand**
-([docs/winnable-failures.md](docs/winnable-failures.md)), which produced the
-two Batch G changes in the results table.
+**What finally moved it: reading all 99 then-winnable failures by hand**
+([docs/winnable-failures.md](docs/winnable-failures.md) — since cut down to
+the 22 still open), which produced the two Batch G changes in the results
+table.
 
 The rejected column rule came back with the failure mode designed out. The
 first version said *never return the column you sorted by*, and the model

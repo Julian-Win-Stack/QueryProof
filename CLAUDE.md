@@ -138,11 +138,14 @@ run was voided by exactly this.
 - `docs/adr/` — the two decisions with consequences big enough to need a page.
 - `KNOWN_ISSUES.md` — deliberate divergences from BIRD's evaluation.
 - `RUNS.md` — append-only log of every run, with its verdict.
-- `docs/winnable-failures.md` — **the work list.** The 99 questions the default
-  gets wrong and could get right, each with the reference SQL, ours, and — for
-  59 of them — SQL from another run that did match. The other 97 failures are
-  excluded on purpose: broken reference queries and unguessable output
-  conventions. Read it before proposing any accuracy work.
+- `docs/winnable-failures.md` — **the work list.** The 22 questions the default
+  gets wrong that a known mechanism could still win — 10 agent-reachable, 2
+  pipeline-fixable below the noise band, 10 re-roll-only — each with the
+  reference SQL, ours, and — for 10 of them — SQL from another run that did
+  match. The 115 out-of-reach failures (97 broken or unguessable references,
+  18 measured dead ends, reclassified 2026-08-01) are excluded on purpose; the
+  doc's provenance note lists the 18 by id. Read it before proposing any
+  accuracy work.
 
 The plan is executed across many sessions. A decision reversed without being
 recorded produces two numbers that look comparable and are not.

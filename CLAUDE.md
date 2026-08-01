@@ -34,6 +34,7 @@ PICKER=llm npm run eval:hard   # all 500, hard mode; PICKER required: none|keywo
 PICKER=keyword npm run eval:hard:dev  # hard mode on the dev slice
 PICKER=llm npm run eval:hard:repair   # hard mode + self-repair (REPAIR=on, 2 retries)
 npm run eval:pickers           # keyword vs LLM picker, one evalite.each run, dev slice
+TAG=<name> PICKER=llm npm run eval:exp    # hard-mode experiment run; TAG names the export file
 npm run triage -- runs/<file>.json    # failure counts, four buckets, per suite
 npm run rescore -- runs/<file>.json   # re-grade a stored run, no model calls
 npm run diff -- runs/<a>.json runs/<b>.json  # per-question regressions and gains, no model calls
@@ -50,7 +51,10 @@ only under `npm run test:db`. `.dbtest.ts` is deliberately not `.db.test.ts` —
 Postgres into the pure suite.
 
 **Every eval script is one eval file plus environment variables** (`EVAL_MODE`,
-`EVAL_DEV`, `PICKER`, `REPAIR`, `TRIALS`, `LIMIT`, `CONCURRENCY`). evalite's CLI
+`EVAL_DEV`, `PICKER`, `REPAIR`, `TRIALS`, `LIMIT`, `CONCURRENCY`, the Batch E
+experiment axes `PICKER_PROMPT`, `EXPAND`, `SQL_CONTEXT`, `PICKER_CONTEXT`,
+`CHECK`, and the Batch F axis `VOTE=N` — best-of-N by execution agreement,
+`src/vote.ts` — see the header of `evals/main.eval.ts`). evalite's CLI
 accepts no custom flags, so `npm run eval:dev -- --picker=llm` silently does
 nothing. Never add a second eval file to express a configuration. **Never name
 an eval env var `MODE`, `DEV`, `PROD`, or `BASE_URL`** — vite owns those names
@@ -80,7 +84,13 @@ gold/          validated/rejected/quarantine.json   (gitignored, output of valid
 scripts/       one-shot and measurement scripts
 src/           library code
 src/prompts/   one file per prompt version, each exporting PROMPT_VERSION
-src/pickers/   table selection: keyword.ts (no LLM), llm.ts (pinned model)
+src/pickers/   table selection: keyword.ts (no LLM), llm.ts (pinned model),
+               expand.ts (join-partner expansion, EXPAND=on)
+src/schema-extras.ts  sample rows / value lists / BIRD descriptions for the
+               SQL_CONTEXT and PICKER_CONTEXT experiments
+src/check.ts   post-execution checks (CHECK=probe|self)
+src/vote.ts    best-of-N: N attempts, result sets grouped by the row
+               comparator, largest group ships (VOTE=N)
 evals/         *.eval.ts, configuration comes from env, not from new files
 evals/dev-slice.json  the frozen 100 ids — committed, never regenerated
 evalite.config.ts     storage (persistent SQLite), concurrency, trials, timeouts

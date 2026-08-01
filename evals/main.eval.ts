@@ -20,7 +20,10 @@
 // configuration so an unset variable can never change a number:
 //   PICKER_PROMPT=picker-v1|picker-v2   which prompt the llm picker runs
 //   EXPAND=on|off        join-partner expansion after the llm picker
-//   SQL_CONTEXT=rows,values,desc        extras in the SQL prompt (comma list)
+//   SQL_CONTEXT=rows,values,desc        extras in the SQL prompt (comma list).
+//                        Defaults to "rows" — the published configuration, not
+//                        empty. SQL_CONTEXT=off is how a pre-2026-07-31
+//                        baseline is reproduced.
 //   PICKER_CONTEXT=values,desc          extras in the picker prompt
 //   CHECK=off|probe|self post-execution check (src/check.ts)
 // All five throw inside the bake-off — its variants are frozen at the D9
@@ -113,7 +116,16 @@ const REPAIR: boolean = readRepair();
 // variable that silently does nothing is how a run gets mislabeled.
 const PICKER_PROMPT: PickerPrompt = readPickerPrompt();
 const EXPAND: boolean = readExpand();
-const SQL_CONTEXT: SqlContextKind[] = readContext('SQL_CONTEXT', SQL_CONTEXT_KINDS);
+// Sample rows are on by default — they are the published configuration, and the
+// axis defaults to whatever is published so an unset variable never silently
+// changes a number. SQL_CONTEXT=off reproduces a pre-2026-07-31 baseline. The
+// bake-off variants are frozen at the D9 configuration, which predates every
+// extras axis, so the default cannot reach into them.
+const SQL_CONTEXT: SqlContextKind[] = readContext(
+  'SQL_CONTEXT',
+  SQL_CONTEXT_KINDS,
+  BAKEOFF ? [] : ['rows'],
+);
 const PICKER_CONTEXT: PickerContextKind[] = readContext('PICKER_CONTEXT', PICKER_CONTEXT_KINDS);
 const CHECK: CheckMode = readCheck();
 const VOTE: number = readVote();
@@ -150,9 +162,10 @@ function readExpand(): boolean {
   return true;
 }
 
-function readContext<Kind extends string>(name: string, known: Kind[]): Kind[] {
+function readContext<Kind extends string>(name: string, known: Kind[], fallback: Kind[] = []): Kind[] {
   const value = process.env[name];
-  if (value === undefined || value === '') return [];
+  if (value === undefined) return fallback;
+  if (value === '' || value === 'off') return [];
   const kinds = value.split(',').map((part) => part.trim());
   for (const kind of kinds) {
     if (!known.some((candidate) => candidate === kind)) {

@@ -44,6 +44,35 @@ npm run demo                   # the product surface, PRODUCT_PATH=1, port 3000
 In hard mode `PICKER` is mandatory — `none` (all 75 tables, the baseline row)
 has to be said, never defaulted into, and an unknown value throws (D22).
 
+## The default configuration
+
+Set 2026-07-31. **Prompt v1, LLM table picker, five sample rows per table,
+everything else off.** That is the 61.0% run — the best measured configuration,
+and now what runs when nothing is specified.
+
+```
+prompt       v1        src/generate-sql.ts imports it; the one switch point
+SQL_CONTEXT  rows      five real rows per table, the only change that beat the band
+picker       llm       stated explicitly in hard mode, never defaulted
+repair       off       ties on accuracy; the demo turns it on for its own reasons
+EXPAND / PICKER_CONTEXT / CHECK / VOTE   off
+MODEL        claude-sonnet-5     EFFORT medium
+```
+
+Three things follow from this, and each one has bitten:
+
+- **`SQL_CONTEXT` defaults to `rows`, not to empty.** Reproducing any number
+  measured before 2026-07-31 needs `SQL_CONTEXT=off`. The run name stamps
+  `sqlContext=rows` either way, so no run is ever mislabeled — but a baseline
+  re-run without `off` is measuring the wrong thing.
+- **v3 is not the default and v2 never was.** Both stay in `src/prompts/` as the
+  evidence behind their RUNS.md entries. v3's counting rule was written for 17
+  specific failures and converted 2 — harmless, unearned, not shipped.
+- **The demo is not this configuration.** `app/api/ask/route.ts` hardcodes its
+  own: picker on, repair on, **no sample rows**. So the product path is not the
+  headline number and has never been measured as it ships. Julian deferred the
+  fix deliberately — do not "correct" it without asking.
+
 Test files split by what they need, and the split is the filename: `src/*.test.ts`
 is pure and runs under `npm test`, `src/*.dbtest.ts` needs the container and runs
 only under `npm run test:db`. `.dbtest.ts` is deliberately not `.db.test.ts` —

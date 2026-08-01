@@ -249,19 +249,27 @@ reports zero variance, which would fake the noise floor the numbers depend on.
 
 ```bash
 npm run validate-gold             # execute all 500 reference queries -> gold/
-npm run eval:easy                 # easy setting, all 500
-PICKER=none npm run eval:hard     # hard baseline (all 75 tables)
-PICKER=llm  npm run eval:hard     # hard + table selection
-TAG=rows PICKER=llm SQL_CONTEXT=rows npm run eval:exp   # + sample rows
-TAG=vote5 PICKER=llm SQL_CONTEXT=rows VOTE=5 npm run eval:exp  # + best-of-5 (the headline row)
-PICKER=llm  npm run eval:hard:repair   # hard + selection + self-repair
+PICKER=llm  npm run eval:hard     # the default configuration — prompt v1,
+                                  # table selection, five sample rows: 61.0%
+
+SQL_CONTEXT=off PICKER=none npm run eval:hard   # baseline (all 75 tables)
+SQL_CONTEXT=off PICKER=llm  npm run eval:hard   # + table selection only
+TAG=vote5 PICKER=llm VOTE=5 npm run eval:exp    # + best-of-5 (the headline row)
+PICKER=llm  npm run eval:hard:repair            # + self-repair
+npm run eval:easy                               # easy setting, all 500
 
 npm run diff -- runs/<before>.json runs/<after>.json   # what a change broke
 npm run rescore -- runs/<file>.json                    # re-grade a stored run
 ```
 
-The last two never call the model — a finished run holds the SQL it generated,
-so re-grading and diffing are database passes.
+Sample rows are on by default, because they are the best measured configuration.
+**`SQL_CONTEXT=off` is required to reproduce any number measured before
+2026-07-31**, all of which were taken without them. Every run stamps its full
+configuration into its own name, so a run can never be silently mislabeled — but
+the stamp catches the mistake afterwards rather than preventing it.
+
+The last two commands never call the model — a finished run holds the SQL it
+generated, so re-grading and diffing are database passes.
 
 Needs Docker Postgres with the BIRD dump loaded, `DATABASE_URL`,
 `DATABASE_URL_RO`, and `ANTHROPIC_API_KEY` in `.env` — see

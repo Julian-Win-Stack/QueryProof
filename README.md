@@ -2,7 +2,7 @@
 
 Ask a Postgres database a question in English; get SQL and rows back.
 
-**65.6% correct on [BIRD Mini-Dev](https://github.com/bird-bench/mini_dev)** —
+**68.8% correct on [BIRD Mini-Dev](https://github.com/bird-bench/mini_dev)** —
 against the **36.0%** GPT-4-turbo baseline BIRD publishes for the same 500
 questions, and measured in a harder setting than that baseline uses.
 
@@ -44,12 +44,14 @@ single-change experiments ran on the full 500 questions on 2026-07-31 alone, and
 nine of them are labelled *rejected* or *tie* in the log.
 
 **The pipeline.** Eleven real databases live in one Postgres instance. An LLM
-picks the relevant tables out of the 75; a second call writes the SQL from those
-tables' schemas plus five real sample rows each, under a prompt that pins the
-SELECT list to exactly what the question asks; two deterministic dialect
-repairs run over the SQL before it executes (`NULLS LAST` onto bare `DESC`,
-`::text` onto a date column that failed under `LIKE`); every query runs under a
-`SELECT`-only role. Model: `claude-sonnet-5`, pinned for every number here.
+picks the relevant tables out of the 75; deterministic code then adds every
+table owning a column the question's hint names, plus any bridge table a
+disconnected join path needs; a second call writes the SQL from those tables'
+schemas plus five real sample rows each, under a prompt that pins the SELECT
+list to exactly what the question asks; two deterministic dialect repairs run
+over the SQL before it executes (`NULLS LAST` onto bare `DESC`, `::text` onto a
+date column that failed under `LIKE`); every query runs under a `SELECT`-only
+role. Model: `claude-sonnet-5`, pinned for every number here.
 
 ## Results
 
@@ -63,6 +65,7 @@ is alien species).
 | + LLM table selection (~2 tables sent) | **59.2%** | 86.0% | $6.31 |
 | + five real sample rows per table | **61.0%²** | 85.4% | $7.34 |
 | + projection prompt rule + two dialect rewrites | **65.6%³** | 85.6% | $7.56 |
+| + code adds the tables the question's hint names | **68.8%⁴** | 93.6% | $8.71 |
 
 Noise: **±2.5 points**, from 3 repeat runs of one configuration — the model has
 no determinism knob, so every comparison is read against that band. Denominator:
@@ -101,6 +104,15 @@ the rewrites account for **exactly +7 questions**, because replaying the
 previous run's stored SQL with only the rewrites applied flips 7 wrong→right
 and 0 right→wrong — same SQL both sides, so no noise band applies. The
 remainder rides on the prompt rule ([RUNS.md](RUNS.md), Batch G).
+
+⁴ +3.2 against the row above, past the band. Sixteen failures shared one
+cause: the question's hint named a column (`cost`, `DisplayName`) and the
+picker never sent the table that owns it. Two attempts to fix that by
+instructing the picker had already failed — so about a hundred lines of code
+do the lookup instead, and repair join paths missing their middle table.
+Missing-table failures fell 49 → 23. Before any money was spent, the idea was
+verified free: applied to the stored picks of three finished runs, it recalled
+15 of the 16 ([RUNS.md](RUNS.md), 2026-08-01).
 
 ## What the table actually says
 
@@ -160,6 +172,13 @@ Five findings, all against intuition, all measured:
    from *different configurations* disagreeing, never from asking one
    configuration five times. What the vote left behind is a confidence signal:
    unanimous answers were right 72.3% of the time, split ones ~25%.
+
+6. **The model won't do a mechanical lookup, even when told to.** The headline
+   step's sixteen target failures all hinged on one lookup: the hint names a
+   column, some table owns it, go find which. Two picker-prompt rewrites — one
+   spelling out that exact step — fixed 5 and 6 of the 16. A hundred lines of
+   code that just do the lookup fixed 15, converted 10 into correct answers,
+   and set the headline. Instructions are suggestions; code is a guarantee.
 
 ## Why the numbers can be trusted
 
@@ -289,8 +308,8 @@ npm run demo        # http://localhost:3000
 
 Question in; picked tables, SQL, rows, and attempt count out — the
 table-selection configuration plus the self-repair loop from finding 3. The
-headline configuration's sample rows, projection prompt, and dialect rewrites
-are not on the product path yet. Answers flagged **low confidence** (empty
+headline configuration's sample rows, projection prompt, dialect rewrites, and
+table-addition code are not on the product path yet. Answers flagged **low confidence** (empty
 result, or a query that needed repair) were right 2.5% of the time on the
 measured run; everything else 63.7%. That heuristic was validated against a
 finished run before shipping — signals that didn't separate (thinking depth,
@@ -309,9 +328,10 @@ reports zero variance, which would fake the noise floor the numbers depend on.
 
 ```bash
 npm run validate-gold             # execute all 500 reference queries -> gold/
-PICKER=llm  npm run eval:hard     # the default configuration — prompt v4,
-                                  # table selection, five sample rows,
-                                  # dialect rewrites: 65.6%
+UNION=on PICKER=llm npm run eval:hard   # the headline configuration — table
+                                        # selection + hint-named table additions,
+                                        # sample rows, dialect rewrites: 68.8%
+PICKER=llm  npm run eval:hard           # without the table-addition code: 65.6%
 
 SQL_CONTEXT=off REWRITE=off PICKER=none npm run eval:hard  # baseline (all 75 tables)
 SQL_CONTEXT=off REWRITE=off PICKER=llm  npm run eval:hard  # + table selection only
@@ -324,10 +344,10 @@ npm run replay -- runs/<file>.json                     # rewrites on stored SQL
 npm run rescore -- runs/<file>.json                    # re-grade a stored run
 ```
 
-Sample rows and the dialect rewrites are on by default, because they are the
-best measured configuration. **`SQL_CONTEXT=off` is required to reproduce any
-number measured before 2026-07-31, and `REWRITE=off` for any number before
-2026-08-01** — the 61.0% row additionally needs `src/generate-sql.ts` importing
+Sample rows and the dialect rewrites are on by default; the table-addition
+code is not yet, so the headline row says `UNION=on` explicitly.
+**`SQL_CONTEXT=off` is required to reproduce any number measured before
+2026-07-31, and `REWRITE=off` for any number before 2026-08-01** — the 61.0% row additionally needs `src/generate-sql.ts` importing
 prompt v1, the same one-line switch every prompt change goes through. Every run
 stamps its full configuration into its own name, so a run can never be silently
 mislabeled — but the stamp catches the mistake afterwards rather than

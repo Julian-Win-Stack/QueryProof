@@ -1051,3 +1051,54 @@ export:        runs/20260801-202519-picker-v4-recall-stage1.json
                (smoke: runs/20260801-202415-picker-v4-recall-stage1.json, LIMIT=3, void)
 ```
 
+## 2026-08-01 — The union test: evidence-column union + FK bridge, measured offline for $0
+
+```
+approach:      no model calls — deterministic post-picker additions applied to
+               the stored selections of three runs (Batch G picker-v1, the
+               picker-v3 and picker-v4 stage-1 exports) and recall recomputed.
+               Code: src/pickers/union.ts — every catalog table owning a
+               column the evidence names whole-word (≤4 owners, underscores
+               match spaces) plus tables named outright, then a foreign-key
+               bridge when the picked set is disconnected.
+question set:  full (500 validated), replayed
+table recall:  picker-v1 85.6% -> 93.8% (469/500); targets 15/16 (0367 blocked
+               by the ≤4-owner guard on "text", accepted). v3/v4 bases land
+               at 467-468 — the prompt variants add nothing over v1+union.
+verdict:       kept — gate met (>=12 of 16 targets), stage 2 authorized
+note:          What two prompt rewrites could not make the model do (the
+               column->owner lookup), ~100 lines of code do deterministically.
+               Additions only, so per-question recall can never fall. Cost of
+               the win: avg tables sent 2.09 -> 3.78 — the EXPAND caveat
+               (recall without accuracy) stays open until stage 2. $0.
+export:        (offline computation; script scripts/evidence-union-recall.ts)
+```
+
+## 2026-08-01 — UNION=on on the Batch G base ⭐ new best number
+
+```
+approach:      mode=hard picker=llm union=on prompt=v4 pickerPrompt=picker-v1 sqlContext=rows rewrite=on model=claude-sonnet-5 effort=medium
+question set:  full (500 validated)
+accuracy:      68.8% (344/500)
+table recall:  93.6% (468/500); avg tables sent 3.75
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       kept
+note:          +3.2 vs Batch G's 65.6% — past the band by 0.7 points, the
+               same one-trial margin the rows run shipped with; a repeat
+               trial is cheap insurance before promoting to the README.
+               Diff vs Batch G: 27 gained, 10 lost, 463 unchanged. Triage:
+               table missing 49 -> 23. Of the 16 cluster-1 targets, 14 now
+               get their tables and 10 score correct (0014, 0039, 0045,
+               0057, 0063, 0206, 0266, 0314, 0356, 0366); 4 have the tables
+               and still write wrong SQL — those move to other clusters.
+               The EXPAND objection did not materialize: EXPAND bought
+               recall 95% with +0.4 accuracy because it added 3.5 blind
+               tables everywhere; the union adds ~1.7 *named* tables and
+               converted. Several of the 10 losses look like extra-table
+               column confusion (frpm."School Name" picked over
+               schools.school) — the known cost, net well worth it.
+               UNION stays default-off until Julian sets the default; this
+               run is the promotion case. 0 voids. $8.71.
+export:        runs/2026-08-01-141455-exp-union-full.json
+               (smoke: runs/2026-08-01-141430-exp-union-smoke-full.json, LIMIT=3, void)
+```

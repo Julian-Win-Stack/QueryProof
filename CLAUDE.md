@@ -37,6 +37,7 @@ npm run eval:pickers           # keyword vs LLM picker, one evalite.each run, de
 TAG=<name> PICKER=llm npm run eval:exp    # hard-mode experiment run; TAG names the export file
 npm run triage -- runs/<file>.json    # failure counts, four buckets, per suite
 npm run replay -- runs/<file>.json    # measure the dialect rewrites on stored SQL, no model calls
+npm run picker-recall          # picker-v3 recall vs a stored run's selections, no SQL generation
 npm run rescore -- runs/<file>.json   # re-grade a stored run, no model calls
 npm run diff -- runs/<a>.json runs/<b>.json  # per-question regressions and gains, no model calls
 npm run demo                   # the product surface, PRODUCT_PATH=1, port 3000
@@ -94,8 +95,11 @@ Postgres into the pure suite.
 `EVAL_DEV`, `PICKER`, `REPAIR`, `TRIALS`, `LIMIT`, `CONCURRENCY`, the Batch E
 experiment axes `PICKER_PROMPT`, `EXPAND`, `SQL_CONTEXT`, `PICKER_CONTEXT`,
 `CHECK`, the Batch F axis `VOTE=N` — best-of-N by execution agreement,
-`src/vote.ts` — and the Batch G axis `REWRITE` — dialect repairs,
-`src/rewrites.ts`, default **on** — see the header of `evals/main.eval.ts`). evalite's CLI
+`src/vote.ts` — the Batch G axis `REWRITE` — dialect repairs,
+`src/rewrites.ts`, default **on** — and the cluster-1 axis `UNION` —
+deterministic post-picker table additions from the evidence plus a foreign-key
+bridge, `src/pickers/union.ts`, default **off** — see the header of
+`evals/main.eval.ts`). evalite's CLI
 accepts no custom flags, so `npm run eval:dev -- --picker=llm` silently does
 nothing. Never add a second eval file to express a configuration. **Never name
 an eval env var `MODE`, `DEV`, `PROD`, or `BASE_URL`** — vite owns those names

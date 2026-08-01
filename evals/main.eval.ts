@@ -18,7 +18,7 @@
 //
 // Batch E experiment axes (2026-07-31), each defaulting to the published
 // configuration so an unset variable can never change a number:
-//   PICKER_PROMPT=picker-v1|picker-v2   which prompt the llm picker runs
+//   PICKER_PROMPT=picker-v1|picker-v2|picker-v3|picker-v4   which prompt the llm picker runs
 //   EXPAND=on|off        join-partner expansion after the llm picker
 //   SQL_CONTEXT=rows,values,desc        extras in the SQL prompt (comma list).
 //                        Defaults to "rows" — the published configuration, not
@@ -46,6 +46,12 @@
 //                        runs must say REWRITE=off — a check rewrite skips the
 //                        dialect repairs, so the combined stamp would lie.
 //
+// Cluster-1 axis (2026-08-01):
+//   UNION=on|off         deterministic post-picker additions
+//                        (src/pickers/union.ts): tables owning a column the
+//                        evidence names come in, then a foreign-key bridge
+//                        repairs a disconnected pick. Defaults to off.
+//
 // EVAL_MODE and EVAL_DEV, not the MODE and DEV the plan wrote: vite owns both
 // names and sets them inside every worker (MODE="test", DEV="1"), so a run
 // configured with them silently reads vite's values — the first eval:easy run
@@ -69,6 +75,7 @@ import { EFFORT, MODEL, usdCost } from '../src/model.ts';
 import { expandWithJoinPartners } from '../src/pickers/expand.ts';
 import { keywordPick } from '../src/pickers/keyword.ts';
 import { llmPick, PICKER_V1, type PickerPrompt } from '../src/pickers/llm.ts';
+import { bridgeDisconnected, unionEvidenceTables } from '../src/pickers/union.ts';
 import {
   buildPickerExtras,
   buildSqlExtras,
@@ -82,6 +89,8 @@ import { extractGoldTables, recallHit } from '../src/table-recall.ts';
 import { voteAnswer } from '../src/vote.ts';
 import { CHECK_PROMPT_VERSION } from '../src/prompts/check-v1.ts';
 import * as pickerV2 from '../src/prompts/picker-v2.ts';
+import * as pickerV3 from '../src/prompts/picker-v3.ts';
+import * as pickerV4 from '../src/prompts/picker-v4.ts';
 import { PROMPT_VERSION } from '../src/generate-sql.ts';
 
 const GOLD_PATH = new URL('../gold/validated.json', import.meta.url);
@@ -127,6 +136,7 @@ const REPAIR: boolean = readRepair();
 // variable that silently does nothing is how a run gets mislabeled.
 const PICKER_PROMPT: PickerPrompt = readPickerPrompt();
 const EXPAND: boolean = readExpand();
+const UNION: boolean = readUnion();
 // Sample rows are on by default — they are the published configuration, and the
 // axis defaults to whatever is published so an unset variable never silently
 // changes a number. SQL_CONTEXT=off reproduces a pre-2026-07-31 baseline. The
@@ -157,13 +167,39 @@ function requireOutsideBakeoff(name: string): void {
 function readPickerPrompt(): PickerPrompt {
   const value = process.env.PICKER_PROMPT;
   if (value === undefined || value === 'picker-v1') return PICKER_V1;
-  if (value !== 'picker-v2') throw new Error(`PICKER_PROMPT="${value}" — picker-v1 or picker-v2`);
-  requireLlmPicker('PICKER_PROMPT=picker-v2');
-  return {
-    version: pickerV2.PICKER_PROMPT_VERSION,
-    system: pickerV2.PICKER_SYSTEM,
-    buildMessage: pickerV2.buildPickerMessage,
-  };
+  if (value === 'picker-v2') {
+    requireLlmPicker('PICKER_PROMPT=picker-v2');
+    return {
+      version: pickerV2.PICKER_PROMPT_VERSION,
+      system: pickerV2.PICKER_SYSTEM,
+      buildMessage: pickerV2.buildPickerMessage,
+    };
+  }
+  if (value === 'picker-v3') {
+    requireLlmPicker('PICKER_PROMPT=picker-v3');
+    return {
+      version: pickerV3.PICKER_PROMPT_VERSION,
+      system: pickerV3.PICKER_SYSTEM,
+      buildMessage: pickerV3.buildPickerMessage,
+    };
+  }
+  if (value === 'picker-v4') {
+    requireLlmPicker('PICKER_PROMPT=picker-v4');
+    return {
+      version: pickerV4.PICKER_PROMPT_VERSION,
+      system: pickerV4.PICKER_SYSTEM,
+      buildMessage: pickerV4.buildPickerMessage,
+    };
+  }
+  throw new Error(`PICKER_PROMPT="${value}" — picker-v1, picker-v2, picker-v3, or picker-v4`);
+}
+
+function readUnion(): boolean {
+  const value = process.env.UNION;
+  if (value === undefined || value === 'off') return false;
+  if (value !== 'on') throw new Error(`UNION="${value}" — on or off`);
+  requireLlmPicker('UNION=on');
+  return true;
 }
 
 function readExpand(): boolean {
@@ -332,6 +368,7 @@ type QuestionResult = {
   promptVersion: string;
   pickerPromptVersion: string;
   expand: string;
+  union: string;
   sqlContext: string;
   pickerContext: string;
   check: string;
@@ -372,9 +409,13 @@ async function selectTables(record: GoldRecord, picker: PickerName): Promise<Sel
     catalog,
     PICKER_PROMPT,
     pickerExtras === null ? undefined : await pickerExtras,
+    record.evidence,
   );
+  const expanded = EXPAND ? expandWithJoinPartners(picked.tables, catalog) : picked.tables;
   return {
-    tables: EXPAND ? expandWithJoinPartners(picked.tables, catalog) : picked.tables,
+    tables: UNION
+      ? bridgeDisconnected(unionEvidenceTables(expanded, record.evidence, catalog), catalog)
+      : expanded,
     pickerTokensIn: picked.usage.inputTokens,
     pickerTokensOut: picked.usage.outputTokens,
     pickerUsd: usdCost(picked.usage),
@@ -445,6 +486,7 @@ async function runQuestion(record: GoldRecord, picker: PickerName): Promise<Ques
     promptVersion: answer.promptVersion,
     pickerPromptVersion: selection.pickerPromptVersion,
     expand: EXPAND ? 'on' : 'off',
+    union: UNION ? 'on' : 'off',
     sqlContext: SQL_CONTEXT.join(','),
     pickerContext: PICKER_CONTEXT.join(','),
     check: CHECK,
@@ -466,6 +508,7 @@ const runName = [
   `prompt=${PROMPT_VERSION}`,
   ...(BAKEOFF || PICKER === 'llm' ? [`pickerPrompt=${PICKER_PROMPT.version}`] : []),
   ...(EXPAND ? ['expand=on'] : []),
+  ...(UNION ? ['union=on'] : []),
   ...(SQL_CONTEXT.length > 0 ? [`sqlContext=${SQL_CONTEXT.join(',')}`] : []),
   ...(PICKER_CONTEXT.length > 0 ? [`pickerContext=${PICKER_CONTEXT.join(',')}`] : []),
   ...(CHECK !== 'off' ? [`check=${CHECK} ${CHECK_PROMPT_VERSION}`] : []),

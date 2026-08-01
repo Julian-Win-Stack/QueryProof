@@ -10,9 +10,11 @@ import { buildUserMessage, PROMPT_VERSION, SYSTEM, type FailedAttempt } from './
 // the import above can never leave a run labeled with the wrong prompt.
 //
 // v5 = v4 plus three aggregation-shape rules (percentage, formula, grain) —
-// the bundle run, 2026-08-01. v4 carried the 65.6% Batch G number; v2 and v3
-// measured as ties and stay unshipped; see "The default configuration" in
-// CLAUDE.md and RUNS.md.
+// the bundle run, 2026-08-01, 72.4%. v6 (ten more targeted rules) measured
+// 71.0%, a tie that converted 8 named targets while its rules broke about as
+// many passers — rejected, stays in src/prompts/ as evidence. v4 carried the
+// 65.6% Batch G number; v2 and v3 measured as ties and stay unshipped; see
+// "The default configuration" in CLAUDE.md and RUNS.md.
 export { PROMPT_VERSION };
 
 const SQL_SCHEMA = {

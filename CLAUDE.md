@@ -90,10 +90,13 @@ Four things follow from this, and each one has bitten:
   the union run's 68.8% or anything earlier needs `CHECK=off REPAIR=off`. Run
   names stamp all of them either way, so no run is ever mislabeled — but a
   baseline re-run without the `off`s is measuring the wrong thing.
-- **v5 is the default; v1–v4 stay in `src/prompts/`** as the evidence behind
-  their RUNS.md entries. Reproducing the 68.8 run needs the `generate-sql.ts`
-  import switched back to v4 *and* `CHECK=off REPAIR=off`; the 61.0 run needs
-  v1, `REWRITE=off`, `UNION=off`, `CHECK=off`, `REPAIR=off`.
+- **v5 is the default; v1–v4 and the rejected v6 stay in `src/prompts/`** as
+  the evidence behind their RUNS.md entries. v6 (ten more targeted rules)
+  measured 71.0%, a tie that broke as many passers as it converted targets —
+  the prompt lever is exhausted. Reproducing the 68.8 run needs the
+  `generate-sql.ts` import switched back to v4 *and* `CHECK=off REPAIR=off`;
+  the 61.0 run needs v1, `REWRITE=off`, `UNION=off`, `CHECK=off`,
+  `REPAIR=off`.
 - **`CHECK` composes with `REWRITE` since the v5 bundle (2026-08-01)** — a
   check-produced rewrite goes through the same dialect repairs in
   `src/check.ts`, so the combined stamp holds. (Before this, the eval threw

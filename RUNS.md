@@ -1183,3 +1183,70 @@ note:          Not a measurement — the smoke that proves the new default
                stay in src/prompts/ as the evidence behind their entries.
 export:        runs/2026-08-01-152040-exp-default-check-v5-full.json
 ```
+
+## 2026-08-01 — Prompt v6 wiring smoke (LIMIT=3)
+
+```
+approach:      mode=hard picker=llm limit=3 prompt=v6, defaults otherwise
+verdict:       void
+note:          Not a measurement — proves the v6 import stamps. Suite name
+               came back "repair=on | prompt=v6 | union=on | sqlContext=rows |
+               check=probe check-v1 | rewrite=on". 3/3 scored, no crashes.
+export:        runs/2026-08-01-155118-exp-smoke-v6-full.json
+```
+
+## 2026-08-01 — Prompt v6: ten targeted rules from the v5-bundle failure analysis
+
+```
+approach:      mode=hard picker=llm, prompt=v6, all other defaults (probe,
+               repair, union, rewrites, rows). v6 = v5 + ten rules, each with
+               named targets from the 40-still-failing analysis: hint dialect
+               (SUM(cond) = row count; 0391 0480), population after "of" wins
+               the denominator (0281), multiply by 100 before dividing (0462),
+               percentage populations join INNER (0353 0372), row-vs-aggregate
+               comparisons filter rows + DISTINCT (0075), "Rank X by Y"
+               returns entity, Y, RANK() (0249 0250 0441), evidence
+               value-format definitions are filters (0225), stored quantity
+               columns read per row (0461), "average of each Y" is GROUP BY
+               not a window (0319), group entities by key not name (0138).
+               14 named targets. Deliberately excluded with evidence:
+               keep-ties (gold votes 83:2 for LIMIT 1), 0218 (hint and gold
+               contradict each other), 0236 (already-covered projection
+               re-roll).
+result:        71.0% (355/500)
+verdict:       rejected
+note:          −1.4 vs the v5 bundle's 72.4% — inside the ±2.5 band, a tie
+               with a worse point estimate. Default stays v5; the import was
+               reverted the same day. v6 stays in src/prompts/ as evidence.
+
+               Targets: 8 of 14 converted (0281 0462 0372 0075 0249 0441
+               0461 0138). Missed: 0391 0480 (dialect rule converted neither
+               of its targets), 0353, 0250, 0225, 0319.
+
+               Diff vs v5 bundle: 18 gained, 25 lost. The 18 gains: 8 named
+               targets, 10 churn (0011 0013 0024 0058 0306 0351 0366 0432
+               0449 0465 — including four from buckets judged unfixable,
+               which flipped on re-rolls). Of the 25 losses, ~7 carry a new
+               rule's fingerprint in the SQL:
+                 0202  dialect rule misread wins (a numeric column) as a
+                       condition — WHERE wins = 1
+                 0222  row-level rule flattened a per-race SUM(points)=0
+                       into WHERE points = 0
+                 0102  DISTINCT push forced the ORDER BY column into SELECT
+                 0080  English-population rule — the exact mirror of its
+                       0281 win; gold follows the hint here and the English
+                       there, so the pair is jointly unwinnable
+                 0175  rank rule bled into a top-N question, adding the
+                       measure column
+                 0364  per-row rule produced a per-row window shape on a
+                       single-number percentage
+                 0093  percent push added ×100 to a rate
+               The other ~18 losses are wobble — 8 of them (0087 0188 0202*
+               0222* 0336 0358 0364* 0445) are the v5 bundle's own
+               unattributed churn gains churning back out (*both readings
+               apply). Rule ledger nets ≈ 0: the ten rules won 8 and broke
+               ~7. The prompt lever is exhausted — at ten-plus rules, new
+               rules break as many passers as they convert targets.
+               0 voids. $10.44.
+export:        runs/2026-08-01-155140-exp-v6-bundle-full.json
+```

@@ -11,8 +11,11 @@ This is a measurement project, not a product: how far can one pinned model
 it stops where it stops. Every run, including every failed idea, has an entry
 in [RUNS.md](RUNS.md) with a verdict and a committed JSON export in `runs/`.
 
+
 Loom: https://www.loom.com/share/f578e364fb4e485494af0b4b94f789dd 
 (If you do only one thing, watch the loom but the ReadMe has the details of the experiments and my judgements.)
+
+
 
 **Headline: 72.4% (362 of 500).** The measured ceiling of this benchmark is
 **77.6%**; the gap is explained below, question by question.

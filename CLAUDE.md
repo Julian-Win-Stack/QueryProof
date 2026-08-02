@@ -157,10 +157,11 @@ run was voided by exactly this.
   gets wrong that a known mechanism could still win — 8 agent-reachable, 2
   pipeline-fixable below the noise band, 11 re-roll-only — each with the
   reference SQL, ours, and — for 10 of them — SQL from another run that did
-  match. The 116 out-of-reach failures (97 broken or unguessable references,
-  19 measured dead ends, reclassified 2026-08-01) are excluded on purpose; the
-  doc's provenance note lists the 19 by id. Read it before proposing any
-  accuracy work.
+  match. The 112 out-of-reach failures (93 broken or unguessable references,
+  19 measured dead ends; reclassified 2026-08-01, corrected by erratum the
+  same night — 4 moved to churn) are excluded on purpose; the doc's
+  provenance note lists the 19 by id. Read it before proposing any accuracy
+  work.
 
 The plan is executed across many sessions. A decision reversed without being
 recorded produces two numbers that look comparable and are not.

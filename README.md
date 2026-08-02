@@ -9,9 +9,9 @@ questions, and measured in a harder setting than that baseline uses.
 Correct means *the generated SQL ran and returned the same rows as the reference
 SQL*. No LLM judges anything, anywhere.
 
-> ### 116 of the 500 questions are out of reach
+> ### 112 of the 500 questions are out of reach
 >
-> **That is 23.2% of the benchmark, and it caps this project at 76.8%.** 97 are
+> **That is 22.4% of the benchmark, and it caps this project at 77.6%.** 93 are
 > impossible — not a hard subset, impossible: the reference query is broken, or
 > it answers in a format the question never asks for, and no honest system can
 > match it. The other 19 are measured dead ends — each is matchable on its own,
@@ -25,6 +25,11 @@ SQL*. No LLM judges anything, anywhere.
 > | The question is genuinely ambiguous | 11 | Two honest readings, different numbers; the reference picked one. |
 > | Other | 4 | |
 > | A fix loses as much as it wins — measured | 19 | The reference counts 258 ban rows where the question asks how many cards; twin questions count distinct. A rule picking either side trades wins for losses. |
+>
+> *Erratum (2026-08-01): four questions originally filed as impossible (0070,
+> 0091, 0349, 0465) have since scored correct in committed runs, so they were
+> flippers, not impossible — they moved to churn. The headline counts above are
+> corrected; the per-row split still includes them.*
 >
 > **Checked, not claimed.** Every one of the 500 questions was re-graded by
 > executing both queries. The 137 that no configuration ever solved were then

@@ -1626,3 +1626,51 @@ note:          0 voids. vs agent-v1: +12/−18. Of the 18 losses, 17
 cost:          $13.72.
 export:        runs/2026-08-01-213707-agent-llm-full.json
 ```
+
+## 2026-08-01 — Analysis addendum: the repeatable core, the flip concentration, an erratum
+
+```
+approach:      no model calls — computed from committed exports (the v5
+               bundle, both agent full runs, and the identical-config
+               pair 2026-07-30-194011 / 2026-07-31-151918).
+verdict:       recorded — analysis only, no accuracy claim, nothing re-run.
+finding 1:     the agent-vs-pipeline diff has a repeatable core. Splitting
+               agent-v3's +9/−21 against the v5 bundle by consistency
+               across both agent rolls: 8 of the 21 losses flip between
+               the agent's own two runs (0014 0090 0125 0358 0411 0433
+               0477, plus 0374, the measured rule cost); 13 fail both
+               agent rolls while the pipeline passes (0025 0056 0087 0111
+               0169 0188 0216 0222 0288 0445 0454 0483 0495). 7 of the 9
+               gains hold in both rolls (0013 0070 0091 0199 0306 0372
+               0449); 0351 and 0432 are single-roll. Repeatable core:
+               +7/−13, net −6 questions (1.2 points, inside the band).
+               Mechanism, read from the 13 side by side: 8 are two-reading
+               conventions — the agent picks the sensible reading where
+               gold wants the literal one (rank vs position 0216, which
+               points table 0222, which diagnosis column 0087, which id
+               0169, which name and meal columns 0445, keep-ties 0454,
+               stored frequency code vs computed count 0495, and 0483,
+               where the agent added status='A' against the prompt's
+               explicit rule in 2 of 2 rolls because the inspected data
+               argued for it); 2 are projection (0188 returned the website
+               without the who, 0288 added a label column); 3 are
+               undiagnosed near-misses (0025 0056 0111). This sharpens the
+               previous entry's framing: vs the pipeline the diff is not
+               all churn — the agent trades lookup questions for
+               convention questions, and the trade runs −6.
+finding 2:     the flipping is concentrated, not general. The identical-
+               config pair agrees on 454 of 500 questions; 46 flip.
+               Across the three modern full runs (v5 bundle, agent-v1,
+               agent-v3): 331 always right, 119 always wrong, 50 move.
+               46 gross flips is the population size that produces the
+               measured ±2.5 band — the two are one measurement seen
+               twice. Instability is a property of specific questions
+               (the two-reading ones), not of the benchmark.
+finding 3:     recorded as an erratum in docs/winnable-failures.md: 0070
+               0091 0349 0465 were filed among the 97 never-scoreable yet
+               hold committed correct runs (0070 and 0091 in pipeline
+               rolls and both agent rolls; 0349 and 0465 in agent-v1).
+               Out of reach 116 → 112, churn 1 → 5, ceiling 384 → 388
+               (77.6%).
+exports:       none new.
+```

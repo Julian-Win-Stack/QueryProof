@@ -32,6 +32,17 @@ could still win. This is the work list.
 >   gold contradicts its own evidence; 0152 needs a keep-ties shape that 83
 >   other golds punish.
 >
+> **Erratum (2026-08-01, night).** Four questions filed among the 97
+> never-scoreable hold committed correct runs and therefore cannot be
+> never-scoreable: 0070 (correct in the rows, v4-rewrites and union pipeline
+> runs, and in both agent full runs), 0091 (correct in the rows run and both
+> agent runs), 0349 and 0465 (correct in the agent-v1 run). They move to
+> churn. Corrected counts: 93 never-scoreable + 19 dead = 112 out of reach;
+> churn grows 1 → 5 (0306 0070 0091 0349 0465); ceiling 384 → 388 (77.6%).
+> The remaining 93 have not been audited id by id — the class was built by
+> elimination, and this erratum is the measured reason to distrust it a
+> little.
+>
 > Entry bodies below are kept verbatim from when the list was built (the 61.0%
 > run) and stamped per later run — the "What we did" text describes that run's
 > SQL, not necessarily the current default's.
@@ -41,14 +52,15 @@ could still win. This is the work list.
 The current default answers 500 questions and gets **362 right** (the
 2026-08-01 v5-bundle run). Of the 138 it gets wrong:
 
-- **116 are out of reach.** 97 could never be scored correct — broken reference
-  SQL or an unguessable output format. 19 more are the measured dead ends
-  listed above.
+- **112 are out of reach.** 93 could never be scored correct — broken reference
+  SQL or an unguessable output format (97 until the erratum above removed
+  four). 19 more are the measured dead ends listed above.
 - **21 are winnable.** They are all here.
-- **1 is churn** — a question that passes in most runs and happened to fail in
-  this one. In neither list.
+- **5 are churn** — questions that pass in other committed runs and happened
+  to fail in this one: 0306, plus the erratum's 0070 0091 0349 0465. In
+  neither list.
 
-So the ceiling on this benchmark is **384 of 500, 76.8%**, and the live
+So the ceiling on this benchmark is **388 of 500, 77.6%**, and the live
 headroom over the current 362 is these 21 questions — about 4.2 points.
 
 ## How grading works

@@ -1,5 +1,66 @@
 # Run log
 
+## Index
+
+| Run | What changed | Result | Verdict |
+|---|---|---|---|
+| [run-2026-07-30-152701-easy-dev](#run-2026-07-30-152701-easy-dev) | First dev-slice run | 58.0% (58/100) | kept |
+| [run-2026-07-30-152736-easy-dev](#run-2026-07-30-152736-easy-dev) | Sabotage check (Phase 5c) | 98.0% — comparator forced to true, meaningless by design | void |
+| [run-2026-07-30-152816-easy-dev](#run-2026-07-30-152816-easy-dev) | Noise floor, 3 trials (Phase 5c) | 52% / 57% / 57% per trial | kept |
+| [run-2026-07-30-152905-easy-full](#run-2026-07-30-152905-easy-full) | eval:easy, voided: vite clobbers DEV | 57.0% — discarded | void |
+| [run-2026-07-30-153025-easy-full](#run-2026-07-30-153025-easy-full) | EASY on all 500 ⭐ the first accuracy number | 55.4% (277/500) | kept |
+| [run-2026-07-30-191137-pickers-dev](#run-2026-07-30-191137-pickers-dev) | Bake-off wiring smokes (LIMIT=3), two runs | wiring smoke — number meaningless by construction (LIMIT stamps the run name) | void |
+| [run-2026-07-30-191255-pickers-dev](#run-2026-07-30-191255-pickers-dev) | Picker bake-off, keyword vs LLM (Phase 6c) ⭐ first HARD numbers | keyword 45.0% \| llm 56.0% | kept |
+| [run-2026-07-30-193533-hard-none-dev](#run-2026-07-30-193533-hard-none-dev) | HARD baseline rehearsal, dev slice (Phase 6d) | 59.0% | kept |
+| [run-2026-07-30-193710-hard-none-full](#run-2026-07-30-193710-hard-none-full) | HARD baseline on all 500 ⭐ README row 1 | 54.6% (273/500) | kept |
+| [run-2026-07-30-194011-hard-llm-full](#run-2026-07-30-194011-hard-llm-full) | HARD + llm picker on all 500 ⭐ README row 2 | 55.4% (277/500) | kept |
+| [run-2026-07-30-194201-hard-llm-repair-smoke](#run-2026-07-30-194201-hard-llm-repair-smoke) | Repair wiring smoke (LIMIT=3) | wiring smoke — number meaningless by construction | void |
+| [run-2026-07-30-194223-hard-llm-repair-full](#run-2026-07-30-194223-hard-llm-repair-full) | HARD + llm + self-repair on all 500 ⭐ README row 3 | 54.8% (274/500) | kept |
+| [run-2026-07-30-152816-easy-dev-rescored](#run-2026-07-30-152816-easy-dev-rescored) | Noise band, re-derived under the new rule | 55.0% / 60.0% / 60.0% per trial (was 52 / 57 / 57) | kept |
+| [run-2026-07-30-193710-hard-none-full-rescored](#run-2026-07-30-193710-hard-none-full-rescored) | HARD baseline on all 500 — README row 1, re-scored | 57.4% (287/500) — was 54.6% (273/500) | kept |
+| [run-2026-07-30-194011-hard-llm-full-rescored](#run-2026-07-30-194011-hard-llm-full-rescored) | HARD + llm picker on all 500 — README row 2, re-scored | 59.2% (296/500) — was 55.4% (277/500) | kept |
+| [run-2026-07-30-194223-hard-llm-repair-full-rescored](#run-2026-07-30-194223-hard-llm-repair-full-rescored) | HARD + llm + self-repair on all 500 — README row 3, re-scored | 58.8% (294/500) — was 54.8% (274/500) | kept |
+| [run-2026-07-30-153025-easy-full-rescored](#run-2026-07-30-153025-easy-full-rescored) | EASY on all 500 — the yardstick, re-scored | 58.4% (292/500) — was 55.4% (277/500) | kept |
+| [run-2026-07-31-122519-hard-none-dev](#run-2026-07-31-122519-hard-none-dev) | prompt v2: an output-contract rule for the extra-column failure | 57.0% (171/300 over 3 trials) — 58.0 / 55.0 / 58.0 | rejected |
+| [run-2026-07-31-1513-exp-smoke](#run-2026-07-31-1513-exp-smoke) | Batch E wiring smokes (LIMIT=3), six runs | wiring smokes — numbers meaningless by construction (LIMIT stamps the run name) | void |
+| [run-2026-07-31-151521-hard-llm-full](#run-2026-07-31-151521-hard-llm-full) | Batch E control, first attempt: voided, store collision | none — the export is empty | void |
+| [run-2026-07-31-151524-exp-picker-v2-full](#run-2026-07-31-151524-exp-picker-v2-full) | Batch E run 1: picker-v2, the over-include rule | 58.4% (292/500) | rejected |
+| [run-2026-07-31-151918-hard-llm-full](#run-2026-07-31-151918-hard-llm-full) | Batch E run 0: the control ⭐ every Batch E number reads against this | 57.8% (289/500) | kept |
+| [run-2026-07-31-152021-exp-expand-full](#run-2026-07-31-152021-exp-expand-full) | Batch E run 2: join-partner expansion | 58.2% (291/500) | rejected |
+| [run-2026-07-31-152120-exp-rows-full](#run-2026-07-31-152120-exp-rows-full) | Batch E run 3: five sample rows per table ⭐ beat the band | 61.0% (305/500) | kept |
+| [run-2026-07-31-152223-exp-values-sql-full](#run-2026-07-31-152223-exp-values-sql-full) | Batch E run 4: distinct-value lists in the SQL prompt | 59.2% (296/500) | rejected |
+| [run-2026-07-31-152329-exp-values-picker-full](#run-2026-07-31-152329-exp-values-picker-full) | Batch E run 5: distinct-value lists in the picker prompt | 58.6% (293/500) | rejected |
+| [run-2026-07-31-152439-exp-desc-sql-full](#run-2026-07-31-152439-exp-desc-sql-full) | Batch E run 6: BIRD column descriptions in the SQL prompt | 58.6% (293/500) | rejected |
+| [run-2026-07-31-152536-exp-desc-picker-full](#run-2026-07-31-152536-exp-desc-picker-full) | Batch E run 7: BIRD descriptions in the picker prompt — voided | 57.6% (268/465) — never comparable: 35 voids | void |
+| [run-2026-07-31-152651-exp-probe-full](#run-2026-07-31-152651-exp-probe-full) | Batch E run 8: probe-on-empty | 60.2% (301/500) | rejected |
+| [run-2026-07-31-152802-exp-self-full](#run-2026-07-31-152802-exp-self-full) | Batch E run 9: self-check every result ⭐ beat the band | 61.4% (307/500) | kept |
+| [run-2026-07-31-153049-exp-stack-full](#run-2026-07-31-153049-exp-stack-full) | Batch E run 10: stack the winners (rows + self-check) | 60.0% (300/500) | rejected |
+| [run-2026-07-31-180141-exp-smoke-runa-full](#run-2026-07-31-180141-exp-smoke-runa-full) | Batch F run A wiring smoke (LIMIT=3) | wiring smoke | void |
+| [run-2026-07-31-180211-exp-rows-v3-full](#run-2026-07-31-180211-exp-rows-v3-full) | Batch F run A: counting rule (prompt v3) on the rows base | 61.6% (308/500) | rejected |
+| [run-2026-07-31-181031-exp-smoke-runb-full](#run-2026-07-31-181031-exp-smoke-runb-full) | Batch F run B wiring smoke (LIMIT=3) | wiring smoke | void |
+| [run-2026-07-31-181111-exp-vote5-full](#run-2026-07-31-181111-exp-vote5-full) | Batch F run B: best-of-5 by execution agreement | 62.4% (312/500) | rejected |
+| [run-2026-07-31-204731-exp-default-check-full](#run-2026-07-31-204731-exp-default-check-full) | Default set to the 61.0% configuration (wiring smoke, LIMIT=3) | not a measurement (default-check smoke) | void |
+| [run-2026-08-01-rewrites-replay](#run-2026-08-01-rewrites-replay) | Rewrites replayed over the rows run's stored SQL (no model calls) | baseline 305/500 (61.0%) -> both rewrites 312/500 (62.4%) | kept |
+| [run-2026-08-01-122859-exp-smoke-g1-full](#run-2026-08-01-122859-exp-smoke-g1-full) | Batch G wiring smoke (LIMIT=3) | wiring smoke | void |
+| [run-2026-08-01-122927-exp-v4-rewrites-full](#run-2026-08-01-122927-exp-v4-rewrites-full) | Batch G: prompt v4 (projection) + dialect rewrites ⭐ new best | 65.6% (328/500) | kept |
+| [run-2026-08-01-123304-exp-default-check-g-full](#run-2026-08-01-123304-exp-default-check-g-full) | Default set to the 65.6% configuration (wiring smoke, LIMIT=3) | not a measurement (default-check smoke) | void |
+| [run-20260801-200012-picker-v3-recall-stage1](#run-20260801-200012-picker-v3-recall-stage1) | picker-v3 (evidence in the picker), stage 1: recall only | table recall 87.6% (438/500) vs baseline 85.6% (428/500) | rejected |
+| [run-20260801-202519-picker-v4-recall-stage1](#run-20260801-202519-picker-v4-recall-stage1) | picker-v4 (evidence + explicit lookup rules), stage 1: recall only | table recall 88.4% (442/500) vs baseline 85.6% (428/500) | rejected |
+| [run-2026-08-01-union-test-offline](#run-2026-08-01-union-test-offline) | The union test: evidence-column union + FK bridge, measured offline for $0 | table recall 85.6% -> 93.8% (469/500), offline | kept |
+| [run-2026-08-01-141455-exp-union-full](#run-2026-08-01-141455-exp-union-full) | UNION=on on the Batch G base ⭐ new best number | 68.8% (344/500) | kept |
+| [run-2026-08-01-150902-exp-v5-bundle-full](#run-2026-08-01-150902-exp-v5-bundle-full) | v5 bundle: aggregation rules + probe + repair ⭐ new best | 72.4% (362/500) | kept |
+| [run-2026-08-01-152040-exp-default-check-v5-full](#run-2026-08-01-152040-exp-default-check-v5-full) | Default set to the 72.4% configuration (wiring smoke, LIMIT=3) | not a measurement (default-check smoke) | void |
+| [run-2026-08-01-155118-exp-smoke-v6-full](#run-2026-08-01-155118-exp-smoke-v6-full) | Prompt v6 wiring smoke (LIMIT=3) | wiring smoke | void |
+| [run-2026-08-01-155140-exp-v6-bundle-full](#run-2026-08-01-155140-exp-v6-bundle-full) | Prompt v6: ten targeted rules from the v5-bundle failure analysis | 71.0% (355/500) | rejected |
+| [run-2026-08-01-175954-ids-v7-targets](#run-2026-08-01-175954-ids-v7-targets) | Prompt v7 on its three named ids only (not a 500-question run) | subset only — no accuracy number | kept |
+| [run-2026-08-01-181519-ids-v7-exposed](#run-2026-08-01-181519-ids-v7-exposed) | Prompt v7 vs v5, paired, on the 74 passers the two rules can touch | v7 64/74 right, v5 control 66/74 right | rejected |
+| [run-2026-08-01-200115-ids-agent-targets](#run-2026-08-01-200115-ids-agent-targets) | Agent, subset runs: 8 named targets + 20-passer regression check (not a 500-question run) | targets 3/8, regression 19/20 held | kept |
+| [run-2026-08-01-200320-agent-llm-full](#run-2026-08-01-200320-agent-llm-full) | The agent, full 500: parity with the pipeline at first attempt | 71.2% (356/500) | kept |
+| [run-2026-08-01-205147-ids-agent2-targets](#run-2026-08-01-205147-ids-agent2-targets) | Agent v2, subset runs: bounce + discipline prompt, two-check protocol (not a 500-question run) | targets 5/8, controls 32/35 | rejected in part |
+| [run-2026-08-01-205534-ids-agent3-limit-sensitive](#run-2026-08-01-205534-ids-agent3-limit-sensitive) | Agent v3 = v2 minus the LIMIT sentence: the agent default (not a 500-question run) | limit set 6/8, targets 6/9 | kept |
+| [run-2026-08-01-213707-agent-llm-full](#run-2026-08-01-213707-agent-llm-full) | Agent v3 + bounce, full 500: three rolls, one plateau | 70.0% (350/500) | kept |
+| [run-2026-08-01-analysis-addendum](#run-2026-08-01-analysis-addendum) | Analysis addendum: the repeatable core, the flip concentration, an erratum | analysis only, no accuracy claim | recorded |
+
 Append-only. One entry per eval run, written when the run finishes. **Never edit
 a past entry** — locking the number is the entire point of this file. A run with
 no entry here did not happen.
@@ -93,6 +154,8 @@ in `docs/decisions.md`.
 
 ---
 
+<a id="run-2026-07-30-152701-easy-dev"></a>
+
 ## 2026-07-30 — First dev-slice run
 
 ```
@@ -106,6 +169,8 @@ note:          First number on the harness. 2 Postgres errors, 0 voids.
                184,623 in / 12,492 out — $0.49.
 export:        runs/2026-07-30-152701-easy-dev.json
 ```
+
+<a id="run-2026-07-30-152736-easy-dev"></a>
 
 ## 2026-07-30 — Sabotage check (Phase 5c)
 
@@ -125,6 +190,8 @@ note:          Grader check, not a measurement: compareRows forced to return
 export:        runs/2026-07-30-152736-easy-dev.json
 ```
 
+<a id="run-2026-07-30-152816-easy-dev"></a>
+
 ## 2026-07-30 — Noise floor, 3 trials (Phase 5c)
 
 ```
@@ -141,6 +208,8 @@ note:          The band every later dev-slice comparison is read against. A
                questions — real model variance, not cache. 0 voids, $1.49.
 export:        runs/2026-07-30-152816-easy-dev.json
 ```
+
+<a id="run-2026-07-30-152905-easy-full"></a>
 
 ## 2026-07-30 — eval:easy, voided: vite clobbers DEV
 
@@ -159,6 +228,8 @@ note:          Wrong configuration. The eval read `DEV=1` that vite itself sets
                the D8 amendment in docs/decisions.md.
 export:        runs/2026-07-30-152905-easy-full.json
 ```
+
+<a id="run-2026-07-30-153025-easy-full"></a>
 
 ## 2026-07-30 — EASY on all 500 ⭐ the first accuracy number
 
@@ -182,6 +253,8 @@ note:          The EASY yardstick (D15: run once, never tuned). By difficulty:
 export:        runs/2026-07-30-153025-easy-full.json
 ```
 
+<a id="run-2026-07-30-191137-pickers-dev"></a>
+
 ## 2026-07-30 — Bake-off wiring smokes (LIMIT=3), two runs
 
 ```
@@ -197,6 +270,8 @@ note:          Two runs. The first caught a real bug before money was spent at
 export:        runs/2026-07-30-191137-pickers-dev.json (broken llm variant)
                runs/2026-07-30-191210-pickers-dev.json (clean)
 ```
+
+<a id="run-2026-07-30-191255-pickers-dev"></a>
 
 ## 2026-07-30 — Picker bake-off, keyword vs LLM (Phase 6c) ⭐ first HARD numbers
 
@@ -222,6 +297,8 @@ note:          First HARD-mode numbers. The gaps dwarf the band: +11 accuracy,
 export:        runs/2026-07-30-191255-pickers-dev.json
 ```
 
+<a id="run-2026-07-30-193533-hard-none-dev"></a>
+
 ## 2026-07-30 — HARD baseline rehearsal, dev slice (Phase 6d)
 
 ```
@@ -239,6 +316,8 @@ note:          The rehearsal before the pre-approved full baseline: pipeline,
                1,494,456 in / 13,629 out (2,622 thinking) — $3.13.
 export:        runs/2026-07-30-193533-hard-none-dev.json
 ```
+
+<a id="run-2026-07-30-193710-hard-none-full"></a>
 
 ## 2026-07-30 — HARD baseline on all 500 ⭐ README row 1
 
@@ -260,6 +339,8 @@ note:          The improvement table's first row (ADR 0003): no table
                7,473,114 in / 75,863 out (19,673 thinking) — $15.70.
 export:        runs/2026-07-30-193710-hard-none-full.json
 ```
+
+<a id="run-2026-07-30-194011-hard-llm-full"></a>
 
 ## 2026-07-30 — HARD + llm picker on all 500 ⭐ README row 2
 
@@ -283,6 +364,8 @@ note:          The improvement table's second row. Against the baseline's
 export:        runs/2026-07-30-194011-hard-llm-full.json
 ```
 
+<a id="run-2026-07-30-194201-hard-llm-repair-smoke"></a>
+
 ## 2026-07-30 — Repair wiring smoke (LIMIT=3)
 
 ```
@@ -294,6 +377,8 @@ note:          repair=on stamped in the suite name and on every row, attempts
                idle — the stopping conditions are covered by src/answer.test.ts.
 export:        runs/2026-07-30-194201-hard-llm-repair-smoke.json
 ```
+
+<a id="run-2026-07-30-194223-hard-llm-repair-full"></a>
 
 ## 2026-07-30 — HARD + llm + self-repair on all 500 ⭐ README row 3
 
@@ -333,6 +418,8 @@ flag as it was scored at run time. Re-scoring reads the SQL out of the export
 and re-executes it; it does not rewrite the file. A number read straight out of
 an export predating 2026-07-31 is a multiset number.
 
+<a id="run-2026-07-30-152816-easy-dev-rescored"></a>
+
 ### Noise band, re-derived under the new rule
 
 ```
@@ -347,6 +434,8 @@ note:          The band had to be re-derived: a band measured under the old
                for the same reason it did before.
 export:        runs/2026-07-30-152816-easy-dev.json (re-graded, not re-run)
 ```
+
+<a id="run-2026-07-30-193710-hard-none-full-rescored"></a>
 
 ### HARD baseline on all 500 — README row 1, re-scored
 
@@ -367,6 +456,8 @@ note:          +2.8 points from grading alone. By difficulty: simple 101/148
 export:        runs/2026-07-30-193710-hard-none-full.json (re-graded)
 ```
 
+<a id="run-2026-07-30-194011-hard-llm-full-rescored"></a>
+
 ### HARD + llm picker on all 500 — README row 2, re-scored
 
 ```
@@ -385,6 +476,8 @@ note:          +3.8 points, the largest gain of the four — the smaller prompt
                challenging 51/102. 20 gained, 1 lost (bird-0003, as above).
 export:        runs/2026-07-30-194011-hard-llm-full.json (re-graded)
 ```
+
+<a id="run-2026-07-30-194223-hard-llm-repair-full-rescored"></a>
 
 ### HARD + llm + self-repair on all 500 — README row 3, re-scored
 
@@ -410,6 +503,8 @@ note:          +4.0 points. Against row 2's re-scored 59.2%: -0.4 points, a
 export:        runs/2026-07-30-194223-hard-llm-repair-full.json (re-graded)
 ```
 
+<a id="run-2026-07-30-153025-easy-full-rescored"></a>
+
 ### EASY on all 500 — the yardstick, re-scored
 
 ```
@@ -427,6 +522,8 @@ note:          +3.0 points. Against the re-scored HARD baseline's 57.4%: +1.0,
                52/102. 16 gained, 1 lost (bird-0003, as above).
 export:        runs/2026-07-30-153025-easy-full.json (re-graded)
 ```
+
+<a id="run-2026-07-31-122519-hard-none-dev"></a>
 
 ## 2026-07-31 — prompt v2: an output-contract rule for the extra-column failure
 
@@ -487,6 +584,8 @@ note:          v1 with two rules added: return exactly the columns asked for,
 export:        runs/2026-07-31-122519-hard-none-dev.json
 ```
 
+<a id="run-2026-07-31-1513-exp-smoke"></a>
+
 ## 2026-07-31 — Batch E wiring smokes (LIMIT=3), six runs
 
 ```
@@ -518,6 +617,8 @@ kept only if the change beats the control by more than the band. The eleven
 runs below cost $105 against the ~$86 estimate; the overage is desc-picker
 ($21 measured vs $9 estimated) and the voided first control (~$6).
 
+<a id="run-2026-07-31-151521-hard-llm-full"></a>
+
 ## 2026-07-31 — Batch E control, first attempt: voided, store collision
 
 ```
@@ -535,6 +636,8 @@ note:          Ran concurrently with the picker-v2 run to halve wall-clock.
                its own config, and survives (next entry).
 export:        runs/2026-07-31-151521-hard-llm-full.json (empty by design of the failure)
 ```
+
+<a id="run-2026-07-31-151524-exp-picker-v2-full"></a>
 
 ## 2026-07-31 — Batch E run 1: picker-v2, the over-include rule
 
@@ -558,6 +661,8 @@ note:          Replaced "Fewer is better when you are confident" with "Include
 export:        runs/2026-07-31-151524-exp-picker-v2-full.json
 ```
 
+<a id="run-2026-07-31-151918-hard-llm-full"></a>
+
 ## 2026-07-31 — Batch E run 0: the control ⭐ every Batch E number reads against this
 
 ```
@@ -575,6 +680,8 @@ note:          Same configuration as README row 2, re-run same-day so every
                Avg 2.10 tables sent. $6.33.
 export:        runs/2026-07-31-151918-hard-llm-full.json
 ```
+
+<a id="run-2026-07-31-152021-exp-expand-full"></a>
 
 ## 2026-07-31 — Batch E run 2: join-partner expansion
 
@@ -599,6 +706,8 @@ note:          After the picker chooses, add every table sharing a distinctive
 export:        runs/2026-07-31-152021-exp-expand-full.json
 ```
 
+<a id="run-2026-07-31-152120-exp-rows-full"></a>
+
 ## 2026-07-31 — Batch E run 3: five sample rows per table ⭐ beat the band
 
 ```
@@ -620,6 +729,8 @@ note:          Five real rows per table, every column cast to text so dates
 export:        runs/2026-07-31-152120-exp-rows-full.json
 ```
 
+<a id="run-2026-07-31-152223-exp-values-sql-full"></a>
+
 ## 2026-07-31 — Batch E run 4: distinct-value lists in the SQL prompt
 
 ```
@@ -638,6 +749,8 @@ note:          Every text column with ≤20 distinct values gets them listed
 export:        runs/2026-07-31-152223-exp-values-sql-full.json
 ```
 
+<a id="run-2026-07-31-152329-exp-values-picker-full"></a>
+
 ## 2026-07-31 — Batch E run 5: distinct-value lists in the picker prompt
 
 ```
@@ -653,6 +766,8 @@ note:          Same value lists, shown to the picker instead. Recall +2.6,
                picker call). $11.91.
 export:        runs/2026-07-31-152329-exp-values-picker-full.json
 ```
+
+<a id="run-2026-07-31-152439-exp-desc-sql-full"></a>
 
 ## 2026-07-31 — Batch E run 6: BIRD column descriptions in the SQL prompt
 
@@ -672,6 +787,8 @@ note:          The number D5 owed. BIRD's database_description CSVs (first
                budget spent on the thing that works. $7.15.
 export:        runs/2026-07-31-152439-exp-desc-sql-full.json
 ```
+
+<a id="run-2026-07-31-152536-exp-desc-picker-full"></a>
 
 ## 2026-07-31 — Batch E run 7: BIRD descriptions in the picker prompt — voided
 
@@ -694,6 +811,8 @@ note:          Descriptions add ~11.3k input tokens to every picker call; at
 export:        runs/2026-07-31-152536-exp-desc-picker-full.json
 ```
 
+<a id="run-2026-07-31-152651-exp-probe-full"></a>
+
 ## 2026-07-31 — Batch E run 8: probe-on-empty
 
 ```
@@ -715,6 +834,8 @@ note:          When a query runs and returns zero rows, the model writes one
 export:        runs/2026-07-31-152651-exp-probe-full.json
 ```
 
+<a id="run-2026-07-31-152802-exp-self-full"></a>
+
 ## 2026-07-31 — Batch E run 9: self-check every result ⭐ beat the band
 
 ```
@@ -734,6 +855,8 @@ note:          Every executed result goes back to the model — confirm or
                band — same repeat-trial caveat as run 3. $8.29.
 export:        runs/2026-07-31-152802-exp-self-full.json
 ```
+
+<a id="run-2026-07-31-153049-exp-stack-full"></a>
 
 ## 2026-07-31 — Batch E run 10: stack the winners (rows + self-check)
 
@@ -769,6 +892,8 @@ convention rule to the SQL prompt on the rows base; run B adds best-of-N with
 an execution-based majority vote. No repeat trials — every number reads against
 the existing ±2.5 band, as all Batch E numbers did.
 
+<a id="run-2026-07-31-180141-exp-smoke-runa-full"></a>
+
 ## 2026-07-31 — Batch F run A wiring smoke (LIMIT=3)
 
 ```
@@ -781,6 +906,8 @@ note:          Wiring only. prompt=v3 stamps the suite name and every exported
                was how a run could get mislabeled.
 export:        runs/2026-07-31-180141-exp-smoke-runa-full.json
 ```
+
+<a id="run-2026-07-31-180211-exp-rows-v3-full"></a>
 
 ## 2026-07-31 — Batch F run A: counting rule (prompt v3) on the rows base
 
@@ -807,6 +934,8 @@ note:          v3 = v1 plus one rule: when counting over a join, count the
 export:        runs/2026-07-31-180211-exp-rows-v3-full.json
 ```
 
+<a id="run-2026-07-31-181031-exp-smoke-runb-full"></a>
+
 ## 2026-07-31 — Batch F run B wiring smoke (LIMIT=3)
 
 ```
@@ -816,6 +945,8 @@ note:          Wiring only. vote=5 stamps the suite name; voteAgreement,
                attempts=5 and the 5x usage sum land on every exported row.
 export:        runs/2026-07-31-181031-exp-smoke-runb-full.json
 ```
+
+<a id="run-2026-07-31-181111-exp-vote5-full"></a>
 
 ## 2026-07-31 — Batch F run B: best-of-5 by execution agreement
 
@@ -847,6 +978,8 @@ export:        runs/2026-07-31-181111-exp-vote5-full.json
 ```
 
 ---
+
+<a id="run-2026-07-31-204731-exp-default-check-full"></a>
 
 ## 2026-07-31 — Default set to the 61.0% configuration (wiring smoke, LIMIT=3)
 
@@ -894,6 +1027,8 @@ NUMBER of columns, because v1 said nothing about what belongs in the SELECT
 list. Fixed in prompt v4 = v1 plus projection discipline, measured by one full
 run. KNOWN_ISSUES.md issue 4 records the dialect finding.
 
+<a id="run-2026-08-01-rewrites-replay"></a>
+
 ## 2026-08-01 — Rewrites replayed over the rows run's stored SQL (no model calls)
 
 ```
@@ -916,6 +1051,8 @@ note:          nulls-last fired on 67 queries: 5 flipped wrong->right
 export:        printed by the script; source run file unchanged
 ```
 
+<a id="run-2026-08-01-122859-exp-smoke-g1-full"></a>
+
 ## 2026-08-01 — Batch G wiring smoke (LIMIT=3)
 
 ```
@@ -925,6 +1062,8 @@ note:          Wiring only. prompt=v4 and rewrite=on stamp the suite name;
                rewrite and rewritesFired land on every exported row. 3/3.
 export:        runs/2026-08-01-122859-exp-smoke-g1-full.json
 ```
+
+<a id="run-2026-08-01-122927-exp-v4-rewrites-full"></a>
 
 ## 2026-08-01 — Batch G: prompt v4 (projection) + dialect rewrites ⭐ new best
 
@@ -957,6 +1096,8 @@ note:          +4.6 vs the rows run (61.0) — past the band, the first change
 export:        runs/2026-08-01-122927-exp-v4-rewrites-full.json
 ```
 
+<a id="run-2026-08-01-123304-exp-default-check-g-full"></a>
+
 ## 2026-08-01 — Default set to the 65.6% configuration (wiring smoke, LIMIT=3)
 
 ```
@@ -980,6 +1121,8 @@ note:          Not a measurement — the smoke that proves the new default
                src/prompts/ as the evidence behind their own entries.
 export:        runs/2026-08-01-123304-exp-default-check-g-full.json
 ```
+
+<a id="run-20260801-200012-picker-v3-recall-stage1"></a>
 
 ## 2026-08-01 — picker-v3 (evidence in the picker), stage 1: recall only
 
@@ -1017,6 +1160,8 @@ export:        runs/20260801-200012-picker-v3-recall-stage1.json
                (smoke: runs/20260801-195847-picker-v3-recall-stage1.json, LIMIT=3, void)
 ```
 
+<a id="run-20260801-202519-picker-v4-recall-stage1"></a>
+
 ## 2026-08-01 — picker-v4 (evidence + explicit lookup rules), stage 1: recall only
 
 ```
@@ -1051,6 +1196,8 @@ export:        runs/20260801-202519-picker-v4-recall-stage1.json
                (smoke: runs/20260801-202415-picker-v4-recall-stage1.json, LIMIT=3, void)
 ```
 
+<a id="run-2026-08-01-union-test-offline"></a>
+
 ## 2026-08-01 — The union test: evidence-column union + FK bridge, measured offline for $0
 
 ```
@@ -1073,6 +1220,8 @@ note:          What two prompt rewrites could not make the model do (the
                (recall without accuracy) stays open until stage 2. $0.
 export:        (offline computation; script scripts/evidence-union-recall.ts)
 ```
+
+<a id="run-2026-08-01-141455-exp-union-full"></a>
 
 ## 2026-08-01 — UNION=on on the Batch G base ⭐ new best number
 
@@ -1102,6 +1251,8 @@ note:          +3.2 vs Batch G's 65.6% — past the band by 0.7 points, the
 export:        runs/2026-08-01-141455-exp-union-full.json
                (smoke: runs/2026-08-01-141430-exp-union-smoke-full.json, LIMIT=3, void)
 ```
+
+<a id="run-2026-08-01-150902-exp-v5-bundle-full"></a>
 
 ## 2026-08-01 — v5 bundle: aggregation rules + probe + repair ⭐ new best
 
@@ -1159,6 +1310,8 @@ export:        runs/2026-08-01-150902-exp-v5-bundle-full.json
                (smoke: runs/2026-08-01-150837-exp-smoke-v5-full.json, LIMIT=3, void)
 ```
 
+<a id="run-2026-08-01-152040-exp-default-check-v5-full"></a>
+
 ## 2026-08-01 — Default set to the 72.4% configuration (wiring smoke, LIMIT=3)
 
 ```
@@ -1184,6 +1337,8 @@ note:          Not a measurement — the smoke that proves the new default
 export:        runs/2026-08-01-152040-exp-default-check-v5-full.json
 ```
 
+<a id="run-2026-08-01-155118-exp-smoke-v6-full"></a>
+
 ## 2026-08-01 — Prompt v6 wiring smoke (LIMIT=3)
 
 ```
@@ -1194,6 +1349,8 @@ note:          Not a measurement — proves the v6 import stamps. Suite name
                check=probe check-v1 | rewrite=on". 3/3 scored, no crashes.
 export:        runs/2026-08-01-155118-exp-smoke-v6-full.json
 ```
+
+<a id="run-2026-08-01-155140-exp-v6-bundle-full"></a>
 
 ## 2026-08-01 — Prompt v6: ten targeted rules from the v5-bundle failure analysis
 
@@ -1251,6 +1408,8 @@ note:          −1.4 vs the v5 bundle's 72.4% — inside the ±2.5 band, a tie
 export:        runs/2026-08-01-155140-exp-v6-bundle-full.json
 ```
 
+<a id="run-2026-08-01-175954-ids-v7-targets"></a>
+
 ## 2026-08-01 — Prompt v7 on its three named ids only (not a 500-question run)
 
 ```
@@ -1307,6 +1466,8 @@ exports:       runs/2026-08-01-175954-ids-v7-targets.json
                runs/2026-08-01-180137-ids-v5-control1.json
                runs/2026-08-01-180147-ids-v5-control2.json
 ```
+
+<a id="run-2026-08-01-181519-ids-v7-exposed"></a>
 
 ## 2026-08-01 — Prompt v7 vs v5, paired, on the 74 passers the two rules can touch
 
@@ -1371,6 +1532,8 @@ exports:       runs/2026-08-01-181519-ids-v7-exposed.json
                runs/2026-08-01-181541-ids-v5-exposed.json
 ```
 
+<a id="run-2026-08-01-200115-ids-agent-targets"></a>
+
 ## 2026-08-01 — Agent, subset runs: 8 named targets + 20-passer regression check (not a 500-question run)
 
 ```
@@ -1415,6 +1578,8 @@ exports:       runs/2026-08-01-200115-ids-agent-targets.json
                (smoke: runs/2026-08-01-195956-ids-agent-smoke.json, one id,
                void — wiring proof only)
 ```
+
+<a id="run-2026-08-01-200320-agent-llm-full"></a>
 
 ## 2026-08-01 — The agent, full 500: parity with the pipeline at first attempt
 
@@ -1479,6 +1644,8 @@ cost:          $12.96.
 export:        runs/2026-08-01-200320-agent-llm-full.json
 ```
 
+<a id="run-2026-08-01-205147-ids-agent2-targets"></a>
+
 ## 2026-08-01 — Agent v2, subset runs: bounce + discipline prompt, two-check protocol (not a 500-question run)
 
 ```
@@ -1535,6 +1702,8 @@ exports:       runs/2026-08-01-205147-ids-agent2-targets.json
                runs/2026-08-01-205312-ids-agent2-control.json
 ```
 
+<a id="run-2026-08-01-205534-ids-agent3-limit-sensitive"></a>
+
 ## 2026-08-01 — Agent v3 = v2 minus the LIMIT sentence: the agent default (not a 500-question run)
 
 ```
@@ -1571,6 +1740,8 @@ cost:          $0.47 (limit set $0.23, targets $0.24).
 exports:       runs/2026-08-01-205534-ids-agent3-limit-sensitive.json
                runs/2026-08-01-205634-ids-agent3-targets.json
 ```
+
+<a id="run-2026-08-01-213707-agent-llm-full"></a>
 
 ## 2026-08-01 — Agent v3 + bounce, full 500: three rolls, one plateau
 
@@ -1626,6 +1797,8 @@ note:          0 voids. vs agent-v1: +12/−18. Of the 18 losses, 17
 cost:          $13.72.
 export:        runs/2026-08-01-213707-agent-llm-full.json
 ```
+
+<a id="run-2026-08-01-analysis-addendum"></a>
 
 ## 2026-08-01 — Analysis addendum: the repeatable core, the flip concentration, an erratum
 

@@ -120,23 +120,30 @@ Every point of accuracy came from the same loop:
   about what a column *means*; they were about what it *holds*. A query
   filtering `segment = 'premium'` scores zero against a table storing
   `'Premium'`; no description says that, a sample row does.
+  ([run-2026-07-31-152120-exp-rows-full](RUNS.md#run-2026-07-31-152120-exp-rows-full),
+  [run-2026-07-31-152439-exp-desc-sql-full](RUNS.md#run-2026-07-31-152439-exp-desc-sql-full))
 - **Two dialect repairs, in code: exactly +7 questions.** BIRD's reference
   queries are a Postgres port of SQLite SQL, patched with `NULLS LAST` on
   their side only; generated SQL never got the patch. Two rewrites apply it.
   The +7 is exact, no noise band needed: replaying the previous run's frozen
   SQL with only the rewrites flips 7 wrong→right and 0 right→wrong.
+  ([run-2026-08-01-rewrites-replay](RUNS.md#run-2026-08-01-rewrites-replay))
 - **Code adds the tables the question's hint names: +3.2.** Sixteen failures
   shared one cause: the hint names a column, the picker LLM never sent the
   table owning it. Telling the picker to do that lookup fixed 5 of 16; a
   hundred lines of code doing the lookup manually with code fixed 15, and
   were verified free against stored runs before any money was spent. LLM
   instructions are suggestions; code is a guarantee.
+  ([run-2026-08-01-141455-exp-union-full](RUNS.md#run-2026-08-01-141455-exp-union-full),
+  [run-20260801-202519-picker-v4-recall-stage1](RUNS.md#run-20260801-202519-picker-v4-recall-stage1),
+  [run-2026-08-01-union-test-offline](RUNS.md#run-2026-08-01-union-test-offline))
 - **Three aggregation prompt rules + a probe + error repair: +3.6**, targets
   named before the run. The probe re-reads a column's actual stored values
   when a query returns nothing (the hint says `'Brasil'`, the data stores
   `'Brazil'`). It went 5 for 5 on its named targets after measuring as a tie
   when applied blindly. Repair retries a crashed query with the error fed
   back; nearly free, rescued 3.
+  ([run-2026-08-01-150902-exp-v5-bundle-full](RUNS.md#run-2026-08-01-150902-exp-v5-bundle-full))
 
 ## What lost: measured, logged, kept
 
@@ -145,34 +152,48 @@ its run and verdict in the log. What was tried → what happened:
 
 **Explain the data to the model better**
 - Human-written column descriptions → +0.8, a tie.
+  ([run-2026-07-31-152439-exp-desc-sql-full](RUNS.md#run-2026-07-31-152439-exp-desc-sql-full))
 - Lists of each column's stored values → a tie. (Sample rows won instead:
   the model needs to *see* the data, not read about it.)
+  ([run-2026-07-31-152223-exp-values-sql-full](RUNS.md#run-2026-07-31-152223-exp-values-sql-full),
+  [run-2026-07-31-152329-exp-values-picker-full](RUNS.md#run-2026-07-31-152329-exp-values-picker-full))
 
 **Tell the model what to do**
 - Tell the picker to look up hint-named columns itself → fixed 5 of 16
   targets. The code version fixed 15.
+  ([run-20260801-202519-picker-v4-recall-stage1](RUNS.md#run-20260801-202519-picker-v4-recall-stage1),
+  [run-2026-08-01-union-test-offline](RUNS.md#run-2026-08-01-union-test-offline))
 - A rule about how to count → the model *obeyed* it, the score didn't move:
   most of those questions were also wrong somewhere else.
+  ([run-2026-07-31-180211-exp-rows-v3-full](RUNS.md#run-2026-07-31-180211-exp-rows-v3-full))
 - A rule against returning extra columns → 62% → 57%. Told not to *select*
   the sorting column, the model stopped *sorting*. (A redesigned version
   shipped later.)
+  ([run-2026-07-31-122519-hard-none-dev](RUNS.md#run-2026-07-31-122519-hard-none-dev))
 - Ten targeted rules at once → converted 8 questions, broke about as many.
+  ([run-2026-08-01-155140-exp-v6-bundle-full](RUNS.md#run-2026-08-01-155140-exp-v6-bundle-full))
 - Only the two cleanest of those rules → converted 2, broke 4. Every rule is
   right for one question and wrong for its twin.
+  ([run-2026-08-01-181519-ids-v7-exposed](RUNS.md#run-2026-08-01-181519-ids-v7-exposed))
 
 **Let the model check its own work**
 - Review its own SQL before answering → a tie. Combined with sample rows it
   *cancels* the gain.
+  ([run-2026-07-31-152802-exp-self-full](RUNS.md#run-2026-07-31-152802-exp-self-full),
+  [run-2026-07-31-153049-exp-stack-full](RUNS.md#run-2026-07-31-153049-exp-stack-full))
 - Answer 5 times, ship the majority → a tie at 2.5× the cost. On 79% of
   questions all five answers were identical, including 110 identically
   *wrong*. Self-agreement is not correctness.
+  ([run-2026-07-31-181111-exp-vote5-full](RUNS.md#run-2026-07-31-181111-exp-vote5-full))
 
 **Fix the plumbing**
 - Widen table selection to include join partners → selection fixed exactly
   as designed, accuracy flat: the rescued questions failed at the next step.
+  ([run-2026-07-31-152021-exp-expand-full](RUNS.md#run-2026-07-31-152021-exp-expand-full))
 - Retry crashed queries with the error message → every retry then *ran*,
   but only 1 of 11 became *correct*. Crashing was never the real problem.
   (Shipped later anyway: nearly free, can't hurt.)
+  ([run-2026-07-30-194223-hard-llm-repair-full](RUNS.md#run-2026-07-30-194223-hard-llm-repair-full))
 
 The pattern across all of it: the model mostly does what you ask. Asking was
 rarely the bottleneck.

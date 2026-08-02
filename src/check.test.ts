@@ -16,7 +16,7 @@ function answerWith(execution: ExecutionResult): Answer {
     execution,
     attempts: 1,
     failures: [],
-    usage: { inputTokens: 100, outputTokens: 10, thinkingTokens: 0, totalTokens: 110 },
+    usage: { inputTokens: 100, outputTokens: 10, thinkingTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0, totalTokens: 110 },
     modelMs: 5,
     executionMs: 1,
     promptVersion: 'v1',
@@ -31,7 +31,7 @@ const failed: ExecutionResult = { ok: false, errorCode: '42703', errorMessage: '
 function reply(sql: string): ModelReply {
   return {
     json: { sql },
-    usage: { inputTokens: 200, outputTokens: 20, thinkingTokens: 8, totalTokens: 220 },
+    usage: { inputTokens: 200, outputTokens: 20, thinkingTokens: 8, cacheCreationTokens: 0, cacheReadTokens: 0, totalTokens: 220 },
     rateLimit: {},
     ms: 7,
   };

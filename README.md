@@ -322,6 +322,55 @@ conventions. Replayed over frozen SQL they flip **+7 questions with zero
 losses**, a count that is exact because nothing regenerates
 ([KNOWN_ISSUES.md](KNOWN_ISSUES.md) issue 4).
 
+## The failures that remain, and why they stay
+
+The 116 out-of-reach questions are the box at the top. Every other failure of
+the headline configuration was read by hand, given a named mechanism, and each
+mechanism was then built and measured. Three classes survived everything —
+each with its receipt in the log.
+
+**Convention coin-flips — no rule can know them.** The question reads two
+honest ways; both queries run clean and return sensible rows; the reference
+picked one side. `results` has both `rank` and `position`, and *"the driver
+who ranked second"* grades against `rank` — the equally honest `position`
+reading scores zero. Constructor points live in two tables; the reference
+wants the standings table. Nothing in the data marks the winning side, and
+legislating one is measured three times as a net loss: prompt v6 (ten rules,
+broke as many as it converted), v7 (two "clean" rules: converted 2, broke 4),
+and the agent's v2 discipline block, whose LIMIT rule converted nothing and
+broke three previously-passing questions in its own control run before being
+cut ([RUNS.md](RUNS.md), 2026-08-01).
+
+The agent experiment drew the line precisely. Given tools to inspect stored
+values before answering, it converted the failures whose wrongness is *visible
+in the data* — filter `type = 'Creature'`, get 0 rows, discover the sibling
+`types` column holds the bare word. It converted none whose wrongness exists
+only in the answer key — and sometimes diligence lost: asked about loans
+*"that were approved"*, it inspected `loan.status`, correctly found `'A'`,
+filtered on it — and the reference ignores the word "approved" entirely. A
+lookup settles what the database knows; it cannot settle what the grader
+prefers.
+
+**Rule slips — the noise band itself.** The prompt already says exact columns,
+exact order, no invented filters; the model follows each rule on ~90% of rolls
+and slips on the rest, a different question each run. Every lever aimed at the
+slip rate measured flat: harder rules (v6, net zero), best-of-5 voting (a tie
+at 2.5× the cost), agent-side verify-before-submit (a tie). These flips are
+why the band is ±2.5 points — not a defect left unfixed, but the variance
+every comparison here is read against.
+
+**One selection miss.** bird-0367 needs the `rulings` table and the picker
+never sends it; no downstream stage can use a table it never sees. One
+question — 0.2 points — left standing rather than re-tune selection around it.
+
+So the closing claim is not "72.4% and stuck." It is: every failure with a
+working mechanism has been converted and the mechanism shipped; every failure
+still standing carries a measured reason — broken reference (97), mirror-
+question convention (measured three times), stochastic slip (measured twice),
+one recall miss. The receipts are the rejected runs in [RUNS.md](RUNS.md) and
+the per-question entries in
+[docs/winnable-failures.md](docs/winnable-failures.md).
+
 ## Comparing two runs
 
 Accuracy says whether a change won. It cannot say what the change *broke* — a

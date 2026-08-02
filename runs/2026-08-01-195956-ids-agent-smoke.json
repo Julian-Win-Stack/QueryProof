@@ -1,0 +1,146 @@
+{
+  "run": {
+    "id": 61,
+    "runType": "full",
+    "createdAt": "2026-08-02 02:59:57"
+  },
+  "suites": [
+    {
+      "id": 64,
+      "name": "hard | slice=ids(bird-0369) | picker=llm | agent=agent-v1 | prompt=agent-v1 | pickerPrompt=picker-v1 | union=on | sqlContext=rows | rewrite=on | effort=medium | claude-sonnet-5",
+      "filepath": "/Users/phyonyanwinn/Project/ProJect/QueryProof/evals/main.eval.ts",
+      "duration": 0,
+      "status": "success",
+      "variantName": null,
+      "variantGroup": null,
+      "createdAt": "2026-08-02 02:59:57",
+      "averageScore": 1,
+      "evals": [
+        {
+          "id": 12429,
+          "duration": 31599,
+          "input": {
+            "id": "bird-0369",
+            "db_id": "card_games",
+            "difficulty": "moderate",
+            "question": "What is the foreign name of the card in French of type Creature, normal layout and black border color, by artist Matthew D. Wilson?",
+            "evidence": "in French refers to language = 'French'; black border color refers to borderColor = 'black'",
+            "sql": "SELECT name FROM foreign_data WHERE uuid IN (SELECT uuid FROM cards WHERE types = 'Creature' AND layout = 'normal' AND borderColor = 'black' AND artist = 'Matthew D. Wilson') AND language = 'French'",
+            "rowCount": 50,
+            "columns": [
+              "name"
+            ],
+            "ms": 21
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "select f.name from cards c join foreign_data f on c.uuid=f.uuid where f.language='French' and c.types='Creature' and c.layout='normal' and c.bordercolor='black' and c.artist='Matthew D. Wilson'",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 50,
+            "goldRowCount": 50,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "cards",
+              "foreign_data",
+              "set_translations"
+            ],
+            "tablesGoldNeeded": [
+              "foreign_data",
+              "cards"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 312,
+            "thinkingTokens": 20,
+            "cacheCreationTokens": 6544,
+            "cacheReadTokens": 6123,
+            "pickerTokensIn": 4490,
+            "pickerTokensOut": 19,
+            "pickerMs": 3248,
+            "usd": 0.029882599999999995,
+            "modelMs": 28146,
+            "executionMs": 117,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT name FROM foreign_data WHERE uuid IN (SELECT uuid FROM cards WHERE types = 'Creature' AND layout = 'normal' AND borderColor = 'black' AND artist = 'Matthew D. Wilson') AND language = 'French'",
+          "status": "success",
+          "colOrder": 0,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0369 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "select f.name from cards c join foreign_data f on c.uuid=f.uuid where f.language='French' and c.types='Creature' and c.layout='normal' and c.bordercolor='black' and c.artist='Matthew D. Wilson'"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "50 vs 50"
+            },
+            {
+              "label": "tables",
+              "value": "3 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 312 out"
+            }
+          ],
+          "createdAt": "2026-08-02 02:59:57",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23675,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:00:28"
+            },
+            {
+              "id": 23676,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:00:28"
+            }
+          ],
+          "traces": []
+        }
+      ]
+    }
+  ]
+}

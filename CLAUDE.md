@@ -36,6 +36,7 @@ PICKER=llm npm run eval:hard:repair   # hard mode + self-repair (REPAIR=on, 2 re
 npm run eval:pickers           # keyword vs LLM picker, one evalite.each run, dev slice
 TAG=<name> PICKER=llm npm run eval:exp    # hard-mode experiment run; TAG names the export file
 TAG=<name> PICKER=llm EVAL_IDS=bird-0058,bird-0372 npm run eval:ids   # only those ids
+PICKER=llm npm run eval:agent  # the tool-calling agent instead of the pipeline, all 500
 npm run triage -- runs/<file>.json    # failure counts, four buckets, per suite
 npm run replay -- runs/<file>.json    # measure the dialect rewrites on stored SQL, no model calls
 npm run picker-recall          # picker-v3 recall vs a stored run's selections, no SQL generation
@@ -128,11 +129,14 @@ as an accuracy figure — the Batch E
 experiment axes `PICKER_PROMPT`, `EXPAND`, `SQL_CONTEXT`, `PICKER_CONTEXT`,
 `CHECK`, the Batch F axis `VOTE=N` — best-of-N by execution agreement,
 `src/vote.ts` — the Batch G axis `REWRITE` — dialect repairs,
-`src/rewrites.ts`, default **on** — and the cluster-1 axis `UNION` —
+`src/rewrites.ts`, default **on** — the cluster-1 axis `UNION` —
 deterministic post-picker table additions from the evidence plus a foreign-key
 bridge, `src/pickers/union.ts`, default **on** where the llm picker is in
-play, off elsewhere — see the header of
-`evals/main.eval.ts`). evalite's CLI
+play, off elsewhere — and the agent axis `AGENT=on` — the tool-calling loop
+in `src/agent.ts` in place of generation + check + repair; requires hard mode
++ llm picker, throws with CHECK/REPAIR/VOTE, and agent runs set
+`EVAL_TIMEOUT_MS=900000` (up to 10 model calls per question) — see the header
+of `evals/main.eval.ts`). evalite's CLI
 accepts no custom flags, so `npm run eval:dev -- --picker=llm` silently does
 nothing. Never add a second eval file to express a configuration. **Never name
 an eval env var `MODE`, `DEV`, `PROD`, or `BASE_URL`** — vite owns those names
@@ -174,6 +178,16 @@ src/pickers/   table selection: keyword.ts (no LLM), llm.ts (pinned model),
                expand.ts (join-partner expansion, EXPAND=on)
 src/schema-extras.ts  sample rows / value lists / BIRD descriptions for the
                SQL_CONTEXT and PICKER_CONTEXT experiments
+src/agent.ts   the tool-calling agent (AGENT=on): inspect_column / run_sql /
+               submit_sql, 10-pass cap, dedupe, forced hand-in; returns the
+               pipeline's Answer shape so scoring and tooling work unchanged.
+               A voluntary submission that errors or comes back empty (the
+               probe's looksEmpty trigger, imported from check.ts) bounces
+               back to the model once — the agent's probe+repair. Prompt is
+               agent-v3 (v1 and the rejected v2 stay in src/prompts/ as
+               evidence, RUNS.md 2026-08-01). Prompt caching is on for its
+               model calls only — the pipeline's single-turn calls stay
+               uncached so their cost numbers stay comparable
 src/check.ts   post-execution checks (CHECK=probe|self)
 src/vote.ts    best-of-N: N attempts, result sets grouped by the row
                comparator, largest group ships (VOTE=N)

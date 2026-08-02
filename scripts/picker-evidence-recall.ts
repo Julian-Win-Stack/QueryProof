@@ -73,6 +73,8 @@ async function main(): Promise<void> {
     inputTokens: 0,
     outputTokens: 0,
     thinkingTokens: 0,
+    cacheCreationTokens: 0,
+    cacheReadTokens: 0,
     totalTokens: 0,
     calls: 0,
   };
@@ -89,6 +91,8 @@ async function main(): Promise<void> {
         usageTotal.inputTokens += picked.usage.inputTokens;
         usageTotal.outputTokens += picked.usage.outputTokens;
         usageTotal.thinkingTokens += picked.usage.thinkingTokens;
+        usageTotal.cacheCreationTokens += picked.usage.cacheCreationTokens;
+        usageTotal.cacheReadTokens += picked.usage.cacheReadTokens;
         usageTotal.totalTokens += picked.usage.totalTokens;
         usageTotal.calls += 1;
         results.push({ id: record.id, hit: recallHit(needed, tables), tables });

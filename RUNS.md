@@ -1370,3 +1370,259 @@ cost:          $2.89.
 exports:       runs/2026-08-01-181519-ids-v7-exposed.json
                runs/2026-08-01-181541-ids-v5-exposed.json
 ```
+
+## 2026-08-01 — Agent, subset runs: 8 named targets + 20-passer regression check (not a 500-question run)
+
+```
+approach:      mode=hard picker=llm agent=agent-v1, union and rewrites on,
+               CHECK/REPAIR off — the agent replaces both. The agent
+               (src/agent.ts) is a tool-calling loop: the model gets
+               inspect_column (top-20 stored values), run_sql (execute and
+               see the first 20 rows) and submit_sql, and up to 10 model
+               calls per question. Same table selection and schema text as
+               the pipeline, so the delta attributes to the loop. Prompt
+               agent-v1 = v5's SQL rules + tool-use instructions
+               (inspect before filtering on a literal, run before
+               submitting, re-read the SELECT list). Prompt caching on for
+               agent calls only (cache_control ephemeral); usdCost now
+               prices cache writes at 1.25x and reads at 0.1x the input
+               rate — with caching off both fields are zero, so no earlier
+               number moves.
+result:        targets   3/8 converted (0366 0369 0447; 0023 0225 0367
+                         0432 0494 still wrong — question-reading and
+                         population errors, not tool failures)
+               regression 19/20 held. All five probe-won questions (0125
+                         0229 0316 0337 0365) and all three repair rescues
+                         (0141 0144 0178) held — the two mechanisms the
+                         agent replaces, replaced without loss. The one
+                         drop (0078) is the two-part-question trap (gold
+                         answers only part two, one column); known wobble
+                         class, 1/20 is inside the 8/74 same-sitting wobble
+                         the v7 experiment measured.
+               Every stop was 'submitted' — the 10-pass cap never bound,
+               no forced hand-ins, no prose strikes. Median 2 passes.
+               Cache reads non-zero on every multi-pass question (the
+               smoke's pass 2 sent 4 uncached tokens against 6,123 read).
+verdict:       kept (the loop works and holds the risk set; no tuning done
+               on the misses — target-specific rules are the measured v6/v7
+               trap. The full run is the only number that can be claimed)
+note:          ~$0.025 per question against the pipeline's ~$0.019
+               ($9.53/500) — caching keeps the multi-call loop in the same
+               cost class.
+cost:          $0.75 across the three subset runs.
+exports:       runs/2026-08-01-200115-ids-agent-targets.json
+               runs/2026-08-01-200152-ids-agent-regression.json
+               (smoke: runs/2026-08-01-195956-ids-agent-smoke.json, one id,
+               void — wiring proof only)
+```
+
+## 2026-08-01 — The agent, full 500: parity with the pipeline at first attempt
+
+```
+approach:      mode=hard picker=llm agent=agent-v1 union=on rewrite=on
+               sqlContext=rows model=claude-sonnet-5 effort=medium.
+               The tool-calling loop (src/agent.ts) in place of generation +
+               probe + repair: inspect_column / run_sql / submit_sql, 10-pass
+               cap, dedupe on repeated lookups, forced hand-in on the last
+               pass, stop reason recorded per question. Table selection and
+               schema text identical to the pipeline, so the delta
+               attributes to the loop. Prompt caching on for agent calls.
+question set:  full (500 validated)
+accuracy:      71.2% (356/500)
+table recall:  94.4%
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       kept — as evidence. 71.2 vs the pipeline's 72.4 is 1.2 points
+               inside the band: a tie. The default configuration does not
+               change; the agent stays behind AGENT=on.
+note:          0 voids. 17 gained, 23 lost, 460 unchanged vs the v5 bundle.
+
+               The gains classify: 4 of the 8 named agent-reachable targets
+               (0023 0366 0369 0447 — 0023 was wrong in the subset run,
+               so it is a coin-flip conversion), both pipeline-fixable
+               questions v7's rejected rules targeted (0058 0372 — won here
+               with no targeted rule, by looking instead), 3 of the
+               projection/column-order re-roll cluster (0109 0199 0323),
+               and 8 unattributed (0013 0070 0091 0236 0306 0349 0449
+               0465).
+
+               The losses tell the same churn story from the other side: 10
+               of 23 are exactly the v5 bundle's own churn-category gains
+               churning back out (8 of its 13 unattributed — 0087 0105 0111
+               0169 0188 0222 0227 0445 — plus churn-backs 0443 0451). One
+               mechanism worth naming from the other 13: on 0025 the agent
+               looked up an id with a tool and inlined the constant
+               (customerid=6718) instead of keeping the subquery — a
+               looked-up value is only as right as the lookup.
+
+               How it behaved: 499 of 500 stops were voluntary submits; the
+               10-pass cap bound once (that answer was wrong). 490 of 500
+               looked at least once before answering — the 10 that never
+               looked went 10/10. Median 2 passes; 1 dedupe hit; no prose
+               strikes. The self-termination discipline is the story: the
+               model needed no forcing 499 times out of 500.
+
+               Cost: $12.96 for 500 ($0.026/question) vs the pipeline's
+               $9.53. Caching carried it: 3.16M tokens read from cache at
+               0.1x — the same tokens at the full input rate are $6.33, so
+               the multi-call loop lands ~$4.5 cheaper than it would
+               uncached (write premium ~$1.17 already netted).
+
+               What this buys the interview: three numbers from one run —
+               parity (356/500 vs 362/500, a tie by the project's own
+               band), cost class held ($0.026 vs $0.019 per question), and
+               behavior (looked 490/500, self-terminated 499/500). And one
+               honest negative: evidence-gathering does not beat five
+               static sample rows plus probe/repair at this accuracy
+               plateau — the remaining failures are question-reading and
+               population-shape errors that looking at data does not fix.
+cost:          $12.96.
+export:        runs/2026-08-01-200320-agent-llm-full.json
+```
+
+## 2026-08-01 — Agent v2, subset runs: bounce + discipline prompt, two-check protocol (not a 500-question run)
+
+```
+approach:      mode=hard picker=llm agent=agent-v2, union and rewrites on.
+               Two fixes aimed at the full run's fixable losses, tested
+               together. (1) Code: a voluntary submission that errors or
+               comes back empty (the probe's looksEmpty trigger — zero rows
+               or a single-cell zero, exported from check.ts) now bounces
+               back to the model once as a tool_result; forced submissions
+               ship as-is. This is the agent's probe+repair, which
+               switching the agent on had silently switched off (0110 lost
+               to a 42P10 on a DISTINCT added after its last test run;
+               0443 and 0462 submitted answers they had seen return 0
+               rows). agentBounces recorded per question. (2) Prompt
+               agent-v2 = agent-v1 plus a discipline block: no filters the
+               question does not state (0056 invented position=
+               'Treasurer'), no tidy-up IS NOT NULL (0327 0454), no ROUND
+               (0493 rounded to 2 decimals against a 6-decimal compare),
+               no LIMIT outside ranking questions, keep lookups as
+               subqueries instead of pasting the constant (0025), submit
+               exactly the query last run (0110).
+question set:  8 named targets (0025 0056 0110 0327 0443 0454 0462 0493)
+               + 35 passing controls: the 20-id regression batch, every
+               passer whose SQL has ROUND (0412 0413 0414 0430 — all four
+               questions ask for the rounding, so they test the rule's
+               exception), an IS NOT NULL with no 'null' in question or
+               hint (0179 0193 0196 0217 0235 0453 0464 0485), or a LIMIT
+               with no ranking word (0146 0189 0377). No passer's correct
+               answer is empty or a single-cell zero (measured against the
+               live db), so the bounce has zero exposure on current
+               passers.
+result:        targets   5/8 (0056 0327 0443 0454 0493). 0025 kept the
+                         lookup as a subquery — the rule worked — but
+                         missed the float literal; 0462 found GSserved =
+                         'K-9' and computed the formula, failing only on
+                         divide-then-multiply at the 6th decimal (the
+                         measured-dead v7 rule); 0110 dropped a justified
+                         LIMIT 1 — the LIMIT sentence broke its own
+                         target.
+               controls  32/35. 0179 lost the evidence's LIMIT 5, 0285
+                         returned all 40 speed ties instead of LIMIT 1 —
+                         both the LIMIT sentence. 0374 flipped its
+                         formula's denominator; cause not visible, tracked
+                         into the v3 entry.
+               bounce    fired 0 times in 43 questions — consistent with
+                         the ~0.6% base rate of error/empty submissions in
+                         the full run. Unit tests prove both paths.
+verdict:       rejected in part — the LIMIT sentence converted nothing
+               (0056's win came from the invented-filter clause) and broke
+               0110, 0179 and 0285. Removed in agent-v3. Everything else
+               carried forward.
+cost:          $1.19 (targets $0.24, controls $0.95).
+exports:       runs/2026-08-01-205147-ids-agent2-targets.json
+               runs/2026-08-01-205312-ids-agent2-control.json
+```
+
+## 2026-08-01 — Agent v3 = v2 minus the LIMIT sentence: the agent default (not a 500-question run)
+
+```
+approach:      agent-v3 (src/prompts/agent-v3.ts) is agent-v2 with the
+               LIMIT sentence deleted, nothing else. Bounce unchanged.
+               Same-sitting re-runs: the 8 LIMIT-sensitive ids (own-goal
+               0110, breaks 0179 0285, wobble 0374, LIMIT controls 0146
+               0189 0377, plus 0056 whose v2 win might have leaned on the
+               sentence), then all 8 targets + 0374 again.
+result:        limit set  6/8 — 0110 0179 0285 all repaired, 0146 0189
+                          0377 hold, 0374 failed again, 0056 rolled the
+                          Treasurer filter again (its v2 pass was partly
+                          luck).
+               targets    6/9 with 0374. Stable across v2+v3 sittings:
+                          0110 0327 0443 0454 0493 converted 2/2 each.
+                          0025 converted 1/2 (subquery discipline held
+                          both rolls; the float literal is the coin).
+                          0056 1/3 and 0462 0/2 stay wobble — 0462 now
+                          fails only on the v7 multiply-before-divide
+                          precision or the stored-column pick, depending
+                          on the roll.
+               regression 0374 is 0/3 under v2/v3 against 2/2 under
+                          agent-v1 — a real loss of the discipline block,
+                          mechanism not visible in the SQL (its hint
+                          formula COUNT(Textless) reads either as count
+                          of rows or count of textless; v1 rolled the
+                          first, v2/v3 roll the second).
+verdict:       kept — agent-v3 + bounce becomes what AGENT=on runs.
+               Honest expectation for a full 500: about +5 stable
+               conversions, −1 stable regression, ±wobble — inside the
+               ±2.5 band against both the agent-v1 356 and the pipeline
+               362. No full run yet; no headline claim made.
+cost:          $0.47 (limit set $0.23, targets $0.24).
+exports:       runs/2026-08-01-205534-ids-agent3-limit-sensitive.json
+               runs/2026-08-01-205634-ids-agent3-targets.json
+```
+
+## 2026-08-01 — Agent v3 + bounce, full 500: three rolls, one plateau
+
+```
+approach:      mode=hard picker=llm agent=agent-v3 union=on rewrite=on
+               sqlContext=rows model=claude-sonnet-5 effort=medium. The
+               agent-v1 loop plus the two fixes measured in the subset
+               entries above: the bounce (an erroring or empty voluntary
+               submission goes back to the model once) and the agent-v3
+               discipline prompt (no invented filters, no tidy IS NOT
+               NULL, no ROUND, lookups stay subqueries, submit what you
+               ran — the LIMIT sentence already excised as v2's measured
+               loss).
+question set:  full (500 validated)
+accuracy:      70.0% (350/500)
+table recall:  93.8% (469/500)
+noise band:    ±2.5 points (dev slice, 3 trials, re-derived 2026-07-31)
+verdict:       kept — as evidence. 350 vs agent-v1's 356 is 1.2 points;
+               vs the pipeline's 362 is 2.4 points; both inside the band.
+               Three configurations, three rolls, one statistical number.
+               agent-v3 stays what AGENT=on runs: across three sittings
+               its named-question record is 4 stable conversions (0110
+               0327 0443 0493, each now 3/3) against 1 stable loss (0374,
+               0/4) — and nothing in this run distinguishes the versions
+               beyond that. No README claim moves.
+note:          0 voids. vs agent-v1: +12/−18. Of the 18 losses, 17
+               classify as churn — extra-column and column-order slips
+               (0236 0349 0109 0411 0433), literal and precision coins
+               (0125 0023 0058 0358 0323 0477), v1's own lucky rolls on
+               the flippy lookup targets handing themselves back (0366
+               0369 0447 0465 0014 0090) — and exactly 1 as the new
+               prompt's cost (0374). The 12 gains include 0432 and 0351
+               flipping IN from the measured-dead class by the same luck,
+               which is the coin thesis demonstrating itself in both
+               directions in one run.
+
+               The bounce fired 7 times, rescued 0, harmed 0 — all seven
+               first submissions were already wrong against non-empty
+               golds. Its subset targets won by the prompt this roll, not
+               the bounce. It stays: unit-tested, zero measured cost, and
+               it is the only net under a forced hand-in.
+
+               Stops: 497 submitted / 3 forced-cap. Median 2 passes.
+               Cost $13.72 ($0.027/question).
+
+               The finding this run settles: the agent family and the
+               pipeline are the same number at this plateau. 356 → 350 on
+               an unchanged question set is what ±2.5 means — the stable
+               per-question fixes (+4) are real and smaller than the
+               churn (±15-18 questions flip between any two rolls). The
+               interview sentence: every remaining lever moves single
+               questions; the noise moves fifteen.
+cost:          $13.72.
+export:        runs/2026-08-01-213707-agent-llm-full.json
+```

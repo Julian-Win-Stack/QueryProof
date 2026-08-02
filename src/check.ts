@@ -67,7 +67,9 @@ export async function applyCheck(
 // pg hands COUNT back as the string '0' (bigint), plain integer zeros as the
 // number 0. NULL stays out: a scalar NULL can be the *correct* answer to an
 // aggregate over an empty set, and probing it risks rewriting a right answer.
-function looksEmpty(rows: unknown[][]): boolean {
+// Exported because the agent's bounce (src/agent.ts) fires on exactly the
+// same trigger — the two must never drift apart.
+export function looksEmpty(rows: unknown[][]): boolean {
   if (rows.length === 0) return true;
   if (rows.length !== 1 || rows[0].length !== 1) return false;
   return rows[0][0] === 0 || rows[0][0] === '0';
@@ -178,6 +180,8 @@ function absorb(answer: CheckedAnswer, reply: ModelReply): void {
   answer.usage.inputTokens += reply.usage.inputTokens;
   answer.usage.outputTokens += reply.usage.outputTokens;
   answer.usage.thinkingTokens += reply.usage.thinkingTokens;
+  answer.usage.cacheCreationTokens += reply.usage.cacheCreationTokens;
+  answer.usage.cacheReadTokens += reply.usage.cacheReadTokens;
   answer.usage.totalTokens += reply.usage.totalTokens;
   answer.modelMs += reply.ms;
 }

@@ -15,7 +15,7 @@ function answerWith(sql: string, execution: ExecutionResult): Answer {
     execution,
     attempts: 1,
     failures: [],
-    usage: { inputTokens: 100, outputTokens: 10, thinkingTokens: 4, totalTokens: 110 },
+    usage: { inputTokens: 100, outputTokens: 10, thinkingTokens: 4, cacheCreationTokens: 0, cacheReadTokens: 0, totalTokens: 110 },
     modelMs: 5,
     executionMs: 1,
     promptVersion: 'v3',

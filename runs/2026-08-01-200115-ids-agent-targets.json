@@ -1,0 +1,1023 @@
+{
+  "run": {
+    "id": 62,
+    "runType": "full",
+    "createdAt": "2026-08-02 03:01:16"
+  },
+  "suites": [
+    {
+      "id": 65,
+      "name": "hard | slice=ids(bird-0023,bird-0366,bird-0367,bird-0369,bird-0447,bird-0225,bird-0494,bird-0432) | picker=llm | agent=agent-v1 | prompt=agent-v1 | pickerPrompt=picker-v1 | union=on | sqlContext=rows | rewrite=on | effort=medium | claude-sonnet-5",
+      "filepath": "/Users/phyonyanwinn/Project/ProJect/QueryProof/evals/main.eval.ts",
+      "duration": 0,
+      "status": "success",
+      "variantName": null,
+      "variantGroup": null,
+      "createdAt": "2026-08-02 03:01:16",
+      "averageScore": 0.5625,
+      "evals": [
+        {
+          "id": 12430,
+          "duration": 12617,
+          "input": {
+            "id": "bird-0023",
+            "db_id": "debit_card_specializing",
+            "difficulty": "simple",
+            "question": "What's the nationality of the customer who spent 548.4 in 2012/8/24?",
+            "evidence": "'2012/8/24' can be represented by '2012-08-24'; spent 548.4 refers to price = '548.4' ",
+            "sql": "SELECT T2.Country FROM transactions_1k AS T1 INNER JOIN gasstations AS T2 ON T1.GasStationID = T2.GasStationID WHERE T1.Date = '2012-08-24' AND T1.Price = '548.4'",
+            "rowCount": 1,
+            "columns": [
+              "country"
+            ],
+            "ms": 1
+          },
+          "output": {
+            "correct": false,
+            "generatedSql": "select c.currency from transactions_1k t join customers c on t.customerid = c.customerid where t.date = '2012-08-24' and round(t.price::numeric,1) = 548.4",
+            "attempts": 4,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "transactions_1k",
+              "customers",
+              "budget"
+            ],
+            "tablesGoldNeeded": [
+              "transactions_1k",
+              "gasstations"
+            ],
+            "recallHit": false,
+            "tokensIn": 8,
+            "tokensOut": 690,
+            "thinkingTokens": 279,
+            "cacheCreationTokens": 3425,
+            "cacheReadTokens": 9073,
+            "pickerTokensIn": 4476,
+            "pickerTokensOut": 20,
+            "pickerMs": 3219,
+            "usd": 0.0264451,
+            "modelMs": 9348,
+            "executionMs": 15,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 4,
+            "agentInspects": 0,
+            "agentRuns": 3,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT T2.Country FROM transactions_1k AS T1 INNER JOIN gasstations AS T2 ON T1.GasStationID = T2.GasStationID WHERE T1.Date = '2012-08-24' AND T1.Price = '548.4'",
+          "status": "success",
+          "colOrder": 0,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0023 (simple)"
+            },
+            {
+              "label": "sql",
+              "value": "select c.currency from transactions_1k t join customers c on t.customerid = c.customerid where t.date = '2012-08-24' and round(t.price::numeric,1) = 548.4"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "3 sent, recall MISS"
+            },
+            {
+              "label": "attempts",
+              "value": "4"
+            },
+            {
+              "label": "tokens",
+              "value": "8 in, 690 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:16",
+          "averageScore": 0,
+          "scores": [
+            {
+              "id": 23687,
+              "name": "same-rows",
+              "score": 0,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:28"
+            },
+            {
+              "id": 23688,
+              "name": "table-recall",
+              "score": 0,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:28"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12431,
+          "duration": 14901,
+          "input": {
+            "id": "bird-0225",
+            "db_id": "formula_1",
+            "difficulty": "simple",
+            "question": "What is the fastest lap number of the champion in 2009?",
+            "evidence": "in 2009 refers to year = 2009; Only the time of the champion shows in the format of \"hour: minutes: seconds.millionsecond\"",
+            "sql": "SELECT T1.fastestLap FROM results AS T1 INNER JOIN races AS T2 ON T1.raceId = T2.raceId WHERE T2.year = 2009 AND T1.time LIKE '_:%:__.___'",
+            "rowCount": 16,
+            "columns": [
+              "fastestlap"
+            ],
+            "ms": 2
+          },
+          "output": {
+            "correct": false,
+            "generatedSql": "select res.fastestlap\nfrom results res\njoin races r on r.raceid = res.raceid\njoin driverstandings ds on ds.raceid = r.raceid and ds.driverid = res.driverid\nwhere r.year = 2009 and ds.position = 1 and res.time ~ '^\\d+:\\d+:\\d+\\.\\d+$'",
+            "attempts": 3,
+            "lastPgError": null,
+            "rowsReturned": 5,
+            "goldRowCount": 16,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "races",
+              "driverstandings",
+              "results",
+              "drivers",
+              "legalities",
+              "seasons"
+            ],
+            "tablesGoldNeeded": [
+              "results",
+              "races"
+            ],
+            "recallHit": true,
+            "tokensIn": 6,
+            "tokensOut": 926,
+            "thinkingTokens": 493,
+            "cacheCreationTokens": 5092,
+            "cacheReadTokens": 9229,
+            "pickerTokensIn": 4467,
+            "pickerTokensOut": 81,
+            "pickerMs": 2242,
+            "usd": 0.0335918,
+            "modelMs": 12555,
+            "executionMs": 38,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 3,
+            "agentInspects": 0,
+            "agentRuns": 2,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT T1.fastestLap FROM results AS T1 INNER JOIN races AS T2 ON T1.raceId = T2.raceId WHERE T2.year = 2009 AND T1.time LIKE '_:%:__.___'",
+          "status": "success",
+          "colOrder": 1,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0225 (simple)"
+            },
+            {
+              "label": "sql",
+              "value": "select res.fastestlap\nfrom results res\njoin races r on r.raceid = res.raceid\njoin driverstandings ds on ds.raceid = r.raceid and ds.driverid = res.driverid\nwhere r.year = 2009 and ds.position = 1 and res.time ~ '^\\d+:\\d+:\\d+\\.\\d+$'"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "5 vs 16"
+            },
+            {
+              "label": "tables",
+              "value": "6 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "3"
+            },
+            {
+              "label": "tokens",
+              "value": "6 in, 926 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:16",
+          "averageScore": 0.5,
+          "scores": [
+            {
+              "id": 23691,
+              "name": "same-rows",
+              "score": 0,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:31"
+            },
+            {
+              "id": 23692,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:31"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12432,
+          "duration": 7042,
+          "input": {
+            "id": "bird-0366",
+            "db_id": "card_games",
+            "difficulty": "moderate",
+            "question": "Lists all types of cards in German.",
+            "evidence": "German refer to language; all types refer to the subtypes, supertypes; subtypes is not null AND supertypes is not null",
+            "sql": "SELECT T1.subtypes, T1.supertypes FROM cards AS T1 INNER JOIN foreign_data AS T2 ON T1.uuid = T2.uuid WHERE T2.language = 'German' AND NOT T1.subtypes IS NULL AND NOT T1.supertypes IS NULL",
+            "rowCount": 1693,
+            "columns": [
+              "subtypes",
+              "supertypes"
+            ],
+            "ms": 16
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT c.subtypes, c.supertypes FROM cards c JOIN foreign_data f ON c.uuid = f.uuid WHERE f.language='German' AND c.subtypes IS NOT NULL AND c.supertypes IS NOT NULL",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1693,
+            "goldRowCount": 1693,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "foreign_data",
+              "cards",
+              "set_translations"
+            ],
+            "tablesGoldNeeded": [
+              "cards",
+              "foreign_data"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 346,
+            "thinkingTokens": 57,
+            "cacheCreationTokens": 6615,
+            "cacheReadTokens": 6104,
+            "pickerTokensIn": 4460,
+            "pickerTokensOut": 19,
+            "pickerMs": 2381,
+            "usd": 0.0303363,
+            "modelMs": 4554,
+            "executionMs": 46,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT T1.subtypes, T1.supertypes FROM cards AS T1 INNER JOIN foreign_data AS T2 ON T1.uuid = T2.uuid WHERE T2.language = 'German' AND NOT T1.subtypes IS NULL AND NOT T1.supertypes IS NULL",
+          "status": "success",
+          "colOrder": 2,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0366 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT c.subtypes, c.supertypes FROM cards c JOIN foreign_data f ON c.uuid = f.uuid WHERE f.language='German' AND c.subtypes IS NOT NULL AND c.supertypes IS NOT NULL"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1693 vs 1693"
+            },
+            {
+              "label": "tables",
+              "value": "3 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 346 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:16",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23679,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:23"
+            },
+            {
+              "id": 23680,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:23"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12433,
+          "duration": 6354,
+          "input": {
+            "id": "bird-0367",
+            "db_id": "card_games",
+            "difficulty": "moderate",
+            "question": "How many unknown power cards contain info about the triggered ability",
+            "evidence": "unknown power cards refers to power is null or power = '*';contain info about the triggered ability refers to text contains 'triggered ability'",
+            "sql": "SELECT Count(DISTINCT T1.id) FROM cards AS T1 INNER JOIN rulings AS T2 ON T1.uuid = T2.uuid WHERE (T1.power IS NULL OR T1.power = '*') AND T2.text LIKE '%triggered ability%'",
+            "rowCount": 1,
+            "columns": [
+              "count"
+            ],
+            "ms": 27
+          },
+          "output": {
+            "correct": false,
+            "generatedSql": "SELECT COUNT(*) FROM cards WHERE (power IS NULL OR power = '*') AND text LIKE '%triggered ability%'",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "cards"
+            ],
+            "tablesGoldNeeded": [
+              "cards",
+              "rulings"
+            ],
+            "recallHit": false,
+            "tokensIn": 4,
+            "tokensOut": 197,
+            "thinkingTokens": 0,
+            "cacheCreationTokens": 5429,
+            "cacheReadTokens": 5314,
+            "pickerTokensIn": 4467,
+            "pickerTokensOut": 44,
+            "pickerMs": 2567,
+            "usd": 0.0259873,
+            "modelMs": 3590,
+            "executionMs": 117,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT Count(DISTINCT T1.id) FROM cards AS T1 INNER JOIN rulings AS T2 ON T1.uuid = T2.uuid WHERE (T1.power IS NULL OR T1.power = '*') AND T2.text LIKE '%triggered ability%'",
+          "status": "success",
+          "colOrder": 3,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0367 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT COUNT(*) FROM cards WHERE (power IS NULL OR power = '*') AND text LIKE '%triggered ability%'"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "1 sent, recall MISS"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 197 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:16",
+          "averageScore": 0,
+          "scores": [
+            {
+              "id": 23677,
+              "name": "same-rows",
+              "score": 0,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:22"
+            },
+            {
+              "id": 23678,
+              "name": "table-recall",
+              "score": 0,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:22"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12434,
+          "duration": 13187,
+          "input": {
+            "id": "bird-0369",
+            "db_id": "card_games",
+            "difficulty": "moderate",
+            "question": "What is the foreign name of the card in French of type Creature, normal layout and black border color, by artist Matthew D. Wilson?",
+            "evidence": "in French refers to language = 'French'; black border color refers to borderColor = 'black'",
+            "sql": "SELECT name FROM foreign_data WHERE uuid IN (SELECT uuid FROM cards WHERE types = 'Creature' AND layout = 'normal' AND borderColor = 'black' AND artist = 'Matthew D. Wilson') AND language = 'French'",
+            "rowCount": 50,
+            "columns": [
+              "name"
+            ],
+            "ms": 21
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "select fd.name from cards c join foreign_data fd on c.uuid=fd.uuid where fd.language='French' and c.types='Creature' and c.layout='normal' and c.bordercolor='black' and c.artist='Matthew D. Wilson'",
+            "attempts": 3,
+            "lastPgError": null,
+            "rowsReturned": 50,
+            "goldRowCount": 50,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "cards",
+              "foreign_data",
+              "set_translations"
+            ],
+            "tablesGoldNeeded": [
+              "foreign_data",
+              "cards"
+            ],
+            "recallHit": true,
+            "tokensIn": 6,
+            "tokensOut": 515,
+            "thinkingTokens": 61,
+            "cacheCreationTokens": 631,
+            "cacheReadTokens": 18801,
+            "pickerTokensIn": 4490,
+            "pickerTokensOut": 84,
+            "pickerMs": 3804,
+            "usd": 0.020319700000000003,
+            "modelMs": 9201,
+            "executionMs": 122,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 3,
+            "agentInspects": 0,
+            "agentRuns": 2,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT name FROM foreign_data WHERE uuid IN (SELECT uuid FROM cards WHERE types = 'Creature' AND layout = 'normal' AND borderColor = 'black' AND artist = 'Matthew D. Wilson') AND language = 'French'",
+          "status": "success",
+          "colOrder": 4,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0369 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "select fd.name from cards c join foreign_data fd on c.uuid=fd.uuid where fd.language='French' and c.types='Creature' and c.layout='normal' and c.bordercolor='black' and c.artist='Matthew D. Wilson'"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "50 vs 50"
+            },
+            {
+              "label": "tables",
+              "value": "3 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "3"
+            },
+            {
+              "label": "tokens",
+              "value": "6 in, 515 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:16",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23689,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:29"
+            },
+            {
+              "id": 23690,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:29"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12435,
+          "duration": 9825,
+          "input": {
+            "id": "bird-0432",
+            "db_id": "toxicology",
+            "difficulty": "challenging",
+            "question": "What is the composition of element chlorine in percentage among the single bond molecules?",
+            "evidence": "element chlorine refers to element = 'cl'; single bond refers to bond_type = '-'; percentage = DIVIDE(SUM(element = 'cl'), COUNT(atom_id)) as percent where bond_type = '-'",
+            "sql": "SELECT CAST(COUNT(CASE WHEN T.element = 'cl' THEN T.atom_id ELSE NULL END) AS REAL) * 100 / NULLIF(COUNT(T.atom_id), 0) FROM (SELECT T1.atom_id, T1.element FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id INNER JOIN bond AS T3 ON T2.molecule_id = T3.molecule_id WHERE T3.bond_type = '-') AS T",
+            "rowCount": 1,
+            "columns": [
+              "?column?"
+            ],
+            "ms": 14
+          },
+          "output": {
+            "correct": false,
+            "generatedSql": "SELECT 100.0*SUM(CASE WHEN a.element='cl' THEN 1 ELSE 0 END)/COUNT(a.atom_id) AS pct\nFROM connected c\nJOIN bond b ON c.bond_id=b.bond_id\nJOIN atom a ON c.atom_id=a.atom_id\nWHERE b.bond_type='-'",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "atom",
+              "bond",
+              "molecule",
+              "connected",
+              "tags"
+            ],
+            "tablesGoldNeeded": [
+              "atom",
+              "molecule",
+              "bond"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 644,
+            "thinkingTokens": 293,
+            "cacheCreationTokens": 3468,
+            "cacheReadTokens": 2975,
+            "pickerTokensIn": 4473,
+            "pickerTokensOut": 37,
+            "pickerMs": 2606,
+            "usd": 0.025029000000000003,
+            "modelMs": 7116,
+            "executionMs": 32,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT CAST(COUNT(CASE WHEN T.element = 'cl' THEN T.atom_id ELSE NULL END) AS REAL) * 100 / NULLIF(COUNT(T.atom_id), 0) FROM (SELECT T1.atom_id, T1.element FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id INNER JOIN bond AS T3 ON T2.molecule_id = T3.molecule_id WHERE T3.bond_type = '-') AS T",
+          "status": "success",
+          "colOrder": 5,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0432 (challenging)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT 100.0*SUM(CASE WHEN a.element='cl' THEN 1 ELSE 0 END)/COUNT(a.atom_id) AS pct\nFROM connected c\nJOIN bond b ON c.bond_id=b.bond_id\nJOIN atom a ON c.atom_id=a.atom_id\nWHERE b.bond_type='-'"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "5 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 644 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:16",
+          "averageScore": 0.5,
+          "scores": [
+            {
+              "id": 23681,
+              "name": "same-rows",
+              "score": 0,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:25"
+            },
+            {
+              "id": 23682,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:25"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12436,
+          "duration": 10862,
+          "input": {
+            "id": "bird-0447",
+            "db_id": "california_schools",
+            "difficulty": "challenging",
+            "question": "Consider the average difference between K-12 enrollment and 15-17 enrollment of schools that are locally funded, list the names and DOC type of schools which has a difference above this average.",
+            "evidence": "Difference between K-12 enrollment and 15-17 enrollment can be computed by `Enrollment (K-12)` - `Enrollment (Ages 5-17)`",
+            "sql": "SELECT T2.School, T2.DOC FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.FundingType = 'Locally funded' AND (T1.\"Enrollment (K-12)\" - T1.\"Enrollment (Ages 5-17)\") > (SELECT AVG(T3.\"Enrollment (K-12)\" - T3.\"Enrollment (Ages 5-17)\") FROM frpm AS T3 INNER JOIN schools AS T4 ON T3.CDSCode = T4.CDSCode WHERE T4.FundingType = 'Locally funded')",
+            "rowCount": 57,
+            "columns": [
+              "school",
+              "doc"
+            ],
+            "ms": 5
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT s.school, s.doc\nFROM frpm f\nJOIN schools s ON f.cdscode = s.cdscode\nWHERE s.fundingtype = 'Locally funded'\nAND (f.\"Enrollment (K-12)\" - f.\"Enrollment (Ages 5-17)\") > (\n  SELECT AVG(f2.\"Enrollment (K-12)\" - f2.\"Enrollment (Ages 5-17)\")\n  FROM frpm f2\n  JOIN schools s2 ON f2.cdscode = s2.cdscode\n  WHERE s2.fundingtype = 'Locally funded'\n)",
+            "attempts": 3,
+            "lastPgError": null,
+            "rowsReturned": 57,
+            "goldRowCount": 57,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "frpm",
+              "schools"
+            ],
+            "tablesGoldNeeded": [
+              "frpm",
+              "schools"
+            ],
+            "recallHit": true,
+            "tokensIn": 6,
+            "tokensOut": 667,
+            "thinkingTokens": 72,
+            "cacheCreationTokens": 6228,
+            "cacheReadTokens": 11026,
+            "pickerTokensIn": 4505,
+            "pickerTokensOut": 31,
+            "pickerMs": 2473,
+            "usd": 0.0337772,
+            "modelMs": 8276,
+            "executionMs": 60,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 3,
+            "agentInspects": 1,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT T2.School, T2.DOC FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.FundingType = 'Locally funded' AND (T1.\"Enrollment (K-12)\" - T1.\"Enrollment (Ages 5-17)\") > (SELECT AVG(T3.\"Enrollment (K-12)\" - T3.\"Enrollment (Ages 5-17)\") FROM frpm AS T3 INNER JOIN schools AS T4 ON T3.CDSCode = T4.CDSCode WHERE T4.FundingType = 'Locally funded')",
+          "status": "success",
+          "colOrder": 6,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0447 (challenging)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT s.school, s.doc\nFROM frpm f\nJOIN schools s ON f.cdscode = s.cdscode\nWHERE s.fundingtype = 'Locally funded'\nAND (f.\"Enrollment (K-12)\" - f.\"Enrollment (Ages 5-17)\") > (\n  SELECT AVG(f2.\"Enrollment (K-12)\" - f2.\"Enrollment (Ages 5-17)\")\n  FROM frpm f2\n  JOIN schools s2 ON f2.cdscode = s2.cdscode\n  WHERE s2.fundingtype = 'Locally funded'\n)"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "57 vs 57"
+            },
+            {
+              "label": "tables",
+              "value": "2 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "3"
+            },
+            {
+              "label": "tokens",
+              "value": "6 in, 667 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:16",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23683,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:26"
+            },
+            {
+              "id": 23684,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:26"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12437,
+          "duration": 12455,
+          "input": {
+            "id": "bird-0494",
+            "db_id": "financial",
+            "difficulty": "challenging",
+            "question": "What was the growth rate of the total amount of loans across all accounts for a male client between 1996 and 1997?",
+            "evidence": "Growth rate = (sum of amount_1997 - sum of amount_1996) / (sum of amount_1996) * 100%; Male refers to gender = 'M'",
+            "sql": "SELECT CAST((SUM(CASE WHEN TO_CHAR(CAST(T1.date AS TIMESTAMP), 'YYYY') = '1997' THEN T1.amount ELSE 0 END) - SUM(CASE WHEN TO_CHAR(CAST(T1.date AS TIMESTAMP), 'YYYY') = '1996' THEN T1.amount ELSE 0 END)) AS REAL) * 100 / NULLIF(SUM(CASE WHEN TO_CHAR(CAST(T1.date AS TIMESTAMP), 'YYYY') = '1996' THEN T1.amount ELSE 0 END), 0) FROM loan AS T1 INNER JOIN account AS T2 ON T1.account_id = T2.account_id INNER JOIN disp AS T3 ON T3.account_id = T2.account_id INNER JOIN client AS T4 ON T4.client_id = T3.client_id WHERE T4.gender = 'M' AND T3.type = 'OWNER'",
+            "rowCount": 1,
+            "columns": [
+              "?column?"
+            ],
+            "ms": 1
+          },
+          "output": {
+            "correct": false,
+            "generatedSql": "SELECT\n  (SUM(CASE WHEN EXTRACT(YEAR FROM l.date)=1997 THEN l.amount ELSE 0 END) - SUM(CASE WHEN EXTRACT(YEAR FROM l.date)=1996 THEN l.amount ELSE 0 END))\n  / SUM(CASE WHEN EXTRACT(YEAR FROM l.date)=1996 THEN l.amount ELSE 0 END)::float * 100 AS growth_rate\nFROM loan l\nJOIN account a ON l.account_id = a.account_id\nJOIN disp d ON d.account_id = a.account_id\nJOIN client c ON c.client_id = d.client_id\nWHERE c.gender = 'M'",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "loan",
+              "account",
+              "disp",
+              "client",
+              "gender"
+            ],
+            "tablesGoldNeeded": [
+              "loan",
+              "account",
+              "disp",
+              "client"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 737,
+            "thinkingTokens": 132,
+            "cacheCreationTokens": 3440,
+            "cacheReadTokens": 2979,
+            "pickerTokensIn": 4483,
+            "pickerTokensOut": 20,
+            "pickerMs": 1941,
+            "usd": 0.0257398,
+            "modelMs": 10439,
+            "executionMs": 13,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT CAST((SUM(CASE WHEN TO_CHAR(CAST(T1.date AS TIMESTAMP), 'YYYY') = '1997' THEN T1.amount ELSE 0 END) - SUM(CASE WHEN TO_CHAR(CAST(T1.date AS TIMESTAMP), 'YYYY') = '1996' THEN T1.amount ELSE 0 END)) AS REAL) * 100 / NULLIF(SUM(CASE WHEN TO_CHAR(CAST(T1.date AS TIMESTAMP), 'YYYY') = '1996' THEN T1.amount ELSE 0 END), 0) FROM loan AS T1 INNER JOIN account AS T2 ON T1.account_id = T2.account_id INNER JOIN disp AS T3 ON T3.account_id = T2.account_id INNER JOIN client AS T4 ON T4.client_id = T3.client_id WHERE T4.gender = 'M' AND T3.type = 'OWNER'",
+          "status": "success",
+          "colOrder": 7,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0494 (challenging)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT\n  (SUM(CASE WHEN EXTRACT(YEAR FROM l.date)=1997 THEN l.amount ELSE 0 END) - SUM(CASE WHEN EXTRACT(YEAR FROM l.date)=1996 THEN l.amount ELSE 0 END))\n  / SUM(CASE WHEN EXTRACT(YEAR FROM l.date)=1996 THEN l.amount ELSE 0 END)::float * 100 AS growth_rate\nFROM loan l\nJOIN account a ON l.account_id = a.account_id\nJOIN disp d ON d.account_id = a.account_id\nJOIN client c ON c.client_id = d.client_id\nWHERE c.gender = 'M'"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "5 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 737 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:16",
+          "averageScore": 0.5,
+          "scores": [
+            {
+              "id": 23685,
+              "name": "same-rows",
+              "score": 0,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:28"
+            },
+            {
+              "id": 23686,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:28"
+            }
+          ],
+          "traces": []
+        }
+      ]
+    }
+  ]
+}

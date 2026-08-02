@@ -33,12 +33,19 @@ function readEffort(): Effort {
 const MAX_TOKENS = 16_000;
 
 export type Usage = {
+  // With caching in play this is the *uncached remainder only* — the API moves
+  // cached tokens out of input_tokens into the two cache fields below. The
+  // three add up to what was actually sent.
   inputTokens: number;
   outputTokens: number;
   // Already counted inside outputTokens and billed at the output rate, so
   // output cost runs well above what the visible reply length suggests.
   // Reported separately to make that visible.
   thinkingTokens: number;
+  // Tokens written to / read from the prompt cache. Zero on every uncached
+  // call, so pre-caching totals are unchanged by these fields existing.
+  cacheCreationTokens: number;
+  cacheReadTokens: number;
   totalTokens: number;
 };
 
@@ -55,13 +62,32 @@ export type ModelReply = {
 // 3 / 15 — a run after that date costs 1.5x what this function reports.
 const USD_PER_MILLION_INPUT = 2;
 const USD_PER_MILLION_OUTPUT = 10;
+// Anthropic's fixed multiples of the input rate: cache writes bill 1.25x
+// (5-minute TTL), cache reads 0.1x.
+const USD_PER_MILLION_CACHE_WRITE = USD_PER_MILLION_INPUT * 1.25;
+const USD_PER_MILLION_CACHE_READ = USD_PER_MILLION_INPUT * 0.1;
 
 // outputTokens already includes thinkingTokens, so thinking is not added again
 // here — it is reported separately only to show where the cost went.
 export function usdCost(usage: Usage): number {
   const input = usage.inputTokens * USD_PER_MILLION_INPUT;
   const output = usage.outputTokens * USD_PER_MILLION_OUTPUT;
-  return (input + output) / 1_000_000;
+  const cacheWrite = usage.cacheCreationTokens * USD_PER_MILLION_CACHE_WRITE;
+  const cacheRead = usage.cacheReadTokens * USD_PER_MILLION_CACHE_READ;
+  return (input + output + cacheWrite + cacheRead) / 1_000_000;
+}
+
+function readUsage(usage: Anthropic.Usage): Usage {
+  const cacheCreation = usage.cache_creation_input_tokens ?? 0;
+  const cacheRead = usage.cache_read_input_tokens ?? 0;
+  return {
+    inputTokens: usage.input_tokens,
+    outputTokens: usage.output_tokens,
+    thinkingTokens: usage.output_tokens_details?.thinking_tokens ?? 0,
+    cacheCreationTokens: cacheCreation,
+    cacheReadTokens: cacheRead,
+    totalTokens: usage.input_tokens + usage.output_tokens + cacheCreation + cacheRead,
+  };
 }
 
 let client: Anthropic | undefined;
@@ -102,6 +128,58 @@ function rateLimitHeaders(headers: Headers): Record<string, string> {
     if (name.startsWith('anthropic-ratelimit-') || name === 'retry-after') found[name] = value;
   });
   return found;
+}
+
+export type ToolReply = {
+  content: Anthropic.ContentBlock[];
+  stopReason: Anthropic.Message['stop_reason'];
+  usage: Usage;
+  ms: number;
+};
+
+// The second way to call the model, for the agent loop: offer tools, get back
+// content blocks the caller branches on. completeJson stays untouched — the
+// pipeline still uses it, and its numbers must not move.
+//
+// cache_control at the top level turns on automatic prompt caching: the agent
+// resends the whole conversation every pass, and without caching each pass
+// re-bills the schema and every earlier turn at the full input rate. The
+// pipeline's single-turn calls stay uncached on purpose — their cost numbers
+// predate caching and stay comparable.
+export async function completeWithTools(params: {
+  system: string;
+  messages: Anthropic.MessageParam[];
+  tools: Anthropic.Tool[];
+  toolChoice?: Anthropic.ToolChoice;
+}): Promise<ToolReply> {
+  const startedAt = Date.now();
+
+  const data = await anthropic().messages.create({
+    model: MODEL,
+    max_tokens: MAX_TOKENS,
+    system: params.system,
+    messages: params.messages,
+    tools: params.tools,
+    ...(params.toolChoice === undefined ? {} : { tool_choice: params.toolChoice }),
+    output_config: { effort: EFFORT },
+    cache_control: { type: 'ephemeral' },
+  });
+
+  if (data.stop_reason === 'refusal') {
+    const { category, explanation } = data.stop_details ?? {};
+    throw new Error(`${MODEL} refused: ${category ?? 'no category'} — ${explanation ?? 'no explanation'}`);
+  }
+
+  if (data.stop_reason === 'max_tokens') {
+    throw new Error(`${MODEL} hit max_tokens (${MAX_TOKENS}) mid-answer — thinking and the reply share that budget`);
+  }
+
+  return {
+    content: data.content,
+    stopReason: data.stop_reason,
+    usage: readUsage(data.usage),
+    ms: Date.now() - startedAt,
+  };
 }
 
 // Returns the parsed reply as unknown rather than as a generic: a strict output
@@ -152,12 +230,7 @@ export async function completeJson(params: {
 
   return {
     json: JSON.parse(answer.text),
-    usage: {
-      inputTokens: usage.input_tokens,
-      outputTokens: usage.output_tokens,
-      thinkingTokens: usage.output_tokens_details?.thinking_tokens ?? 0,
-      totalTokens: usage.input_tokens + usage.output_tokens,
-    },
+    usage: readUsage(usage),
     rateLimit: rateLimitHeaders(response.headers),
     ms: Date.now() - startedAt,
   };

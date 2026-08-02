@@ -66,6 +66,18 @@
 //                        2026-08-01) — so UNION=off is how the 65.6% Batch G
 //                        number or anything earlier is reproduced.
 //
+// Agent axis (2026-08-01):
+//   AGENT=on|off         the tool-calling loop (src/agent.ts) in place of
+//                        answerQuestion + applyCheck: the model gets
+//                        inspect_column / run_sql / submit_sql and up to 10
+//                        passes. Same table selection and schema text as the
+//                        pipeline, so the delta attributes to the loop. Off by
+//                        default. Requires hard mode + llm picker, outside the
+//                        bake-off. CHECK, REPAIR and VOTE all throw with it —
+//                        the agent replaces the first two, and the third is
+//                        unmeasured against it. REWRITE still applies, to the
+//                        submitted SQL.
+//
 // EVAL_MODE and EVAL_DEV, not the MODE and DEV the plan wrote: vite owns both
 // names and sets them inside every worker (MODE="test", DEV="1"), so a run
 // configured with them silently reads vite's values — the first eval:easy run
@@ -81,6 +93,7 @@ import { readFileSync } from 'node:fs';
 
 import { evalite } from 'evalite';
 
+import { agentAnswer, type AgentAnswer, type AgentStop } from '../src/agent.ts';
 import { answerQuestion } from '../src/answer.ts';
 import { applyCheck, type CheckAction, type CheckMode } from '../src/check.ts';
 import { compareRows } from '../src/compare-rows.ts';
@@ -106,6 +119,7 @@ import * as pickerV2 from '../src/prompts/picker-v2.ts';
 import * as pickerV3 from '../src/prompts/picker-v3.ts';
 import * as pickerV4 from '../src/prompts/picker-v4.ts';
 import { PROMPT_VERSION } from '../src/generate-sql.ts';
+import { AGENT_PROMPT_VERSION } from '../src/prompts/agent-v3.ts';
 
 const GOLD_PATH = new URL('../gold/validated.json', import.meta.url);
 const SLICE_PATH = new URL('./dev-slice.json', import.meta.url);
@@ -152,6 +166,7 @@ if (IDS.length > 0 && DEV) {
 // alternative is a plausible number measured under a config nobody chose,
 // which is how the first eval:easy run got voided.
 const PICKER: PickerName = readPicker();
+const AGENT: boolean = readAgent();
 const REPAIR: boolean = readRepair();
 
 // Batch E axes. Every reader throws on an unknown value, and every non-default
@@ -251,8 +266,24 @@ function readContext<Kind extends string>(name: string, known: Kind[], fallback:
   return kinds as Kind[];
 }
 
+function readAgent(): boolean {
+  const value = process.env.AGENT;
+  if (value === undefined || value === 'off') return false;
+  if (value !== 'on') throw new Error(`AGENT="${value}" — on or off`);
+  requireLlmPicker('AGENT=on');
+  return true;
+}
+
 function readCheck(): CheckMode {
   const value = process.env.CHECK;
+  // The agent replaces the check — its loop verifies before submitting, so a
+  // probe on top would measure two mechanisms at once.
+  if (AGENT) {
+    if (value !== undefined && value !== 'off') {
+      throw new Error(`CHECK=${value} with AGENT=on — the agent replaces the check, run one at a time`);
+    }
+    return 'off';
+  }
   // Unset follows the published configuration (v5 bundle, 72.4%): probe on the
   // headline path, off everywhere it was never measured — easy mode, the
   // bake-off. CHECK=off reproduces the 68.8% union run or anything earlier.
@@ -273,6 +304,9 @@ function readVote(): number {
   requireOutsideBakeoff(`VOTE=${value}`);
   if (CHECK !== 'off') {
     throw new Error(`VOTE=${value} with CHECK=${CHECK} — the interaction is unmeasured, run one at a time`);
+  }
+  if (AGENT) {
+    throw new Error(`VOTE=${value} with AGENT=on — the interaction is unmeasured, run one at a time`);
   }
   return votes;
 }
@@ -296,6 +330,14 @@ function readRewrite(): boolean {
 
 function readRepair(): boolean {
   const value = process.env.REPAIR;
+  // The agent replaces the repair loop — it sees its own Postgres errors
+  // through run_sql and retries inside its passes.
+  if (AGENT) {
+    if (value !== undefined && value !== 'off') {
+      throw new Error(`REPAIR=${value} with AGENT=on — the agent replaces the repair loop`);
+    }
+    return false;
+  }
   // Unset follows the published configuration (v5 bundle, 72.4%): on for the
   // headline path, off in easy mode and the bake-off, which predate it.
   // REPAIR=off reproduces the 68.8% union run or anything earlier.
@@ -392,6 +434,10 @@ type QuestionResult = {
   tokensIn: number;
   tokensOut: number;
   thinkingTokens: number;
+  // Cache traffic (agent runs; zero on the uncached pipeline). Priced inside
+  // usd at 1.25x / 0.1x the input rate.
+  cacheCreationTokens: number;
+  cacheReadTokens: number;
   // The picker's own call, zero for easy / none / keyword. usd is the whole
   // question — generation plus picker — so cost-per-correct (E4) stays honest
   // when the llm picker is in play.
@@ -416,6 +462,17 @@ type QuestionResult = {
   // What the check actually did on this question — 'skipped' when the trigger
   // never fired. Always 'skipped' when check is off.
   checkAction: CheckAction;
+  agent: string;
+  // How the loop ended and what it did — empty / null on pipeline runs. The
+  // stop reason crossed with `correct` is a headline number: if forced answers
+  // are mostly wrong, the agent knew when it was lost.
+  agentStop: AgentStop | '';
+  agentPasses: number | null;
+  agentInspects: number | null;
+  agentRuns: number | null;
+  agentDedupeHits: number | null;
+  // Submissions sent back for erroring or coming up empty (agent-v2's bounce).
+  agentBounces: number | null;
   rewrite: string;
   // Which dialect repairs actually fired on this question (comma list, empty
   // when none did) — attribution without a re-run.
@@ -477,13 +534,28 @@ async function runQuestion(record: GoldRecord, picker: PickerName): Promise<Ques
     repair: REPAIR,
     rewrite: REWRITE,
   };
-  const voted = VOTE > 1 ? await voteAnswer({ ...answerParams, votes: VOTE }) : null;
-  const generated = voted ?? (await answerQuestion(answerParams));
-  const answer = await applyCheck(
-    CHECK,
-    { question: record.question, evidence: record.evidence, schemaText, rewrite: REWRITE },
-    generated,
-  );
+
+  let answer;
+  let voted = null;
+  let agentMeta: AgentAnswer | null = null;
+  if (AGENT) {
+    agentMeta = await agentAnswer({
+      question: record.question,
+      evidence: record.evidence,
+      schemaText,
+      tables: selection.tables,
+      rewrite: REWRITE,
+    });
+    answer = { ...agentMeta, checkAction: 'skipped' as CheckAction };
+  } else {
+    voted = VOTE > 1 ? await voteAnswer({ ...answerParams, votes: VOTE }) : null;
+    const generated = voted ?? (await answerQuestion(answerParams));
+    answer = await applyCheck(
+      CHECK,
+      { question: record.question, evidence: record.evidence, schemaText, rewrite: REWRITE },
+      generated,
+    );
+  }
   const execution = answer.execution;
 
   // Gold SQL failing is infrastructure — every gold query was validated
@@ -515,6 +587,8 @@ async function runQuestion(record: GoldRecord, picker: PickerName): Promise<Ques
     tokensIn: answer.usage.inputTokens,
     tokensOut: answer.usage.outputTokens,
     thinkingTokens: answer.usage.thinkingTokens,
+    cacheCreationTokens: answer.usage.cacheCreationTokens,
+    cacheReadTokens: answer.usage.cacheReadTokens,
     pickerTokensIn: selection.pickerTokensIn,
     pickerTokensOut: selection.pickerTokensOut,
     pickerMs: selection.pickerMs,
@@ -532,6 +606,13 @@ async function runQuestion(record: GoldRecord, picker: PickerName): Promise<Ques
     pickerContext: PICKER_CONTEXT.join(','),
     check: CHECK,
     checkAction: answer.checkAction,
+    agent: AGENT ? 'on' : 'off',
+    agentStop: agentMeta === null ? '' : agentMeta.agentStop,
+    agentPasses: agentMeta === null ? null : agentMeta.agentPasses,
+    agentInspects: agentMeta === null ? null : agentMeta.agentInspects,
+    agentRuns: agentMeta === null ? null : agentMeta.agentRuns,
+    agentDedupeHits: agentMeta === null ? null : agentMeta.agentDedupeHits,
+    agentBounces: agentMeta === null ? null : agentMeta.agentBounces,
     rewrite: REWRITE ? 'on' : 'off',
     rewritesFired: answer.rewrites.join(','),
     vote: VOTE,
@@ -548,7 +629,8 @@ const runName = [
     : [`slice=${DEV ? 'dev' : 'full'}${LIMIT === undefined ? '' : ` | limit=${LIMIT}`}`]),
   `picker=${BAKEOFF ? 'bakeoff' : PICKER}`,
   ...(REPAIR ? ['repair=on'] : []),
-  `prompt=${PROMPT_VERSION}`,
+  ...(AGENT ? [`agent=${AGENT_PROMPT_VERSION}`] : []),
+  `prompt=${AGENT ? AGENT_PROMPT_VERSION : PROMPT_VERSION}`,
   ...(BAKEOFF || PICKER === 'llm' ? [`pickerPrompt=${PICKER_PROMPT.version}`] : []),
   ...(EXPAND ? ['expand=on'] : []),
   ...(UNION ? ['union=on'] : []),

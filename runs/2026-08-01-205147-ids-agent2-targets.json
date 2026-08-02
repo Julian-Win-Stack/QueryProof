@@ -1,0 +1,1034 @@
+{
+  "run": {
+    "id": 65,
+    "runType": "full",
+    "createdAt": "2026-08-02 03:51:47"
+  },
+  "suites": [
+    {
+      "id": 68,
+      "name": "hard | slice=ids(bird-0025,bird-0056,bird-0110,bird-0327,bird-0443,bird-0454,bird-0462,bird-0493) | picker=llm | agent=agent-v2 | prompt=agent-v2 | pickerPrompt=picker-v1 | union=on | sqlContext=rows | rewrite=on | effort=medium | claude-sonnet-5",
+      "filepath": "/Users/phyonyanwinn/Project/ProJect/QueryProof/evals/main.eval.ts",
+      "duration": 0,
+      "status": "success",
+      "variantName": null,
+      "variantGroup": null,
+      "createdAt": "2026-08-02 03:51:47",
+      "averageScore": 0.6875,
+      "evals": [
+        {
+          "id": 12958,
+          "duration": 25647,
+          "input": {
+            "id": "bird-0025",
+            "db_id": "debit_card_specializing",
+            "difficulty": "challenging",
+            "question": "For the customer who paid 634.8 in 2012/8/25, what was the consumption decrease rate from Year 2012 to 2013?",
+            "evidence": "'2012/8/24' can be represented by '2012-08-24'; Consumption decrease rate = (consumption_2012 - consumption_2013) / consumption_2012; paid 634.8 refers to price = '634.8'",
+            "sql": "SELECT CAST(SUM(CASE WHEN SUBSTR(Date, 1, 4) = '2012' THEN Consumption ELSE 0 END) - SUM(CASE WHEN SUBSTR(Date, 1, 4) = '2013' THEN Consumption ELSE 0 END) AS REAL) / NULLIF(SUM(CASE WHEN SUBSTR(Date, 1, 4) = '2012' THEN Consumption ELSE 0 END), 0) FROM yearmonth WHERE CustomerID = (SELECT T1.CustomerID FROM transactions_1k AS T1 INNER JOIN gasstations AS T2 ON T1.GasStationID = T2.GasStationID WHERE T1.Date = '2012-08-25' AND T1.Price = 1513.12 )",
+            "rowCount": 1,
+            "columns": [
+              "?column?"
+            ],
+            "ms": 6
+          },
+          "output": {
+            "correct": false,
+            "generatedSql": "select\n  (sum(consumption) filter (where date like '2012%') - sum(consumption) filter (where date like '2013%'))\n  / sum(consumption) filter (where date like '2012%') as decrease_rate\nfrom yearmonth\nwhere customerid = (select customerid from transactions_1k where date='2012-08-25' and price between 634 and 635)",
+            "attempts": 9,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "transactions_1k",
+              "yearmonth"
+            ],
+            "tablesGoldNeeded": [
+              "yearmonth",
+              "transactions_1k",
+              "gasstations"
+            ],
+            "recallHit": false,
+            "tokensIn": 18,
+            "tokensOut": 1278,
+            "thinkingTokens": 317,
+            "cacheCreationTokens": 4359,
+            "cacheReadTokens": 27009,
+            "pickerTokensIn": 4493,
+            "pickerTokensOut": 23,
+            "pickerMs": 2804,
+            "usd": 0.0383313,
+            "modelMs": 22661,
+            "executionMs": 133,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v2",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 9,
+            "agentInspects": 1,
+            "agentRuns": 7,
+            "agentDedupeHits": 0,
+            "agentBounces": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT CAST(SUM(CASE WHEN SUBSTR(Date, 1, 4) = '2012' THEN Consumption ELSE 0 END) - SUM(CASE WHEN SUBSTR(Date, 1, 4) = '2013' THEN Consumption ELSE 0 END) AS REAL) / NULLIF(SUM(CASE WHEN SUBSTR(Date, 1, 4) = '2012' THEN Consumption ELSE 0 END), 0) FROM yearmonth WHERE CustomerID = (SELECT T1.CustomerID FROM transactions_1k AS T1 INNER JOIN gasstations AS T2 ON T1.GasStationID = T2.GasStationID WHERE T1.Date = '2012-08-25' AND T1.Price = 1513.12 )",
+          "status": "success",
+          "colOrder": 0,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0025 (challenging)"
+            },
+            {
+              "label": "sql",
+              "value": "select\n  (sum(consumption) filter (where date like '2012%') - sum(consumption) filter (where date like '2013%'))\n  / sum(consumption) filter (where date like '2012%') as decrease_rate\nfrom yearmonth\nwhere customerid = (select customerid from transactions_1k where date='2012-08-25' and price between 634 and 635)"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "2 sent, recall MISS"
+            },
+            {
+              "label": "attempts",
+              "value": "9"
+            },
+            {
+              "label": "tokens",
+              "value": "18 in, 1278 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:51:47",
+          "averageScore": 0,
+          "scores": [
+            {
+              "id": 24747,
+              "name": "same-rows",
+              "score": 0,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:52:13"
+            },
+            {
+              "id": 24748,
+              "name": "table-recall",
+              "score": 0,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:52:13"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12959,
+          "duration": 8147,
+          "input": {
+            "id": "bird-0056",
+            "db_id": "student_club",
+            "difficulty": "moderate",
+            "question": "Which student has been entrusted to manage the budget for the Yearly Kickoff?",
+            "evidence": "name of students means the full name; full name refers to first_name, last_name;'Yearly Kickoff' is an event name;",
+            "sql": "SELECT T4.first_name, T4.last_name FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event INNER JOIN expense AS T3 ON T2.budget_id = T3.link_to_budget INNER JOIN member AS T4 ON T3.link_to_member = T4.member_id WHERE T1.event_name = 'Yearly Kickoff'",
+            "rowCount": 4,
+            "columns": [
+              "first_name",
+              "last_name"
+            ],
+            "ms": 1
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "select distinct m.first_name, m.last_name\nfrom event e\njoin budget b on b.link_to_event = e.event_id\njoin expense ex on ex.link_to_budget = b.budget_id\njoin member m on m.member_id = ex.link_to_member\nwhere e.event_name = 'Yearly Kickoff'",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 2,
+            "goldRowCount": 4,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "member",
+              "budget",
+              "event",
+              "superhero",
+              "attendance",
+              "expense"
+            ],
+            "tablesGoldNeeded": [
+              "event",
+              "budget",
+              "expense",
+              "member"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 369,
+            "thinkingTokens": 73,
+            "cacheCreationTokens": 5659,
+            "cacheReadTokens": 5374,
+            "pickerTokensIn": 4476,
+            "pickerTokensOut": 37,
+            "pickerMs": 2808,
+            "usd": 0.0282423,
+            "modelMs": 5292,
+            "executionMs": 6,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v2",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "agentBounces": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT T4.first_name, T4.last_name FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event INNER JOIN expense AS T3 ON T2.budget_id = T3.link_to_budget INNER JOIN member AS T4 ON T3.link_to_member = T4.member_id WHERE T1.event_name = 'Yearly Kickoff'",
+          "status": "success",
+          "colOrder": 1,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0056 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "select distinct m.first_name, m.last_name\nfrom event e\njoin budget b on b.link_to_event = e.event_id\njoin expense ex on ex.link_to_budget = b.budget_id\njoin member m on m.member_id = ex.link_to_member\nwhere e.event_name = 'Yearly Kickoff'"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "2 vs 4"
+            },
+            {
+              "label": "tables",
+              "value": "6 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 369 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:51:47",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 24739,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:51:55"
+            },
+            {
+              "id": 24740,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:51:55"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12960,
+          "duration": 7431,
+          "input": {
+            "id": "bird-0110",
+            "db_id": "thrombosis_prediction",
+            "difficulty": "moderate",
+            "question": "Among the patients who were diagnosed with SLE, who is the oldest with normal hemoglobin level. Provide the ID and sex.",
+            "evidence": "diagnosed with SLE refers to Diagnosis = 'SLE'; The larger the birthday value, the younger the person is, and vice versa; normal hemoglobin level refers to 10 < HGB < 17;",
+            "sql": "SELECT T1.ID, T1.SEX FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T1.Diagnosis = 'SLE' AND T2.HGB > 10 AND T2.HGB < 17 ORDER BY T1.Birthday ASC NULLS FIRST LIMIT 1",
+            "rowCount": 1,
+            "columns": [
+              "id",
+              "sex"
+            ],
+            "ms": 1
+          },
+          "output": {
+            "correct": false,
+            "generatedSql": "SELECT DISTINCT p.id, p.sex FROM patient p JOIN laboratory l ON p.id=l.id WHERE p.diagnosis='SLE' AND l.hgb>10 AND l.hgb<17 ORDER BY p.id",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 56,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "patient",
+              "laboratory",
+              "examination",
+              "player"
+            ],
+            "tablesGoldNeeded": [
+              "patient",
+              "laboratory"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 340,
+            "thinkingTokens": 62,
+            "cacheCreationTokens": 5006,
+            "cacheReadTokens": 4747,
+            "pickerTokensIn": 4493,
+            "pickerTokensOut": 18,
+            "pickerMs": 2287,
+            "usd": 0.026038400000000003,
+            "modelMs": 5068,
+            "executionMs": 17,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v2",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "agentBounces": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT T1.ID, T1.SEX FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T1.Diagnosis = 'SLE' AND T2.HGB > 10 AND T2.HGB < 17 ORDER BY T1.Birthday ASC NULLS FIRST LIMIT 1",
+          "status": "success",
+          "colOrder": 2,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0110 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT DISTINCT p.id, p.sex FROM patient p JOIN laboratory l ON p.id=l.id WHERE p.diagnosis='SLE' AND l.hgb>10 AND l.hgb<17 ORDER BY p.id"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "56 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "4 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 340 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:51:47",
+          "averageScore": 0.5,
+          "scores": [
+            {
+              "id": 24737,
+              "name": "same-rows",
+              "score": 0,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:51:55"
+            },
+            {
+              "id": 24738,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:51:55"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12961,
+          "duration": 6963,
+          "input": {
+            "id": "bird-0327",
+            "db_id": "codebase_community",
+            "difficulty": "moderate",
+            "question": "State all the tags used by Mark Meckes in his posts that doesn't have comments.",
+            "evidence": "used by Mark Meckes refers to DisplayName = 'Mark Meckes'; Doen't have comments refers to CommentCount = 0;",
+            "sql": "SELECT T3.Tags FROM users AS T1 INNER JOIN postHistory AS T2 ON T1.Id = T2.UserId INNER JOIN posts AS T3 ON T3.Id = T2.PostId WHERE T1.DisplayName = 'Mark Meckes' AND T3.CommentCount = 0",
+            "rowCount": 5,
+            "columns": [
+              "tags"
+            ],
+            "ms": 24
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "select tags from posts where owneruserid = (select id from users where displayname='Mark Meckes') and commentcount=0",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 2,
+            "goldRowCount": 5,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "users",
+              "posts",
+              "comments",
+              "tags"
+            ],
+            "tablesGoldNeeded": [
+              "users",
+              "posthistory",
+              "posts"
+            ],
+            "recallHit": false,
+            "tokensIn": 4,
+            "tokensOut": 173,
+            "thinkingTokens": 0,
+            "cacheCreationTokens": 4825,
+            "cacheReadTokens": 4712,
+            "pickerTokensIn": 4476,
+            "pickerTokensOut": 90,
+            "pickerMs": 3195,
+            "usd": 0.0245949,
+            "modelMs": 3568,
+            "executionMs": 117,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v2",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "agentBounces": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT T3.Tags FROM users AS T1 INNER JOIN postHistory AS T2 ON T1.Id = T2.UserId INNER JOIN posts AS T3 ON T3.Id = T2.PostId WHERE T1.DisplayName = 'Mark Meckes' AND T3.CommentCount = 0",
+          "status": "success",
+          "colOrder": 3,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0327 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "select tags from posts where owneruserid = (select id from users where displayname='Mark Meckes') and commentcount=0"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "2 vs 5"
+            },
+            {
+              "label": "tables",
+              "value": "4 sent, recall MISS"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 173 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:51:47",
+          "averageScore": 0.5,
+          "scores": [
+            {
+              "id": 24733,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:51:54"
+            },
+            {
+              "id": 24734,
+              "name": "table-recall",
+              "score": 0,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:51:54"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12962,
+          "duration": 13010,
+          "input": {
+            "id": "bird-0443",
+            "db_id": "california_schools",
+            "difficulty": "moderate",
+            "question": "Give the names of the schools with the percent eligible for free meals in K-12 is more than 0.1 and test takers whose test score is greater than or equal to 1500?",
+            "evidence": "Percent eligible for free meals = Free Meal Count (K-12) / Total (Enrollment (K-12)",
+            "sql": "SELECT T2.\"School Name\" FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE CAST(T2.\"Free Meal Count (K-12)\" AS REAL) / NULLIF(T2.\"Enrollment (K-12)\", 0) > 0.1 AND T1.NumGE1500 > 0",
+            "rowCount": 1167,
+            "columns": [
+              "School Name"
+            ],
+            "ms": 1
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT f.\"School Name\" FROM frpm f JOIN satscores s ON f.cdscode = s.cds WHERE f.\"Free Meal Count (K-12)\"/f.\"Enrollment (K-12)\" > 0.1 AND s.numge1500 > 0",
+            "attempts": 3,
+            "lastPgError": null,
+            "rowsReturned": 1167,
+            "goldRowCount": 1167,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "frpm",
+              "satscores",
+              "tags",
+              "schools"
+            ],
+            "tablesGoldNeeded": [
+              "satscores",
+              "frpm"
+            ],
+            "recallHit": true,
+            "tokensIn": 6,
+            "tokensOut": 621,
+            "thinkingTokens": 184,
+            "cacheCreationTokens": 7181,
+            "cacheReadTokens": 13087,
+            "pickerTokensIn": 4501,
+            "pickerTokensOut": 18,
+            "pickerMs": 3381,
+            "usd": 0.0359739,
+            "modelMs": 9561,
+            "executionMs": 18,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v2",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 3,
+            "agentInspects": 0,
+            "agentRuns": 2,
+            "agentDedupeHits": 0,
+            "agentBounces": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT T2.\"School Name\" FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE CAST(T2.\"Free Meal Count (K-12)\" AS REAL) / NULLIF(T2.\"Enrollment (K-12)\", 0) > 0.1 AND T1.NumGE1500 > 0",
+          "status": "success",
+          "colOrder": 4,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0443 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT f.\"School Name\" FROM frpm f JOIN satscores s ON f.cdscode = s.cds WHERE f.\"Free Meal Count (K-12)\"/f.\"Enrollment (K-12)\" > 0.1 AND s.numge1500 > 0"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1167 vs 1167"
+            },
+            {
+              "label": "tables",
+              "value": "4 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "3"
+            },
+            {
+              "label": "tokens",
+              "value": "6 in, 621 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:51:47",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 24745,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:52:00"
+            },
+            {
+              "id": 24746,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:52:00"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12963,
+          "duration": 9862,
+          "input": {
+            "id": "bird-0454",
+            "db_id": "california_schools",
+            "difficulty": "simple",
+            "question": "List the names of virtual schools that are among the top 5 in their respective counties based on average reading scores.",
+            "evidence": "Exclusively virtual refers to Virtual = 'F'; respective counties means PARTITION BY County",
+            "sql": "SELECT School FROM (SELECT T2.School, T1.AvgScrRead, RANK() OVER (PARTITION BY T2.County ORDER BY T1.AvgScrRead DESC NULLS LAST) AS rnk FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.Virtual = 'F') AS ranked_schools WHERE rnk <= 5",
+            "rowCount": 34,
+            "columns": [
+              "school"
+            ],
+            "ms": 3
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT school FROM (\nSELECT s.school, s.county, sc.avgscrread,\nRANK() OVER (PARTITION BY s.county ORDER BY sc.avgscrread DESC NULLS LAST) rnk\nFROM schools s JOIN satscores sc ON s.cdscode = sc.cds\nWHERE s.virtual = 'F'\n) t WHERE rnk <= 5",
+            "attempts": 3,
+            "lastPgError": null,
+            "rowsReturned": 34,
+            "goldRowCount": 34,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "schools",
+              "satscores",
+              "zip_code"
+            ],
+            "tablesGoldNeeded": [
+              "satscores",
+              "schools"
+            ],
+            "recallHit": true,
+            "tokensIn": 6,
+            "tokensOut": 526,
+            "thinkingTokens": 93,
+            "cacheCreationTokens": 5881,
+            "cacheReadTokens": 10516,
+            "pickerTokensIn": 4480,
+            "pickerTokensOut": 17,
+            "pickerMs": 2319,
+            "usd": 0.0312077,
+            "modelMs": 7456,
+            "executionMs": 42,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v2",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 3,
+            "agentInspects": 1,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "agentBounces": 0,
+            "rewrite": "on",
+            "rewritesFired": "nulls-last",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT School FROM (SELECT T2.School, T1.AvgScrRead, RANK() OVER (PARTITION BY T2.County ORDER BY T1.AvgScrRead DESC NULLS LAST) AS rnk FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.Virtual = 'F') AS ranked_schools WHERE rnk <= 5",
+          "status": "success",
+          "colOrder": 5,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0454 (simple)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT school FROM (\nSELECT s.school, s.county, sc.avgscrread,\nRANK() OVER (PARTITION BY s.county ORDER BY sc.avgscrread DESC NULLS LAST) rnk\nFROM schools s JOIN satscores sc ON s.cdscode = sc.cds\nWHERE s.virtual = 'F'\n) t WHERE rnk <= 5"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "34 vs 34"
+            },
+            {
+              "label": "tables",
+              "value": "3 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "3"
+            },
+            {
+              "label": "tokens",
+              "value": "6 in, 526 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:51:47",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 24741,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:51:57"
+            },
+            {
+              "id": 24742,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:51:57"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12964,
+          "duration": 12300,
+          "input": {
+            "id": "bird-0462",
+            "db_id": "california_schools",
+            "difficulty": "moderate",
+            "question": "Which schools served a grade span of Kindergarten to 9th grade in the county of Los Angeles and what is its Percent (%) Eligible FRPM (Ages 5-17)?",
+            "evidence": "Percent (%) Eligible FRPM (Ages 5-17) can be acquired by `FRPM Count (Ages 5-17)` / `Enrollment (Ages 5-17)` * 100",
+            "sql": "SELECT T2.School, T1.\"FRPM Count (Ages 5-17)\" * 100 / NULLIF(T1.\"Enrollment (Ages 5-17)\", 0) FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.County = 'Los Angeles' AND T2.GSserved = 'K-9'",
+            "rowCount": 2,
+            "columns": [
+              "school",
+              "?column?"
+            ],
+            "ms": 2
+          },
+          "output": {
+            "correct": false,
+            "generatedSql": "select s.school, f.\"FRPM Count (Ages 5-17)\" / f.\"Enrollment (Ages 5-17)\" * 100\nfrom schools s join frpm f on s.cdscode = f.cdscode\nwhere s.gsserved = 'K-9' and s.county = 'Los Angeles'",
+            "attempts": 4,
+            "lastPgError": null,
+            "rowsReturned": 2,
+            "goldRowCount": 2,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "schools",
+              "frpm",
+              "tags"
+            ],
+            "tablesGoldNeeded": [
+              "frpm",
+              "schools"
+            ],
+            "recallHit": true,
+            "tokensIn": 8,
+            "tokensOut": 581,
+            "thinkingTokens": 88,
+            "cacheCreationTokens": 6752,
+            "cacheReadTokens": 18824,
+            "pickerTokensIn": 4509,
+            "pickerTokensOut": 17,
+            "pickerMs": 2259,
+            "usd": 0.0356588,
+            "modelMs": 9917,
+            "executionMs": 53,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v2",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 4,
+            "agentInspects": 1,
+            "agentRuns": 2,
+            "agentDedupeHits": 0,
+            "agentBounces": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT T2.School, T1.\"FRPM Count (Ages 5-17)\" * 100 / NULLIF(T1.\"Enrollment (Ages 5-17)\", 0) FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.County = 'Los Angeles' AND T2.GSserved = 'K-9'",
+          "status": "success",
+          "colOrder": 6,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0462 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "select s.school, f.\"FRPM Count (Ages 5-17)\" / f.\"Enrollment (Ages 5-17)\" * 100\nfrom schools s join frpm f on s.cdscode = f.cdscode\nwhere s.gsserved = 'K-9' and s.county = 'Los Angeles'"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "2 vs 2"
+            },
+            {
+              "label": "tables",
+              "value": "3 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "4"
+            },
+            {
+              "label": "tokens",
+              "value": "8 in, 581 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:51:47",
+          "averageScore": 0.5,
+          "scores": [
+            {
+              "id": 24743,
+              "name": "same-rows",
+              "score": 0,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:51:59"
+            },
+            {
+              "id": 24744,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:51:59"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12965,
+          "duration": 7318,
+          "input": {
+            "id": "bird-0493",
+            "db_id": "financial",
+            "difficulty": "moderate",
+            "question": "What percentage of clients who opened their accounts in the district with an average salary of over 10000 are women?",
+            "evidence": "Female refers to gender = 'F'; Woman and female are closed; Average salary can be found in A11",
+            "sql": "SELECT CAST(SUM(CASE WHEN T2.gender = 'F' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(T2.client_id), 0) FROM district AS T1 INNER JOIN client AS T2 ON T1.district_id = T2.district_id WHERE T1.A11 > 10000",
+            "rowCount": 1,
+            "columns": [
+              "?column?"
+            ],
+            "ms": 1
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT 100.0 * SUM(CASE WHEN c.gender='F' THEN 1 ELSE 0 END) / COUNT(*) \nFROM client c JOIN district d ON c.district_id=d.district_id\nWHERE d.a11 > 10000",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "client",
+              "district",
+              "gender"
+            ],
+            "tablesGoldNeeded": [
+              "district",
+              "client"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 303,
+            "thinkingTokens": 23,
+            "cacheCreationTokens": 3194,
+            "cacheReadTokens": 3004,
+            "pickerTokensIn": 4480,
+            "pickerTokensOut": 49,
+            "pickerMs": 2516,
+            "usd": 0.0210738,
+            "modelMs": 4753,
+            "executionMs": 7,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v2",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "agentBounces": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT CAST(SUM(CASE WHEN T2.gender = 'F' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(T2.client_id), 0) FROM district AS T1 INNER JOIN client AS T2 ON T1.district_id = T2.district_id WHERE T1.A11 > 10000",
+          "status": "success",
+          "colOrder": 7,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0493 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT 100.0 * SUM(CASE WHEN c.gender='F' THEN 1 ELSE 0 END) / COUNT(*) \nFROM client c JOIN district d ON c.district_id=d.district_id\nWHERE d.a11 > 10000"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "3 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 303 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:51:47",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 24735,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:51:54"
+            },
+            {
+              "id": 24736,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:51:54"
+            }
+          ],
+          "traces": []
+        }
+      ]
+    }
+  ]
+}

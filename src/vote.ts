@@ -76,6 +76,8 @@ export async function voteAnswer(
       inputTokens: attempts.reduce((sum, a) => sum + a.usage.inputTokens, 0),
       outputTokens: attempts.reduce((sum, a) => sum + a.usage.outputTokens, 0),
       thinkingTokens: attempts.reduce((sum, a) => sum + a.usage.thinkingTokens, 0),
+      cacheCreationTokens: attempts.reduce((sum, a) => sum + a.usage.cacheCreationTokens, 0),
+      cacheReadTokens: attempts.reduce((sum, a) => sum + a.usage.cacheReadTokens, 0),
       totalTokens: attempts.reduce((sum, a) => sum + a.usage.totalTokens, 0),
     },
     modelMs: attempts.reduce((sum, a) => sum + a.modelMs, 0),

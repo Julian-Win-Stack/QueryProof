@@ -15,7 +15,7 @@ function generated(sql: string): GeneratedSql {
   return {
     sql,
     promptVersion: 'v1',
-    usage: { inputTokens: 100, outputTokens: 10, thinkingTokens: 5, totalTokens: 110 },
+    usage: { inputTokens: 100, outputTokens: 10, thinkingTokens: 5, cacheCreationTokens: 0, cacheReadTokens: 0, totalTokens: 110 },
     ms: 1,
   };
 }

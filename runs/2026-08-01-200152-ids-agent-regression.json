@@ -1,0 +1,2513 @@
+{
+  "run": {
+    "id": 63,
+    "runType": "full",
+    "createdAt": "2026-08-02 03:01:53"
+  },
+  "suites": [
+    {
+      "id": 66,
+      "name": "hard | slice=ids(bird-0125,bird-0229,bird-0316,bird-0337,bird-0365,bird-0141,bird-0144,bird-0178,bird-0000,bird-0042,bird-0078,bird-0124,bird-0165,bird-0203,bird-0251,bird-0285,bird-0324,bird-0374,bird-0420,bird-0460) | picker=llm | agent=agent-v1 | prompt=agent-v1 | pickerPrompt=picker-v1 | union=on | sqlContext=rows | rewrite=on | effort=medium | claude-sonnet-5",
+      "filepath": "/Users/phyonyanwinn/Project/ProJect/QueryProof/evals/main.eval.ts",
+      "duration": 0,
+      "status": "success",
+      "variantName": null,
+      "variantGroup": null,
+      "createdAt": "2026-08-02 03:01:53",
+      "averageScore": 0.95,
+      "evals": [
+        {
+          "id": 12438,
+          "duration": 6024,
+          "input": {
+            "id": "bird-0000",
+            "db_id": "debit_card_specializing",
+            "difficulty": "simple",
+            "question": "What is the ratio of customers who pay in EUR against customers who pay in CZK?",
+            "evidence": "ratio of customers who pay in EUR against customers who pay in CZK = count(Currency = 'EUR') / count(Currency = 'CZK').",
+            "sql": "SELECT CAST(SUM(CASE WHEN Currency = 'EUR' THEN 1 ELSE 0 END) AS REAL) / NULLIF(SUM(CASE WHEN Currency = 'CZK' THEN 1 ELSE 0 END), 0) FROM customers",
+            "rowCount": 1,
+            "columns": [
+              "?column?"
+            ],
+            "ms": 8
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT COUNT(*) FILTER (WHERE currency='EUR')::float / NULLIF(COUNT(*) FILTER (WHERE currency='CZK'),0) FROM customers",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "customers",
+              "tags"
+            ],
+            "tablesGoldNeeded": [
+              "customers"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 231,
+            "thinkingTokens": 0,
+            "cacheCreationTokens": 2316,
+            "cacheReadTokens": 2174,
+            "pickerTokensIn": 4476,
+            "pickerTokensOut": 13,
+            "pickerMs": 2488,
+            "usd": 0.0176248,
+            "modelMs": 3476,
+            "executionMs": 27,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT CAST(SUM(CASE WHEN Currency = 'EUR' THEN 1 ELSE 0 END) AS REAL) / NULLIF(SUM(CASE WHEN Currency = 'CZK' THEN 1 ELSE 0 END), 0) FROM customers",
+          "status": "success",
+          "colOrder": 0,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0000 (simple)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT COUNT(*) FILTER (WHERE currency='EUR')::float / NULLIF(COUNT(*) FILTER (WHERE currency='CZK'),0) FROM customers"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "2 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 231 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:53",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23699,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:59"
+            },
+            {
+              "id": 23700,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:59"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12439,
+          "duration": 6541,
+          "input": {
+            "id": "bird-0042",
+            "db_id": "student_club",
+            "difficulty": "simple",
+            "question": "What was Brent Thomason's major?",
+            "evidence": "Brent Thomason is the full name; full name refers to first_name, last_name; major refers to major_name",
+            "sql": "SELECT T2.major_name FROM member AS T1 INNER JOIN major AS T2 ON T1.link_to_major = T2.major_id WHERE T1.first_name = 'Brent' AND T1.last_name = 'Thomason'",
+            "rowCount": 1,
+            "columns": [
+              "major_name"
+            ],
+            "ms": 0
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "select m.major_name from member mem join major m on mem.link_to_major=m.major_id where mem.first_name='Brent' and mem.last_name='Thomason'",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "member",
+              "major",
+              "superhero"
+            ],
+            "tablesGoldNeeded": [
+              "member",
+              "major"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 203,
+            "thinkingTokens": 0,
+            "cacheCreationTokens": 3620,
+            "cacheReadTokens": 3497,
+            "pickerTokensIn": 4461,
+            "pickerTokensOut": 14,
+            "pickerMs": 2418,
+            "usd": 0.0208494,
+            "modelMs": 4082,
+            "executionMs": 6,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT T2.major_name FROM member AS T1 INNER JOIN major AS T2 ON T1.link_to_major = T2.major_id WHERE T1.first_name = 'Brent' AND T1.last_name = 'Thomason'",
+          "status": "success",
+          "colOrder": 1,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0042 (simple)"
+            },
+            {
+              "label": "sql",
+              "value": "select m.major_name from member mem join major m on mem.link_to_major=m.major_id where mem.first_name='Brent' and mem.last_name='Thomason'"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "3 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 203 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:53",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23701,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:59"
+            },
+            {
+              "id": 23702,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:59"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12440,
+          "duration": 8792,
+          "input": {
+            "id": "bird-0078",
+            "db_id": "thrombosis_prediction",
+            "difficulty": "moderate",
+            "question": "Are there more in-patient or outpatient who were male? What is the deviation in percentage?",
+            "evidence": "male refers to SEX = 'M'; in-patient refers to Admission = '+'; outpatient refers to Admission = '-'; percentage = DIVIDE(COUNT(ID) where SEX = 'M' and Admission = '+', COUNT(ID) where SEX  = 'M' and Admission = '-')",
+            "sql": "SELECT CAST(SUM(CASE WHEN Admission = '+' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(CASE WHEN Admission = '-' THEN 1 ELSE 0 END), 0) FROM Patient WHERE SEX = 'M'",
+            "rowCount": 1,
+            "columns": [
+              "?column?"
+            ],
+            "ms": 2
+          },
+          "output": {
+            "correct": false,
+            "generatedSql": "SELECT \n  CASE WHEN COUNT(*) FILTER (WHERE sex='M' AND admission='+') > COUNT(*) FILTER (WHERE sex='M' AND admission='-') THEN 'in-patient' ELSE 'outpatient' END AS more,\n  CAST(COUNT(*) FILTER (WHERE sex='M' AND admission='+') AS FLOAT) / COUNT(*) FILTER (WHERE sex='M' AND admission='-') * 100 AS percentage\nFROM patient",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": false,
+            "tablesSent": [
+              "patient",
+              "tags"
+            ],
+            "tablesGoldNeeded": [
+              "patient"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 382,
+            "thinkingTokens": 26,
+            "cacheCreationTokens": 2540,
+            "cacheReadTokens": 2392,
+            "pickerTokensIn": 4477,
+            "pickerTokensOut": 57,
+            "pickerMs": 3511,
+            "usd": 0.0201804,
+            "modelMs": 5242,
+            "executionMs": 4,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT CAST(SUM(CASE WHEN Admission = '+' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(CASE WHEN Admission = '-' THEN 1 ELSE 0 END), 0) FROM Patient WHERE SEX = 'M'",
+          "status": "success",
+          "colOrder": 2,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0078 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT \n  CASE WHEN COUNT(*) FILTER (WHERE sex='M' AND admission='+') > COUNT(*) FILTER (WHERE sex='M' AND admission='-') THEN 'in-patient' ELSE 'outpatient' END AS more,\n  CAST(COUNT(*) FILTER (WHERE sex='M' AND admission='+') AS FLOAT) / COUNT(*) FILTER (WHERE sex='M' AND admission='-') * 100 AS percentage\nFROM patient"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "2 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 382 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:53",
+          "averageScore": 0.5,
+          "scores": [
+            {
+              "id": 23717,
+              "name": "same-rows",
+              "score": 0,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:02"
+            },
+            {
+              "id": 23718,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:02"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12441,
+          "duration": 12823,
+          "input": {
+            "id": "bird-0124",
+            "db_id": "thrombosis_prediction",
+            "difficulty": "challenging",
+            "question": "Among the patients who has a normal anti-scl70, how many of them are female and does not have any symptom?",
+            "evidence": "normal anti-scl70 refers to SC170 IN('negative', '0'); female refers to Sex = 'F'; does not have any symptom refers to symptoms IS NULL; Should consider DISTINCT in the final result;",
+            "sql": "SELECT COUNT(DISTINCT T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID INNER JOIN Examination AS T3 ON T3.ID = T2.ID WHERE (T2.SC170 = 'negative' OR T2.SC170 = '0') AND T1.SEX = 'F' AND T3.Symptoms IS NULL",
+            "rowCount": 1,
+            "columns": [
+              "count"
+            ],
+            "ms": 1
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT COUNT(DISTINCT p.\"id\")\nFROM \"patient\" p\nJOIN \"laboratory\" l ON p.\"id\" = l.\"id\"\nJOIN \"examination\" e ON p.\"id\" = e.\"id\"\nWHERE l.\"sc170\" IN ('negative', '0')\nAND p.\"sex\" = 'F'\nAND e.\"symptoms\" IS NULL",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "patient",
+              "laboratory",
+              "examination"
+            ],
+            "tablesGoldNeeded": [
+              "patient",
+              "laboratory",
+              "examination"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 276,
+            "thinkingTokens": 29,
+            "cacheCreationTokens": 4229,
+            "cacheReadTokens": 4037,
+            "pickerTokensIn": 4481,
+            "pickerTokensOut": 56,
+            "pickerMs": 6505,
+            "usd": 0.0236699,
+            "modelMs": 6271,
+            "executionMs": 11,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 1,
+            "agentRuns": 0,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT COUNT(DISTINCT T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID INNER JOIN Examination AS T3 ON T3.ID = T2.ID WHERE (T2.SC170 = 'negative' OR T2.SC170 = '0') AND T1.SEX = 'F' AND T3.Symptoms IS NULL",
+          "status": "success",
+          "colOrder": 3,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0124 (challenging)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT COUNT(DISTINCT p.\"id\")\nFROM \"patient\" p\nJOIN \"laboratory\" l ON p.\"id\" = l.\"id\"\nJOIN \"examination\" e ON p.\"id\" = e.\"id\"\nWHERE l.\"sc170\" IN ('negative', '0')\nAND p.\"sex\" = 'F'\nAND e.\"symptoms\" IS NULL"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "3 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 276 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:53",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23727,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:06"
+            },
+            {
+              "id": 23728,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:06"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12442,
+          "duration": 26848,
+          "input": {
+            "id": "bird-0125",
+            "db_id": "thrombosis_prediction",
+            "difficulty": "moderate",
+            "question": "Among the patients who has a normal level of anti-centromere and a normal level of anti-SSB, how many of them are male?",
+            "evidence": "normal level of anti-centromere refers to CENTROMEA IN('-', '+-'); normal level of anti-SSB refers to SSB IN('-', '+-'); male refers to Sex = 'M'; Should consider DISTINCT in the final result;",
+            "sql": "SELECT COUNT(DISTINCT T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.CENTROMEA IN ('negative', '0') AND T2.SSB IN ('negative', '0') AND T1.SEX = 'M'",
+            "rowCount": 1,
+            "columns": [
+              "count"
+            ],
+            "ms": 2
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT COUNT(DISTINCT p.id) FROM patient p JOIN laboratory l ON p.id=l.id WHERE l.centromea IN ('negative','0') AND l.ssb IN ('negative','0') AND p.sex='M'",
+            "attempts": 7,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "laboratory",
+              "patient"
+            ],
+            "tablesGoldNeeded": [
+              "patient",
+              "laboratory"
+            ],
+            "recallHit": true,
+            "tokensIn": 14,
+            "tokensOut": 1267,
+            "thinkingTokens": 425,
+            "cacheCreationTokens": 5180,
+            "cacheReadTokens": 24745,
+            "pickerTokensIn": 4487,
+            "pickerTokensOut": 18,
+            "pickerMs": 2993,
+            "usd": 0.039751,
+            "modelMs": 23761,
+            "executionMs": 55,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 7,
+            "agentInspects": 3,
+            "agentRuns": 5,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT COUNT(DISTINCT T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.CENTROMEA IN ('negative', '0') AND T2.SSB IN ('negative', '0') AND T1.SEX = 'M'",
+          "status": "success",
+          "colOrder": 4,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0125 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT COUNT(DISTINCT p.id) FROM patient p JOIN laboratory l ON p.id=l.id WHERE l.centromea IN ('negative','0') AND l.ssb IN ('negative','0') AND p.sex='M'"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "2 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "7"
+            },
+            {
+              "label": "tokens",
+              "value": "14 in, 1267 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:53",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23731,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:20"
+            },
+            {
+              "id": 23732,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:20"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12443,
+          "duration": 7629,
+          "input": {
+            "id": "bird-0141",
+            "db_id": "european_football_2",
+            "difficulty": "simple",
+            "question": "What is the overall rating of the football player Gabriel Tamas in year 2011?",
+            "evidence": "in year 2011 refers to strftime('%Y', date) = '2011';",
+            "sql": "SELECT t2.overall_rating FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t1.player_name = 'Gabriel Tamas' AND TO_CHAR(CAST(t2.date AS TIMESTAMP), 'YYYY') = '2011'",
+            "rowCount": 1,
+            "columns": [
+              "overall_rating"
+            ],
+            "ms": 20
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT pa.overall_rating FROM player p JOIN player_attributes pa ON p.player_api_id = pa.player_api_id WHERE p.player_name = 'Gabriel Tamas' AND substr(pa.date,1,4) = '2011'",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "player",
+              "player_attributes",
+              "races",
+              "seasons"
+            ],
+            "tablesGoldNeeded": [
+              "player",
+              "player_attributes"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 294,
+            "thinkingTokens": 21,
+            "cacheCreationTokens": 4404,
+            "cacheReadTokens": 4226,
+            "pickerTokensIn": 4475,
+            "pickerTokensOut": 18,
+            "pickerMs": 2649,
+            "usd": 0.0239332,
+            "modelMs": 4876,
+            "executionMs": 40,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT t2.overall_rating FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t1.player_name = 'Gabriel Tamas' AND TO_CHAR(CAST(t2.date AS TIMESTAMP), 'YYYY') = '2011'",
+          "status": "success",
+          "colOrder": 5,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0141 (simple)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT pa.overall_rating FROM player p JOIN player_attributes pa ON p.player_api_id = pa.player_api_id WHERE p.player_name = 'Gabriel Tamas' AND substr(pa.date,1,4) = '2011'"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "4 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 294 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:53",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23715,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:01"
+            },
+            {
+              "id": 23716,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:01"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12444,
+          "duration": 7374,
+          "input": {
+            "id": "bird-0144",
+            "db_id": "european_football_2",
+            "difficulty": "moderate",
+            "question": "From 2010 to 2015, what was the average overall rating of players who are higher than 170?",
+            "evidence": "from 2010 to 2015 refers to strftime('%Y', date) >= '2010' AND <= '2015'; average overall rating = SUM(t2.overall_rating)/ COUNT(t2.id); higher than 170 refers to Player.height > 170;",
+            "sql": "SELECT CAST(SUM(t2.overall_rating) AS REAL) / NULLIF(COUNT(t2.id), 0) FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t1.height > 170 AND TO_CHAR(CAST(t2.\"date\" AS TIMESTAMP), 'YYYY') >= '2010' AND TO_CHAR(CAST(t2.\"date\" AS TIMESTAMP), 'YYYY') <= '2015'",
+            "rowCount": 1,
+            "columns": [
+              "?column?"
+            ],
+            "ms": 45
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT SUM(pa.overall_rating)::float/COUNT(pa.id) FROM player_attributes pa JOIN player p ON pa.player_api_id = p.player_api_id WHERE substr(pa.date,1,4) >= '2010' AND substr(pa.date,1,4) <= '2015' AND p.height > 170",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "player_attributes",
+              "player",
+              "tags"
+            ],
+            "tablesGoldNeeded": [
+              "player",
+              "player_attributes"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 308,
+            "thinkingTokens": 0,
+            "cacheCreationTokens": 3906,
+            "cacheReadTokens": 3735,
+            "pickerTokensIn": 4477,
+            "pickerTokensOut": 18,
+            "pickerMs": 2812,
+            "usd": 0.022733999999999997,
+            "modelMs": 4415,
+            "executionMs": 66,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT CAST(SUM(t2.overall_rating) AS REAL) / NULLIF(COUNT(t2.id), 0) FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t1.height > 170 AND TO_CHAR(CAST(t2.\"date\" AS TIMESTAMP), 'YYYY') >= '2010' AND TO_CHAR(CAST(t2.\"date\" AS TIMESTAMP), 'YYYY') <= '2015'",
+          "status": "success",
+          "colOrder": 6,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0144 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT SUM(pa.overall_rating)::float/COUNT(pa.id) FROM player_attributes pa JOIN player p ON pa.player_api_id = p.player_api_id WHERE substr(pa.date,1,4) >= '2010' AND substr(pa.date,1,4) <= '2015' AND p.height > 170"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "3 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 308 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:53",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23711,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:00"
+            },
+            {
+              "id": 23712,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:00"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12445,
+          "duration": 6727,
+          "input": {
+            "id": "bird-0165",
+            "db_id": "european_football_2",
+            "difficulty": "simple",
+            "question": "State the name of the most strongest player.",
+            "evidence": "strongest players refers to player has MAX(overall_rating)",
+            "sql": "SELECT DISTINCT t1.player_name FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t2.overall_rating = (SELECT MAX(overall_rating) FROM Player_Attributes)",
+            "rowCount": 1,
+            "columns": [
+              "player_name"
+            ],
+            "ms": 18
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT p.player_name FROM player p JOIN player_attributes pa ON p.player_api_id = pa.player_api_id ORDER BY pa.overall_rating DESC NULLS LAST LIMIT 1",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "player",
+              "player_attributes"
+            ],
+            "tablesGoldNeeded": [
+              "player",
+              "player_attributes"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 231,
+            "thinkingTokens": 0,
+            "cacheCreationTokens": 3574,
+            "cacheReadTokens": 3432,
+            "pickerTokensIn": 4460,
+            "pickerTokensOut": 42,
+            "pickerMs": 2976,
+            "usd": 0.021279399999999997,
+            "modelMs": 3639,
+            "executionMs": 61,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "nulls-last",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT DISTINCT t1.player_name FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t2.overall_rating = (SELECT MAX(overall_rating) FROM Player_Attributes)",
+          "status": "success",
+          "colOrder": 7,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0165 (simple)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT p.player_name FROM player p JOIN player_attributes pa ON p.player_api_id = pa.player_api_id ORDER BY pa.overall_rating DESC NULLS LAST LIMIT 1"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "2 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 231 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:53",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23703,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:00"
+            },
+            {
+              "id": 23704,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:00"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12446,
+          "duration": 5880,
+          "input": {
+            "id": "bird-0178",
+            "db_id": "european_football_2",
+            "difficulty": "moderate",
+            "question": "What is the percentage of players that are under 180 cm who have an overall strength of more than 70?",
+            "evidence": "percentage refers to DIVIDE(COUNT(height < 180 AND overall_rating > 70),COUNT(id)) * 100",
+            "sql": "SELECT CAST(COUNT(CASE WHEN t2.overall_rating > 70 AND t1.height < 180 THEN t1.id ELSE NULL END) AS REAL) * 100 / NULLIF(COUNT(t1.id), 0) AS percent FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id",
+            "rowCount": 1,
+            "columns": [
+              "percent"
+            ],
+            "ms": 14
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT COUNT(*) FILTER (WHERE p.height < 180 AND pa.overall_rating > 70) * 100.0 / COUNT(pa.id) AS percentage\nFROM player_attributes pa\nJOIN player p ON p.player_api_id = pa.player_api_id",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "player",
+              "player_attributes",
+              "tags"
+            ],
+            "tablesGoldNeeded": [
+              "player",
+              "player_attributes"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 225,
+            "thinkingTokens": 12,
+            "cacheCreationTokens": 3805,
+            "cacheReadTokens": 3695,
+            "pickerTokensIn": 4478,
+            "pickerTokensOut": 18,
+            "pickerMs": 2066,
+            "usd": 0.021645499999999998,
+            "modelMs": 3693,
+            "executionMs": 43,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT CAST(COUNT(CASE WHEN t2.overall_rating > 70 AND t1.height < 180 THEN t1.id ELSE NULL END) AS REAL) * 100 / NULLIF(COUNT(t1.id), 0) AS percent FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id",
+          "status": "success",
+          "colOrder": 8,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0178 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT COUNT(*) FILTER (WHERE p.height < 180 AND pa.overall_rating > 70) * 100.0 / COUNT(pa.id) AS percentage\nFROM player_attributes pa\nJOIN player p ON p.player_api_id = pa.player_api_id"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "3 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 225 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:53",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23695,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:59"
+            },
+            {
+              "id": 23696,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:59"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12447,
+          "duration": 6739,
+          "input": {
+            "id": "bird-0203",
+            "db_id": "formula_1",
+            "difficulty": "simple",
+            "question": "How old is the youngest Japanese driver? What is his name?",
+            "evidence": "date of birth refers to drivers.dob; The larger the birthday value, the younger the person is, and vice versa; Japanese refers to nationality = 'Japanese'; age = YEAR(CURRENT_TIMESTAMP) - YEAR(dob);",
+            "sql": "SELECT EXTRACT(YEAR FROM CURRENT_TIMESTAMP) - EXTRACT(YEAR FROM dob) AS age, forename, surname FROM drivers WHERE nationality = 'Japanese' ORDER BY dob DESC LIMIT 1",
+            "rowCount": 1,
+            "columns": [
+              "age",
+              "forename",
+              "surname"
+            ],
+            "ms": 1
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT EXTRACT(YEAR FROM CURRENT_TIMESTAMP)::int - EXTRACT(YEAR FROM dob)::int AS age, forename, surname FROM drivers WHERE nationality='Japanese' ORDER BY dob DESC NULLS LAST LIMIT 1",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "drivers",
+              "constructors",
+              "patient",
+              "player",
+              "races",
+              "seasons",
+              "users",
+              "laptimes",
+              "pitstops",
+              "qualifying",
+              "results"
+            ],
+            "tablesGoldNeeded": [
+              "drivers"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 332,
+            "thinkingTokens": 31,
+            "cacheCreationTokens": 7045,
+            "cacheReadTokens": 6829,
+            "pickerTokensIn": 4468,
+            "pickerTokensOut": 14,
+            "pickerMs": 2608,
+            "usd": 0.0313823,
+            "modelMs": 4091,
+            "executionMs": 4,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "nulls-last",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT EXTRACT(YEAR FROM CURRENT_TIMESTAMP) - EXTRACT(YEAR FROM dob) AS age, forename, surname FROM drivers WHERE nationality = 'Japanese' ORDER BY dob DESC LIMIT 1",
+          "status": "success",
+          "colOrder": 9,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0203 (simple)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT EXTRACT(YEAR FROM CURRENT_TIMESTAMP)::int - EXTRACT(YEAR FROM dob)::int AS age, forename, surname FROM drivers WHERE nationality='Japanese' ORDER BY dob DESC NULLS LAST LIMIT 1"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "11 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 332 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:53",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23705,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:00"
+            },
+            {
+              "id": 23706,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:00"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12448,
+          "duration": 5909,
+          "input": {
+            "id": "bird-0229",
+            "db_id": "formula_1",
+            "difficulty": "simple",
+            "question": "List out the code for drivers who have nationality in America.",
+            "evidence": "nationality = 'America'",
+            "sql": "SELECT code FROM drivers WHERE Nationality = 'American'",
+            "rowCount": 157,
+            "columns": [
+              "code"
+            ],
+            "ms": 0
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT \"code\" FROM \"drivers\" WHERE \"nationality\" = 'American'",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 157,
+            "goldRowCount": 157,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "drivers",
+              "constructors",
+              "qualifying",
+              "results"
+            ],
+            "tablesGoldNeeded": [
+              "drivers"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 170,
+            "thinkingTokens": 16,
+            "cacheCreationTokens": 4114,
+            "cacheReadTokens": 3797,
+            "pickerTokensIn": 4465,
+            "pickerTokensOut": 14,
+            "pickerMs": 2593,
+            "usd": 0.0218224,
+            "modelMs": 3278,
+            "executionMs": 3,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 1,
+            "agentRuns": 0,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT code FROM drivers WHERE Nationality = 'American'",
+          "status": "success",
+          "colOrder": 10,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0229 (simple)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT \"code\" FROM \"drivers\" WHERE \"nationality\" = 'American'"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "157 vs 157"
+            },
+            {
+              "label": "tables",
+              "value": "4 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 170 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:53",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23697,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:59"
+            },
+            {
+              "id": 23698,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:59"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12449,
+          "duration": 4548,
+          "input": {
+            "id": "bird-0251",
+            "db_id": "superhero",
+            "difficulty": "challenging",
+            "question": "List the superheroes from Marvel Comics who have the super power of 'Super Strength'.",
+            "evidence": "the superheroes from Marvel Comics refers to publisher_name = 'Marvel Comics'; super power of \"Super Strength\" refers to power_name = 'Super Strength';",
+            "sql": "SELECT superhero_name FROM superhero AS T1 WHERE EXISTS(SELECT 1 FROM hero_power AS T2 INNER JOIN superpower AS T3 ON T2.power_id = T3.id WHERE T3.power_name = 'Super Strength' AND T1.id = T2.hero_id) AND EXISTS(SELECT 1 FROM publisher AS T4 WHERE T4.publisher_name = 'Marvel Comics' AND T1.publisher_id = T4.id)",
+            "rowCount": 201,
+            "columns": [
+              "superhero_name"
+            ],
+            "ms": 1
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT s.superhero_name\nFROM superhero s\nJOIN publisher p ON s.publisher_id = p.id\nJOIN hero_power hp ON hp.hero_id = s.id\nJOIN superpower sp ON sp.id = hp.power_id\nWHERE p.publisher_name = 'Marvel Comics' AND sp.power_name = 'Super Strength'",
+            "attempts": 1,
+            "lastPgError": null,
+            "rowsReturned": 201,
+            "goldRowCount": 201,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "superhero",
+              "publisher",
+              "superpower",
+              "hero_power",
+              "cards",
+              "player_attributes"
+            ],
+            "tablesGoldNeeded": [
+              "superhero",
+              "hero_power",
+              "superpower",
+              "publisher"
+            ],
+            "recallHit": true,
+            "tokensIn": 2,
+            "tokensOut": 177,
+            "thinkingTokens": 0,
+            "cacheCreationTokens": 7826,
+            "cacheReadTokens": 0,
+            "pickerTokensIn": 4478,
+            "pickerTokensOut": 27,
+            "pickerMs": 2215,
+            "usd": 0.030565000000000002,
+            "modelMs": 2291,
+            "executionMs": 5,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 1,
+            "agentInspects": 0,
+            "agentRuns": 0,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT superhero_name FROM superhero AS T1 WHERE EXISTS(SELECT 1 FROM hero_power AS T2 INNER JOIN superpower AS T3 ON T2.power_id = T3.id WHERE T3.power_name = 'Super Strength' AND T1.id = T2.hero_id) AND EXISTS(SELECT 1 FROM publisher AS T4 WHERE T4.publisher_name = 'Marvel Comics' AND T1.publisher_id = T4.id)",
+          "status": "success",
+          "colOrder": 11,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0251 (challenging)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT s.superhero_name\nFROM superhero s\nJOIN publisher p ON s.publisher_id = p.id\nJOIN hero_power hp ON hp.hero_id = s.id\nJOIN superpower sp ON sp.id = hp.power_id\nWHERE p.publisher_name = 'Marvel Comics' AND sp.power_name = 'Super Strength'"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "201 vs 201"
+            },
+            {
+              "label": "tables",
+              "value": "6 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "1"
+            },
+            {
+              "label": "tokens",
+              "value": "2 in, 177 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:53",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23693,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:57"
+            },
+            {
+              "id": 23694,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:01:57"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12450,
+          "duration": 10214,
+          "input": {
+            "id": "bird-0285",
+            "db_id": "superhero",
+            "difficulty": "moderate",
+            "question": "Which hero was the fastest?",
+            "evidence": "which hero refers to superhero_name; fastest refers to MAX(attribute_value) WHERE attribute_name = 'Speed';",
+            "sql": "SELECT T1.superhero_name FROM superhero AS T1 INNER JOIN hero_attribute AS T2 ON T1.id = T2.hero_id INNER JOIN attribute AS T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'Speed' ORDER BY T2.attribute_value DESC NULLS LAST LIMIT 1",
+            "rowCount": 1,
+            "columns": [
+              "superhero_name"
+            ],
+            "ms": 0
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT s.superhero_name FROM superhero s JOIN hero_attribute ha ON s.id=ha.hero_id JOIN attribute a ON ha.attribute_id=a.id WHERE a.attribute_name='Speed' ORDER BY ha.attribute_value DESC NULLS LAST LIMIT 1",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "superhero",
+              "hero_attribute",
+              "attribute"
+            ],
+            "tablesGoldNeeded": [
+              "superhero",
+              "hero_attribute",
+              "attribute"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 307,
+            "thinkingTokens": 0,
+            "cacheCreationTokens": 2972,
+            "cacheReadTokens": 2793,
+            "pickerTokensIn": 4459,
+            "pickerTokensOut": 71,
+            "pickerMs": 3040,
+            "usd": 0.0206946,
+            "modelMs": 7137,
+            "executionMs": 4,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "nulls-last",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT T1.superhero_name FROM superhero AS T1 INNER JOIN hero_attribute AS T2 ON T1.id = T2.hero_id INNER JOIN attribute AS T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'Speed' ORDER BY T2.attribute_value DESC NULLS LAST LIMIT 1",
+          "status": "success",
+          "colOrder": 12,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0285 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT s.superhero_name FROM superhero s JOIN hero_attribute ha ON s.id=ha.hero_id JOIN attribute a ON ha.attribute_id=a.id WHERE a.attribute_name='Speed' ORDER BY ha.attribute_value DESC NULLS LAST LIMIT 1"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "3 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 307 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:53",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23725,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:03"
+            },
+            {
+              "id": 23726,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:03"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12451,
+          "duration": 9770,
+          "input": {
+            "id": "bird-0316",
+            "db_id": "codebase_community",
+            "difficulty": "moderate",
+            "question": "Who is the owner of the post titled 'Open source tools for visualizing multi-dimensional data?'",
+            "evidence": "'Open source tools for visualizing multi-dimensional data' is the Title of Post; owner refers to DisplayName;",
+            "sql": "SELECT T2.DisplayName FROM posts AS T1 INNER JOIN users AS T2 ON T1.OwnerUserId = T2.Id WHERE T1.Title = 'Open source tools for visualizing multi-dimensional data?'",
+            "rowCount": 1,
+            "columns": [
+              "displayname"
+            ],
+            "ms": 13
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "select u.displayname from posts p join users u on p.owneruserid=u.id where p.title='Open source tools for visualizing multi-dimensional data?'",
+            "attempts": 4,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "posts",
+              "users",
+              "income"
+            ],
+            "tablesGoldNeeded": [
+              "posts",
+              "users"
+            ],
+            "recallHit": true,
+            "tokensIn": 8,
+            "tokensOut": 364,
+            "thinkingTokens": 0,
+            "cacheCreationTokens": 4493,
+            "cacheReadTokens": 12629,
+            "pickerTokensIn": 4482,
+            "pickerTokensOut": 15,
+            "pickerMs": 2673,
+            "usd": 0.0265283,
+            "modelMs": 6847,
+            "executionMs": 198,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 4,
+            "agentInspects": 0,
+            "agentRuns": 3,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT T2.DisplayName FROM posts AS T1 INNER JOIN users AS T2 ON T1.OwnerUserId = T2.Id WHERE T1.Title = 'Open source tools for visualizing multi-dimensional data?'",
+          "status": "success",
+          "colOrder": 13,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0316 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "select u.displayname from posts p join users u on p.owneruserid=u.id where p.title='Open source tools for visualizing multi-dimensional data?'"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "3 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "4"
+            },
+            {
+              "label": "tokens",
+              "value": "8 in, 364 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:53",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23721,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:03"
+            },
+            {
+              "id": 23722,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:03"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12452,
+          "duration": 6869,
+          "input": {
+            "id": "bird-0324",
+            "db_id": "codebase_community",
+            "difficulty": "simple",
+            "question": "Calculate the ratio of votes in 2010 and 2011.",
+            "evidence": "DIVIDE(COUNT(Id where YEAR(CreationDate) = 2010), COUNT(Id where YEAR(CreationDate) = 2011)) FROM votes;",
+            "sql": "SELECT CAST(SUM(CASE WHEN TO_CHAR(CAST(CreationDate AS TIMESTAMP), 'YYYY') = '2010' THEN 1 ELSE 0 END) AS REAL) / NULLIF(SUM(CASE WHEN TO_CHAR(CAST(CreationDate AS TIMESTAMP), 'YYYY') = '2011' THEN 1 ELSE 0 END), 0) FROM votes",
+            "rowCount": 1,
+            "columns": [
+              "?column?"
+            ],
+            "ms": 15
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT CAST(COUNT(*) FILTER (WHERE EXTRACT(YEAR FROM creationdate)=2010) AS FLOAT) / NULLIF(COUNT(*) FILTER (WHERE EXTRACT(YEAR FROM creationdate)=2011),0) FROM votes",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "votes",
+              "races",
+              "seasons",
+              "tags"
+            ],
+            "tablesGoldNeeded": [
+              "votes"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 313,
+            "thinkingTokens": 0,
+            "cacheCreationTokens": 3287,
+            "cacheReadTokens": 3105,
+            "pickerTokensIn": 4470,
+            "pickerTokensOut": 13,
+            "pickerMs": 2744,
+            "usd": 0.0210465,
+            "modelMs": 4044,
+            "executionMs": 31,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT CAST(SUM(CASE WHEN TO_CHAR(CAST(CreationDate AS TIMESTAMP), 'YYYY') = '2010' THEN 1 ELSE 0 END) AS REAL) / NULLIF(SUM(CASE WHEN TO_CHAR(CAST(CreationDate AS TIMESTAMP), 'YYYY') = '2011' THEN 1 ELSE 0 END), 0) FROM votes",
+          "status": "success",
+          "colOrder": 14,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0324 (simple)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT CAST(COUNT(*) FILTER (WHERE EXTRACT(YEAR FROM creationdate)=2010) AS FLOAT) / NULLIF(COUNT(*) FILTER (WHERE EXTRACT(YEAR FROM creationdate)=2011),0) FROM votes"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "4 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 313 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:53",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23707,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:00"
+            },
+            {
+              "id": 23708,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:00"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12453,
+          "duration": 13214,
+          "input": {
+            "id": "bird-0337",
+            "db_id": "codebase_community",
+            "difficulty": "moderate",
+            "question": "Identify the total views on the post 'Computer Game Datasets'. Name the user who posted it last time.",
+            "evidence": "total views refer to ViewCount; Name the user refers to DisplayName; post 'Computer Game Datasets' refers to Text = 'Computer Game Datasets';",
+            "sql": "SELECT T2.ViewCount, T3.DisplayName FROM postHistory AS T1 INNER JOIN posts AS T2 ON T1.PostId = T2.Id INNER JOIN users AS T3 ON T2.LastEditorUserId = T3.Id WHERE T1.Text = 'Computer Game Datasets'",
+            "rowCount": 1,
+            "columns": [
+              "viewcount",
+              "displayname"
+            ],
+            "ms": 17
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "select p.viewcount, u.displayname from posts p join users u on p.lasteditoruserid=u.id where p.title ilike 'Computer Game Datasets'",
+            "attempts": 5,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "posts",
+              "users"
+            ],
+            "tablesGoldNeeded": [
+              "posthistory",
+              "posts",
+              "users"
+            ],
+            "recallHit": false,
+            "tokensIn": 10,
+            "tokensOut": 583,
+            "thinkingTokens": 108,
+            "cacheCreationTokens": 4269,
+            "cacheReadTokens": 15619,
+            "pickerTokensIn": 4482,
+            "pickerTokensOut": 15,
+            "pickerMs": 2628,
+            "usd": 0.0287603,
+            "modelMs": 10335,
+            "executionMs": 180,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 5,
+            "agentInspects": 0,
+            "agentRuns": 4,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT T2.ViewCount, T3.DisplayName FROM postHistory AS T1 INNER JOIN posts AS T2 ON T1.PostId = T2.Id INNER JOIN users AS T3 ON T2.LastEditorUserId = T3.Id WHERE T1.Text = 'Computer Game Datasets'",
+          "status": "success",
+          "colOrder": 15,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0337 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "select p.viewcount, u.displayname from posts p join users u on p.lasteditoruserid=u.id where p.title ilike 'Computer Game Datasets'"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "2 sent, recall MISS"
+            },
+            {
+              "label": "attempts",
+              "value": "5"
+            },
+            {
+              "label": "tokens",
+              "value": "10 in, 583 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:53",
+          "averageScore": 0.5,
+          "scores": [
+            {
+              "id": 23729,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:06"
+            },
+            {
+              "id": 23730,
+              "name": "table-recall",
+              "score": 0,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:06"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12454,
+          "duration": 8885,
+          "input": {
+            "id": "bird-0365",
+            "db_id": "card_games",
+            "difficulty": "moderate",
+            "question": "How many Brazilian Portuguese translated sets are inside the Commander block?",
+            "evidence": "Commander block refer to block = 'Commander'; sets refer to code = setCode; Portuguese refer to language = 'Portuguese (Brasil)'",
+            "sql": "SELECT COUNT(T1.id) FROM sets AS T1 INNER JOIN set_translations AS T2 ON T1.code = T2.setCode WHERE T2.language = 'Portuguese (Brazil)' AND T1.block = 'Commander'",
+            "rowCount": 1,
+            "columns": [
+              "count"
+            ],
+            "ms": 1
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT COUNT(*) FROM set_translations st JOIN sets s ON st.setcode=s.code WHERE st.language='Portuguese (Brazil)' AND s.block='Commander'",
+            "attempts": 3,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "set_translations",
+              "sets",
+              "cards",
+              "drivers",
+              "foreign_data"
+            ],
+            "tablesGoldNeeded": [
+              "sets",
+              "set_translations"
+            ],
+            "recallHit": true,
+            "tokensIn": 6,
+            "tokensOut": 386,
+            "thinkingTokens": 12,
+            "cacheCreationTokens": 8363,
+            "cacheReadTokens": 15844,
+            "pickerTokensIn": 4474,
+            "pickerTokensOut": 18,
+            "pickerMs": 2669,
+            "usd": 0.0370763,
+            "modelMs": 6172,
+            "executionMs": 9,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 3,
+            "agentInspects": 2,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT COUNT(T1.id) FROM sets AS T1 INNER JOIN set_translations AS T2 ON T1.code = T2.setCode WHERE T2.language = 'Portuguese (Brazil)' AND T1.block = 'Commander'",
+          "status": "success",
+          "colOrder": 16,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0365 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT COUNT(*) FROM set_translations st JOIN sets s ON st.setcode=s.code WHERE st.language='Portuguese (Brazil)' AND s.block='Commander'"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "5 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "3"
+            },
+            {
+              "label": "tokens",
+              "value": "6 in, 386 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:53",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23719,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:02"
+            },
+            {
+              "id": 23720,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:02"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12455,
+          "duration": 6885,
+          "input": {
+            "id": "bird-0374",
+            "db_id": "card_games",
+            "difficulty": "simple",
+            "question": "What proportion of cards do not have a text box with a normal layout?",
+            "evidence": "do not have a text box refers to isTextless = 1; proportion refers to DIVIDE(COUNT(Textless = 1 and layout = 'normal'),COUNT(Textless))*100",
+            "sql": "SELECT CAST(SUM(CASE WHEN isTextless = 1 AND layout = 'normal' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(*), 0) FROM cards",
+            "rowCount": 1,
+            "columns": [
+              "?column?"
+            ],
+            "ms": 14
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT COUNT(CASE WHEN \"istextless\"=1 AND \"layout\"='normal' THEN 1 END) * 100.0 / COUNT(\"istextless\") FROM \"cards\"",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "cards",
+              "tags"
+            ],
+            "tablesGoldNeeded": [
+              "cards"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 271,
+            "thinkingTokens": 42,
+            "cacheCreationTokens": 5740,
+            "cacheReadTokens": 5556,
+            "pickerTokensIn": 4469,
+            "pickerTokensOut": 13,
+            "pickerMs": 3003,
+            "usd": 0.0272472,
+            "modelMs": 3780,
+            "executionMs": 48,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT CAST(SUM(CASE WHEN isTextless = 1 AND layout = 'normal' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(*), 0) FROM cards",
+          "status": "success",
+          "colOrder": 17,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0374 (simple)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT COUNT(CASE WHEN \"istextless\"=1 AND \"layout\"='normal' THEN 1 END) * 100.0 / COUNT(\"istextless\") FROM \"cards\""
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "2 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 271 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:53",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23709,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:00"
+            },
+            {
+              "id": 23710,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:00"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12456,
+          "duration": 7474,
+          "input": {
+            "id": "bird-0420",
+            "db_id": "toxicology",
+            "difficulty": "simple",
+            "question": "How many connections does the atom 19 have?",
+            "evidence": "connections refers to bond_id; atom 19 refers to atom_id like 'TR%_19';",
+            "sql": "SELECT COUNT(T.bond_id) FROM connected AS T WHERE RIGHT(T.atom_id, 2) = '19'",
+            "rowCount": 1,
+            "columns": [
+              "count"
+            ],
+            "ms": 1
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT count(*) FROM connected WHERE atom_id LIKE 'TR%\\_19'",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "connected",
+              "atom",
+              "bond"
+            ],
+            "tablesGoldNeeded": [
+              "connected"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 322,
+            "thinkingTokens": 155,
+            "cacheCreationTokens": 2666,
+            "cacheReadTokens": 2567,
+            "pickerTokensIn": 4462,
+            "pickerTokensOut": 13,
+            "pickerMs": 2224,
+            "usd": 0.0194604,
+            "modelMs": 5197,
+            "executionMs": 18,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT COUNT(T.bond_id) FROM connected AS T WHERE RIGHT(T.atom_id, 2) = '19'",
+          "status": "success",
+          "colOrder": 18,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0420 (simple)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT count(*) FROM connected WHERE atom_id LIKE 'TR%\\_19'"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "3 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 322 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:53",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23713,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:00"
+            },
+            {
+              "id": 23714,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:00"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12457,
+          "duration": 10191,
+          "input": {
+            "id": "bird-0460",
+            "db_id": "california_schools",
+            "difficulty": "challenging",
+            "question": "What is the total number of non-chartered schools in the county of Los Angeles with a percent (%) of eligible free meals for grades 1 through 12 that is less than 0.18%?",
+            "evidence": "non-chartered schools refer to schools whose Charter = 0; K-12 means grades 1 through 12; percent of eligible free rate for K-12 = `Free Meal Count (K-12)` * 100 / `Enrollment (K-12)`",
+            "sql": "SELECT COUNT(T2.School) FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.County = 'Los Angeles' AND T2.Charter = 0 AND CAST(T1.\"Free Meal Count (K-12)\" AS REAL) * 100 / NULLIF(T1.\"Enrollment (K-12)\", 0) < 0.18",
+            "rowCount": 1,
+            "columns": [
+              "count"
+            ],
+            "ms": 3
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT COUNT(*) FROM frpm f JOIN schools s ON f.cdscode=s.cdscode WHERE s.charter=0 AND f.\"County Name\"='Los Angeles' AND f.\"Free Meal Count (K-12)\"*100/f.\"Enrollment (K-12)\" < 0.18",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "frpm",
+              "schools",
+              "tags"
+            ],
+            "tablesGoldNeeded": [
+              "frpm",
+              "schools"
+            ],
+            "recallHit": true,
+            "tokensIn": 4,
+            "tokensOut": 371,
+            "thinkingTokens": 62,
+            "cacheCreationTokens": 5873,
+            "cacheReadTokens": 5640,
+            "pickerTokensIn": 4506,
+            "pickerTokensOut": 14,
+            "pickerMs": 2096,
+            "usd": 0.0286805,
+            "modelMs": 8021,
+            "executionMs": 19,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "off",
+            "promptVersion": "agent-v1",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "off",
+            "checkAction": "skipped",
+            "agent": "on",
+            "agentStop": "submitted",
+            "agentPasses": 2,
+            "agentInspects": 0,
+            "agentRuns": 1,
+            "agentDedupeHits": 0,
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT COUNT(T2.School) FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.County = 'Los Angeles' AND T2.Charter = 0 AND CAST(T1.\"Free Meal Count (K-12)\" AS REAL) * 100 / NULLIF(T1.\"Enrollment (K-12)\", 0) < 0.18",
+          "status": "success",
+          "colOrder": 19,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0460 (challenging)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT COUNT(*) FROM frpm f JOIN schools s ON f.cdscode=s.cdscode WHERE s.charter=0 AND f.\"County Name\"='Los Angeles' AND f.\"Free Meal Count (K-12)\"*100/f.\"Enrollment (K-12)\" < 0.18"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "3 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "4 in, 371 out"
+            }
+          ],
+          "createdAt": "2026-08-02 03:01:53",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23723,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:03"
+            },
+            {
+              "id": 23724,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 03:02:03"
+            }
+          ],
+          "traces": []
+        }
+      ]
+    }
+  ]
+}

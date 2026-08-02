@@ -62,7 +62,14 @@ export async function answerQuestion(
   deps: Deps = { generate: generateSql, execute: executeReadOnly },
 ): Promise<Answer> {
   const failures: FailedAttempt[] = [];
-  const usage: Usage = { inputTokens: 0, outputTokens: 0, thinkingTokens: 0, totalTokens: 0 };
+  const usage: Usage = {
+    inputTokens: 0,
+    outputTokens: 0,
+    thinkingTokens: 0,
+    cacheCreationTokens: 0,
+    cacheReadTokens: 0,
+    totalTokens: 0,
+  };
   const rewrites = new Set<string>();
   let modelMs = 0;
   let executionMs = 0;
@@ -77,6 +84,8 @@ export async function answerQuestion(
     usage.inputTokens += generated.usage.inputTokens;
     usage.outputTokens += generated.usage.outputTokens;
     usage.thinkingTokens += generated.usage.thinkingTokens;
+    usage.cacheCreationTokens += generated.usage.cacheCreationTokens;
+    usage.cacheReadTokens += generated.usage.cacheReadTokens;
     usage.totalTokens += generated.usage.totalTokens;
     modelMs += generated.ms;
 

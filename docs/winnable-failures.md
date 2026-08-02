@@ -1,4 +1,4 @@
-# The 22 winnable failures
+# The 21 winnable failures
 
 Every question the current default (72.4%) gets wrong **and** a known mechanism
 could still win. This is the work list.
@@ -6,11 +6,11 @@ could still win. This is the work list.
 > **Provenance (2026-08-01, evening).** This file held 99 entries when it was
 > built against the 61.0% run. Three promoted changes since — Batch G, the
 > evidence-union, the v5 bundle — fixed 59 of them; those entries are deleted
-> (git history keeps every one). 18 more were reclassified as dead after the v6
+> (git history keeps every one). 19 more were reclassified as dead after the v6
 > experiment measured their fixes as net losses — each is matchable on its own,
 > but every rule that converted one broke a mirror question that reads the same
 > way. They are deleted too, and counted in the README's out-of-reach box. For
-> the record, the 18 and why:
+> the record, the 19 and why:
 >
 > - **0281, 0353, 0391, 0480** — hint-vs-English contradictions. Gold follows
 >   the hint on one question and the English on its mirror; v6's rule won 0281's
@@ -18,9 +18,12 @@ could still win. This is the work list.
 > - **0249, 0441, 0273, 0308** — gold output conventions (rank columns, id vs
 >   name, label vs boolean) knowable only by peeking at the answer; v6's rank
 >   rule bled into passing questions instead.
-> - **0120, 0361** — counting convention. Gold counts join rows here and
+> - **0120, 0361, 0127** — counting convention. Gold counts join rows here and
 >   distinct entities on twin questions; a rule picking either side trades
->   wins for losses (prompt v3, measured tie).
+>   wins for losses (prompt v3, measured tie). 0127 joined this bucket on
+>   2026-08-01: the evidence-union now sends it the examination table and the
+>   current SQL carries the coagulation filter, so the only gap left is
+>   `COUNT(DISTINCT id)` = 1 against gold's join-row `COUNT(T1.ID)` = 7.
 > - **0351, 0446** — the same English cue maps to opposite joins: "find all
 >   cards and their rulings" gets INNER, "list schools with the phone if any"
 >   gets LEFT. A rule for one breaks the other.
@@ -38,15 +41,15 @@ could still win. This is the work list.
 The current default answers 500 questions and gets **362 right** (the
 2026-08-01 v5-bundle run). Of the 138 it gets wrong:
 
-- **115 are out of reach.** 97 could never be scored correct — broken reference
-  SQL or an unguessable output format. 18 more are the measured dead ends
+- **116 are out of reach.** 97 could never be scored correct — broken reference
+  SQL or an unguessable output format. 19 more are the measured dead ends
   listed above.
-- **22 are winnable.** They are all here.
+- **21 are winnable.** They are all here.
 - **1 is churn** — a question that passes in most runs and happened to fail in
   this one. In neither list.
 
-So the ceiling on this benchmark is **385 of 500, 77.0%**, and the live
-headroom over the current 362 is these 22 questions — about 4.4 points.
+So the ceiling on this benchmark is **384 of 500, 76.8%**, and the live
+headroom over the current 362 is these 21 questions — about 4.2 points.
 
 ## How grading works
 
@@ -74,10 +77,10 @@ PICKER=llm npm run eval:hard
 
 ---
 
-## Agent-reachable (10)
+## Agent-reachable (8)
 
 The answer is knowable from the data, and only a per-question lookup can know
-it. Seven are twin-column traps — two near-identical columns or tables
+it. Five are twin-column traps — two near-identical columns or tables
 (`type` vs `types`, a cost stored in two tables) where the question's words
 do not pick one and static sample rows make both look plausible; one SELECT on
 each candidate would show which column actually holds the value. 0225 needs the
@@ -137,113 +140,6 @@ SELECT DISTINCT g.country FROM transactions_1k t JOIN gasstations g ON t.gasstat
 ```
 1 rows x 1 cols  [country]
     CZE
-```
-
-</details>
-
----
-
-### bird-0058 — student_club, moderate
-
-**Status: still failing in the 2026-08-01 `union` run (68.8%).**
-**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
-
-**Question.** Based on the total cost for all event, what is the percentage of cost for Yearly Kickoff event?
-
-**Evidence given with it.** percentage = DIVIDE(SUM(cost where event_name = 'Yearly Kickoff'), SUM(cost)) * 100
-
-**What we did.** Summed budget.amount over a budget-to-event join and reported 11.9047619047619048 percent for 'Yearly Kickoff'.
-
-**What is expected.** Gold sums expense.cost across event -> budget -> expense (expense.link_to_budget = budget.budget_id) and gets 21.530166915170767.
-
-**To fix it.** Map the word 'cost' to expense.cost rather than budget.amount — they are different money columns, and reaching expense requires the extra hop through budget.budget_id.
-
-*Fails every time — a real defect, not run-to-run variance.*
-
-<details>
-<summary>Queries and results</summary>
-
-Tables sent to the model: budget, event
-
-**Reference SQL — this is what correct means.**
-
-```sql
-SELECT CAST(SUM(CASE WHEN T1.event_name = 'Yearly Kickoff' THEN T3.cost ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(T3.cost), 0) FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event INNER JOIN expense AS T3 ON T2.budget_id = T3.link_to_budget
-```
-
-```
-1 rows x 1 cols  [?column?]
-    21.530166915170767
-```
-
-**Our SQL — wrong.**
-
-```sql
-SELECT SUM(CASE WHEN e.event_name = 'Yearly Kickoff' THEN b.amount ELSE 0 END) * 100.0 / SUM(b.amount) AS percentage FROM "budget" b JOIN "event" e ON b."link_to_event" = e."event_id"
-```
-
-```
-1 rows x 1 cols  [percentage]
-    11.9047619047619048
-```
-
-**A query that did match, from the `desc-picker` run.**
-
-```sql
-SELECT 100.0 * SUM(CASE WHEN e.event_name = 'Yearly Kickoff' THEN ex.cost ELSE 0 END) / SUM(ex.cost) AS percentage FROM "expense" ex JOIN "budget" b ON ex.link_to_budget = b.budget_id JOIN "event" e ON b.link_to_event = e.event_id
-```
-
-```
-1 rows x 1 cols  [percentage]
-    21.530166915170767
-```
-
-</details>
-
----
-
-### bird-0127 — thrombosis_prediction, challenging
-
-**Status: still failing in the 2026-08-01 `union` run (68.8%).**
-**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
-
-**Question.** For the patients with a normal range of creatinine phosphokinase, how many of them have a positive measure of degree of coagulation?
-
-**Evidence given with it.** normal range of creatinine phosphokinase refers to CPK < 250; positive measure of degree of coagulation refers to KCT = '+' or RVVT = '+' or LAC = '+' ;
-
-**What we did.** Queried laboratory alone (SELECT COUNT(DISTINCT id) FROM laboratory WHERE cpk < 250), silently omitting the coagulation condition, and counted 267 patients.
-
-**What is expected.** Gold joins Patient to Laboratory and to Examination and adds (T3.KCT = '+' OR T3.RVVT = '+' OR T3.LAC = '+') alongside CPK < 250, giving 7; KCT, RVVT and LAC live on examination, which our picker never selected (ourTables was laboratory and patient only).
-
-**To fix it.** Table selection must pull in every table owning a column named in the question or evidence, and the SQL step should fail loudly when a required column is absent from the offered schema instead of dropping the filter.
-
-*Fails every time — a real defect, not run-to-run variance.*
-
-<details>
-<summary>Queries and results</summary>
-
-Tables sent to the model: laboratory, patient
-
-**Reference SQL — this is what correct means.**
-
-```sql
-SELECT COUNT(T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID INNER JOIN Examination AS T3 ON T1.ID = T3.ID WHERE T2.CPK < 250 AND (T3.KCT = '+' OR T3.RVVT = '+' OR T3.LAC = '+')
-```
-
-```
-1 rows x 1 cols  [count]
-    7
-```
-
-**Our SQL — wrong.**
-
-```sql
-SELECT COUNT(DISTINCT id) FROM laboratory WHERE cpk < 250
-```
-
-```
-1 rows x 1 cols  [count]
-    267
 ```
 
 </details>
@@ -685,12 +581,80 @@ SELECT 100.0 * SUM(CASE WHEN a.element = 'cl' THEN 1 ELSE 0 END) / COUNT(a.atom_
 
 ---
 
-## Pipeline-fixable, below the noise band (2)
+## Pipeline-fixable, below the noise band (3)
 
-Both converted in the v6 experiment with no traced collateral damage — the fix
-is known and safe. But 2 of 500 is 0.4 points against a ±2.5-point noise band,
-so a run claiming them cannot prove itself. Parked until they ride along with a
-bigger change.
+Each has a known, measured-safe fix. 0462 and 0372 converted in the v6
+experiment with no traced collateral damage; 0058 joined them on 2026-08-01
+(see its entry). But 3 of 500 is 0.6 points against a ±2.5-point noise band, so
+a run claiming them cannot prove itself on the headline — it is judged by these
+three ids converting with no regressions elsewhere.
+
+### bird-0058 — student_club, moderate
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+
+**Reclassified 2026-08-01: pipeline-fixable, not agent-reachable.** The
+twin-column half of this is fixed — the current default is sent the expense
+table and sums `ex.cost`. What is left is float precision: ours divides then
+multiplies (21.530166268348694), gold multiplies then divides
+(21.530166915170767). They diverge at the 6th decimal, exactly where the
+comparator stops. The v6 rule "multiply before dividing when computing a
+percentage" converts it.
+
+**Question.** Based on the total cost for all event, what is the percentage of cost for Yearly Kickoff event?
+
+**Evidence given with it.** percentage = DIVIDE(SUM(cost where event_name = 'Yearly Kickoff'), SUM(cost)) * 100
+
+**What we did.** Summed budget.amount over a budget-to-event join and reported 11.9047619047619048 percent for 'Yearly Kickoff'.
+
+**What is expected.** Gold sums expense.cost across event -> budget -> expense (expense.link_to_budget = budget.budget_id) and gets 21.530166915170767.
+
+**To fix it.** Map the word 'cost' to expense.cost rather than budget.amount — they are different money columns, and reaching expense requires the extra hop through budget.budget_id.
+
+*Fails every time — a real defect, not run-to-run variance.*
+
+<details>
+<summary>Queries and results</summary>
+
+Tables sent to the model: budget, event
+
+**Reference SQL — this is what correct means.**
+
+```sql
+SELECT CAST(SUM(CASE WHEN T1.event_name = 'Yearly Kickoff' THEN T3.cost ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(T3.cost), 0) FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event INNER JOIN expense AS T3 ON T2.budget_id = T3.link_to_budget
+```
+
+```
+1 rows x 1 cols  [?column?]
+    21.530166915170767
+```
+
+**Our SQL — wrong.**
+
+```sql
+SELECT SUM(CASE WHEN e.event_name = 'Yearly Kickoff' THEN b.amount ELSE 0 END) * 100.0 / SUM(b.amount) AS percentage FROM "budget" b JOIN "event" e ON b."link_to_event" = e."event_id"
+```
+
+```
+1 rows x 1 cols  [percentage]
+    11.9047619047619048
+```
+
+**A query that did match, from the `desc-picker` run.**
+
+```sql
+SELECT 100.0 * SUM(CASE WHEN e.event_name = 'Yearly Kickoff' THEN ex.cost ELSE 0 END) / SUM(ex.cost) AS percentage FROM "expense" ex JOIN "budget" b ON ex.link_to_budget = b.budget_id JOIN "event" e ON b.link_to_event = e.event_id
+```
+
+```
+1 rows x 1 cols  [percentage]
+    21.530166915170767
+```
+
+</details>
+
+---
 
 ### bird-0462 — california_schools, moderate
 

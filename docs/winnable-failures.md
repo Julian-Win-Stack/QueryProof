@@ -581,13 +581,15 @@ SELECT 100.0 * SUM(CASE WHEN a.element = 'cl' THEN 1 ELSE 0 END) / COUNT(a.atom_
 
 ---
 
-## Pipeline-fixable, below the noise band (3)
+## Pipeline-fixable, below the noise band (2)
 
-Each has a known, measured-safe fix. 0462 and 0372 converted in the v6
-experiment with no traced collateral damage; 0058 joined them on 2026-08-01
-(see its entry). But 3 of 500 is 0.6 points against a ±2.5-point noise band, so
-a run claiming them cannot prove itself on the headline — it is judged by these
-three ids converting with no regressions elsewhere.
+Both have a known fix, measured on the questions themselves. Prompt v7 — v5
+plus two rules carried forward from the rejected v6 — takes 0058 3 times out of
+3 where v5 takes it 0 out of 2, and holds 0372 3 out of 3. But 2 of 500 is 0.4
+points against a ±2.5-point noise band, so a run claiming them cannot prove
+itself on the headline; it would be judged by these ids holding with no
+regressions elsewhere. v7 has never been run on the full 500 and is not the
+default (RUNS.md, 2026-08-01).
 
 ### bird-0058 — student_club, moderate
 
@@ -656,55 +658,6 @@ SELECT 100.0 * SUM(CASE WHEN e.event_name = 'Yearly Kickoff' THEN ex.cost ELSE 0
 
 ---
 
-### bird-0462 — california_schools, moderate
-
-**Status: still failing in the 2026-08-01 `union` run (68.8%).**
-**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
-
-**Question.** Which schools served a grade span of Kindergarten to 9th grade in the county of Los Angeles and what is its Percent (%) Eligible FRPM (Ages 5-17)?
-
-**Evidence given with it.** Percent (%) Eligible FRPM (Ages 5-17) can be acquired by `FRPM Count (Ages 5-17)` / `Enrollment (Ages 5-17)` * 100
-
-**What we did.** Filtered frpm."County Name" = 'Los Angeles' with frpm."Low Grade" = 'K' AND frpm."High Grade" = '9' and returned the stored frpm."Percent (%) Eligible FRPM (Ages 5-17)" column, which yields 0 rows.
-
-**What is expected.** Gold filters schools.County = 'Los Angeles' AND schools.GSserved = 'K-9' — those two schools carry frpm Low/High Grade of K/5 and K/8, so the frpm grade columns never match — and computes "FRPM Count (Ages 5-17)" * 100 / "Enrollment (Ages 5-17)" to get 3.7558 and 97.6388.
-
-**To fix it.** Express a grade-span filter as schools.GSserved = 'K-9' rather than frpm's Low/High Grade pair, and compute the percentage from the evidence formula instead of selecting the similarly named stored column that holds a 0–1 fraction.
-
-*Answered differently across identical runs, so partly luck. Verify a fix over several runs.*
-
-<details>
-<summary>Queries and results</summary>
-
-Tables sent to the model: schools, frpm
-
-**Reference SQL — this is what correct means.**
-
-```sql
-SELECT T2.School, T1."FRPM Count (Ages 5-17)" * 100 / NULLIF(T1."Enrollment (Ages 5-17)", 0) FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.County = 'Los Angeles' AND T2.GSserved = 'K-9'
-```
-
-```
-2 rows x 2 cols  [school, ?column?]
-    White Oak Elementary | 3.755868544600939
-    The Accelerated | 97.63888888888889
-```
-
-**Our SQL — wrong.**
-
-```sql
-SELECT s."school", f."Percent (%) Eligible FRPM (Ages 5-17)" FROM "frpm" f JOIN "schools" s ON f."cdscode" = s."cdscode" WHERE f."County Name" = 'Los Angeles' AND f."Low Grade" = 'K' AND f."High Grade" = '9'
-```
-
-```
-0 rows x 2 cols  [school, Percent (%) Eligible FRPM (Ages 5-17)]
-
-```
-
-</details>
-
----
-
 ### bird-0372 — card_games, challenging
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
@@ -764,12 +717,71 @@ SELECT (COUNT(*) FILTER (WHERE f.language = 'French' AND (c.power IS NULL OR c.p
 
 ---
 
-## Re-roll only (10)
+## Re-roll only (11)
 
 No mechanism exists. Each fails because the model ignores a rule it usually
-follows — an extra column, wrong column order — roughly 10% of the time. v6
-measured that pushing harder in the prompt breaks as many questions as it
-fixes, and best-of-5 voting measured a tie. These flip in and out on their own.
+follows — an extra column, wrong column order — roughly 10% of the time, or
+because the picker's own selection wobbles. v6 measured that pushing harder in
+the prompt breaks as many questions as it fixes, and best-of-5 voting measured
+a tie. These flip in and out on their own.
+
+### bird-0462 — california_schools, moderate
+
+**Status: still failing in the 2026-08-01 `union` run (68.8%).**
+**Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+
+**Reclassified 2026-08-01 (evening): re-roll only, not pipeline-fixable.**
+Measured directly on this id under prompt v7, which carries the
+multiply-before-divide rule this entry was parked on: 2 of 3 rolls pass. The
+rule is not what is missing — v7 wrote `* 100.0 /` in every roll. It fails two
+other ways. The llm picker sometimes drops `schools` (1 roll of 4 was sent
+`frpm` alone, and gold needs `schools.GSserved = 'K-9'`); and with `schools`
+present the model still sometimes filters frpm's Low/High Grade pair instead.
+Its conversion in the v6 run was the same coin landing the other way.
+
+**Question.** Which schools served a grade span of Kindergarten to 9th grade in the county of Los Angeles and what is its Percent (%) Eligible FRPM (Ages 5-17)?
+
+**Evidence given with it.** Percent (%) Eligible FRPM (Ages 5-17) can be acquired by `FRPM Count (Ages 5-17)` / `Enrollment (Ages 5-17)` * 100
+
+**What we did.** Filtered frpm."County Name" = 'Los Angeles' with frpm."Low Grade" = 'K' AND frpm."High Grade" = '9' and returned the stored frpm."Percent (%) Eligible FRPM (Ages 5-17)" column, which yields 0 rows.
+
+**What is expected.** Gold filters schools.County = 'Los Angeles' AND schools.GSserved = 'K-9' — those two schools carry frpm Low/High Grade of K/5 and K/8, so the frpm grade columns never match — and computes "FRPM Count (Ages 5-17)" * 100 / "Enrollment (Ages 5-17)" to get 3.7558 and 97.6388.
+
+**To fix it.** Express a grade-span filter as schools.GSserved = 'K-9' rather than frpm's Low/High Grade pair, and compute the percentage from the evidence formula instead of selecting the similarly named stored column that holds a 0–1 fraction.
+
+*Answered differently across identical runs, so partly luck. Verify a fix over several runs.*
+
+<details>
+<summary>Queries and results</summary>
+
+Tables sent to the model: schools, frpm
+
+**Reference SQL — this is what correct means.**
+
+```sql
+SELECT T2.School, T1."FRPM Count (Ages 5-17)" * 100 / NULLIF(T1."Enrollment (Ages 5-17)", 0) FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.County = 'Los Angeles' AND T2.GSserved = 'K-9'
+```
+
+```
+2 rows x 2 cols  [school, ?column?]
+    White Oak Elementary | 3.755868544600939
+    The Accelerated | 97.63888888888889
+```
+
+**Our SQL — wrong.**
+
+```sql
+SELECT s."school", f."Percent (%) Eligible FRPM (Ages 5-17)" FROM "frpm" f JOIN "schools" s ON f."cdscode" = s."cdscode" WHERE f."County Name" = 'Los Angeles' AND f."Low Grade" = 'K' AND f."High Grade" = '9'
+```
+
+```
+0 rows x 2 cols  [school, Percent (%) Eligible FRPM (Ages 5-17)]
+
+```
+
+</details>
+
+---
 
 ### bird-0013 — debit_card_specializing, simple
 

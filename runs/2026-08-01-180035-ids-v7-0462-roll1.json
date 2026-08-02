@@ -1,0 +1,139 @@
+{
+  "run": {
+    "id": 52,
+    "runType": "full",
+    "createdAt": "2026-08-02 01:00:35"
+  },
+  "suites": [
+    {
+      "id": 55,
+      "name": "hard | slice=ids(bird-0462) | picker=llm | repair=on | prompt=v7 | pickerPrompt=picker-v1 | union=on | sqlContext=rows | check=probe check-v1 | rewrite=on | effort=medium | claude-sonnet-5",
+      "filepath": "/Users/phyonyanwinn/Project/ProJect/QueryProof/evals/main.eval.ts",
+      "duration": 0,
+      "status": "success",
+      "variantName": null,
+      "variantGroup": null,
+      "createdAt": "2026-08-02 01:00:35",
+      "averageScore": 1,
+      "evals": [
+        {
+          "id": 12270,
+          "duration": 5616,
+          "input": {
+            "id": "bird-0462",
+            "db_id": "california_schools",
+            "difficulty": "moderate",
+            "question": "Which schools served a grade span of Kindergarten to 9th grade in the county of Los Angeles and what is its Percent (%) Eligible FRPM (Ages 5-17)?",
+            "evidence": "Percent (%) Eligible FRPM (Ages 5-17) can be acquired by `FRPM Count (Ages 5-17)` / `Enrollment (Ages 5-17)` * 100",
+            "sql": "SELECT T2.School, T1.\"FRPM Count (Ages 5-17)\" * 100 / NULLIF(T1.\"Enrollment (Ages 5-17)\", 0) FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.County = 'Los Angeles' AND T2.GSserved = 'K-9'",
+            "rowCount": 2,
+            "columns": [
+              "school",
+              "?column?"
+            ],
+            "ms": 2
+          },
+          "output": {
+            "correct": true,
+            "generatedSql": "SELECT s.\"school\", f.\"FRPM Count (Ages 5-17)\" * 100.0 / f.\"Enrollment (Ages 5-17)\" FROM frpm f INNER JOIN schools s ON f.cdscode = s.cdscode WHERE s.county = 'Los Angeles' AND s.gsserved = 'K-9'",
+            "attempts": 1,
+            "lastPgError": null,
+            "rowsReturned": 2,
+            "goldRowCount": 2,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "frpm",
+              "schools",
+              "tags"
+            ],
+            "tablesGoldNeeded": [
+              "frpm",
+              "schools"
+            ],
+            "recallHit": true,
+            "tokensIn": 4903,
+            "tokensOut": 133,
+            "thinkingTokens": 0,
+            "pickerTokensIn": 4509,
+            "pickerTokensOut": 17,
+            "pickerMs": 2710,
+            "usd": 0.020324000000000002,
+            "modelMs": 2839,
+            "executionMs": 11,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "on",
+            "promptVersion": "v7",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "probe",
+            "checkAction": "skipped",
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT T2.School, T1.\"FRPM Count (Ages 5-17)\" * 100 / NULLIF(T1.\"Enrollment (Ages 5-17)\", 0) FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.County = 'Los Angeles' AND T2.GSserved = 'K-9'",
+          "status": "success",
+          "colOrder": 0,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0462 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT s.\"school\", f.\"FRPM Count (Ages 5-17)\" * 100.0 / f.\"Enrollment (Ages 5-17)\" FROM frpm f INNER JOIN schools s ON f.cdscode = s.cdscode WHERE s.county = 'Los Angeles' AND s.gsserved = 'K-9'"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "2 vs 2"
+            },
+            {
+              "label": "tables",
+              "value": "3 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "1"
+            },
+            {
+              "label": "tokens",
+              "value": "4903 in, 133 out"
+            }
+          ],
+          "createdAt": "2026-08-02 01:00:35",
+          "averageScore": 1,
+          "scores": [
+            {
+              "id": 23357,
+              "name": "same-rows",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 01:00:41"
+            },
+            {
+              "id": 23358,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 01:00:41"
+            }
+          ],
+          "traces": []
+        }
+      ]
+    }
+  ]
+}

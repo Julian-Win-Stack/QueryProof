@@ -1250,3 +1250,123 @@ note:          −1.4 vs the v5 bundle's 72.4% — inside the ±2.5 band, a tie
                0 voids. $10.44.
 export:        runs/2026-08-01-155140-exp-v6-bundle-full.json
 ```
+
+## 2026-08-01 — Prompt v7 on its three named ids only (not a 500-question run)
+
+```
+approach:      mode=hard picker=llm, prompt=v7, all other defaults (probe,
+               repair, union, rewrites, rows). v7 = v5 + exactly the two v6
+               rules that converted a named target and broke nothing:
+               multiply by 100 before dividing (0462, and 0058 after its
+               2026-08-01 reclassification), and INNER-join the percentage
+               population (0372).
+
+               New env axis EVAL_IDS=id,id runs exactly the ids named, so a
+               targeted fix can be checked for cents instead of $10. The ids
+               are stamped into the run name — a subset run can never read as
+               an accuracy figure.
+
+               Eight runs, all subset: one 3-id run, three re-rolls of 0462,
+               two re-rolls of 0058+0372, two v5 control runs of 0058+0372.
+result:        0058  v7 3/3 pass   v5 control 0/2   converted
+               0372  v7 3/3 pass   v5 control 1/2   improved, v5 sometimes
+                                                    gets it on its own
+               0462  v7 2/3 pass   not converted — see note
+verdict:       kept (the rules work on their named ids; the default import
+               stays v5, because v7 has no 500-question number)
+note:          0058 is the clean win and it is attributable: v5 divides then
+               multiplies (21.530166268348694), gold multiplies then divides
+               (21.530166915170767), and they part at the 6th decimal, which
+               is where the comparator stops. v7 writes the multiply first
+               and matches.
+
+               0462 does not belong in the pipeline-fixable bucket. Its
+               remaining failure is not the arithmetic rule — v7 applied
+               `* 100.0 /` in every roll. It fails two other ways: the llm
+               picker sometimes drops `schools` (1 of 4 rolls sent frpm
+               alone, and gold needs schools.GSserved = 'K-9'), and with
+               schools present the model still sometimes filters frpm's
+               Low/High Grade pair instead. That is a picker/re-roll
+               failure wearing a prompt fix's clothes. Its v6 conversion
+               was luck of the same coin. Reclassify to re-roll-only:
+               pipeline-fixable drops to 2 (0372, 0058).
+
+               **v7 has no accuracy number.** 500 questions were never run
+               under it, so 72.4% (v5 bundle) is still the project's measured
+               figure, and no README table changes. Two rules cannot be
+               assumed harmless on the 497 questions not checked here —
+               v6 taught exactly that lesson. A full run under v7 is the only
+               thing that would let it be claimed.
+cost:          $0.33 across all eight subset runs.
+exports:       runs/2026-08-01-175954-ids-v7-targets.json
+               runs/2026-08-01-180035-ids-v7-0462-roll1.json
+               runs/2026-08-01-180041-ids-v7-0462-roll2.json
+               runs/2026-08-01-180054-ids-v7-0462-roll3.json
+               runs/2026-08-01-180111-ids-v7-stable1.json
+               runs/2026-08-01-180118-ids-v7-stable2.json
+               runs/2026-08-01-180137-ids-v5-control1.json
+               runs/2026-08-01-180147-ids-v5-control2.json
+```
+
+## 2026-08-01 — Prompt v7 vs v5, paired, on the 74 passers the two rules can touch
+
+```
+approach:      mode=hard picker=llm, all other defaults. The regression check
+               a full run would have cost $9.53 to answer, done for $2.89.
+
+               v7 = v5 + exactly two rules, and v5's text is otherwise
+               reproduced word for word (diffed line by line — nothing
+               removed, nothing reworded). Both rules concern percentages, so
+               only percentage-shaped questions can move by anything but
+               chance. Exposure set: of the 362 questions the v5 bundle got
+               right, the 74 whose question or hint says percent, percentage,
+               ratio, proportion or DIVIDE(.
+
+               Both prompts ran over those same 74 in the same sitting, so a
+               v7 failure only counts if v5 got that question right minutes
+               earlier. That control is the point — bird-0462 looked
+               converted in the v6 run and turned out to be a coin flip.
+result:        v7  64/74 right      v5 control  66/74 right
+               7 right under v5, wrong under v7
+               5 wrong under v5, right under v7
+               3 wrong under both (baseline wobble: 8 of 74 questions the
+                 full run got right failed under their own prompt)
+verdict:       rejected
+note:          The headline 64 vs 66 is nothing — 2 questions inside an 8-
+               question wobble. The finding is in the SQL, not the count.
+               Four of the seven carry a new rule's fingerprint:
+
+                 0402  the INNER-JOIN rule added atom->bond on molecule_id.
+                       Gold uses that very join — with COUNT(DISTINCT).
+                       v5 had reached the same numbers through an
+                       IN (SELECT molecule_id FROM bond ...) subquery. The
+                       rule moved it onto gold's shape and the fan-out it
+                       does not de-duplicate. This is bird-0432's fix
+                       breaking bird-0432's mirror, exactly.
+                 0436  the arithmetic rule pushed *100.0 onto a question
+                       asking for a ratio. Gold returns the bare fraction.
+                       Same failure as v6's 0093.
+                 0414  the rule prescribes the literal form x * 100.0 / y;
+                       the model wrote exactly that and dropped the
+                       ROUND(..., 4) the question asks for and gold has.
+                 0223  the INNER-JOIN rule added a second, redundant join of
+                       races, so r.time resolved to races.time.
+               0493 is mixed — v7 joined account in, but the picker also sent
+               it a table v5 never got. 0336 (wrong creationdate column) and
+               0474 (invented status = 'A') are unrelated wobble.
+
+               So the ledger is 2 converted (0058, 0372) against ~4 broken.
+               Two rules, isolated, measured on the only questions they can
+               touch, with a same-sitting control — and they still lose. That
+               is the third independent measurement of the same thing, after
+               v6 (71.0%) and the prompt-v3 counting rule. The prompt lever
+               is exhausted, and this is the cleanest evidence of it: the
+               failure is not that the rules are wrong, it is that each one
+               is right for one question and wrong for its mirror.
+
+               Default stays v5. v7 stays in src/prompts/ as the evidence
+               behind this entry.
+cost:          $2.89.
+exports:       runs/2026-08-01-181519-ids-v7-exposed.json
+               runs/2026-08-01-181541-ids-v5-exposed.json
+```

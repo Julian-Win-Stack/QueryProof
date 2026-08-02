@@ -15,6 +15,9 @@
 //                        outside the bake-off since the v5 bundle (72.4%,
 //                        2026-08-01); REPAIR=off reproduces earlier numbers.
 //   EVAL_DEV=1           filter to the frozen 100-id dev slice
+//   EVAL_IDS=id,id,...   run exactly these gold ids — checking a targeted fix
+//                        on its named questions, never a headline number. An id
+//                        not in gold throws. Stamped into the run name.
 //   LIMIT=N              first N questions only — wiring smoke, never evidence
 //   TRIALS / CONCURRENCY read in evalite.config.ts
 //
@@ -135,6 +138,15 @@ const BAKEOFF = process.env.EVAL_PICKERS === '1';
 // A limited run exists to prove the wiring, not to measure anything. It is
 // stamped into the run name so its number can never read as a real one.
 const LIMIT = process.env.LIMIT ? Number(process.env.LIMIT) : undefined;
+// Same reasoning as LIMIT: a subset run proves a fix on named questions and is
+// never evidence for an accuracy figure, so the ids go in the run name.
+const IDS: string[] =
+  process.env.EVAL_IDS === undefined || process.env.EVAL_IDS === ''
+    ? []
+    : process.env.EVAL_IDS.split(',').map((id) => id.trim());
+if (IDS.length > 0 && DEV) {
+  throw new Error('EVAL_IDS and EVAL_DEV=1 both filter the question set — set one');
+}
 
 // A misconfigured run must crash here, before any money is spent — the
 // alternative is a plausible number measured under a config nobody chose,
@@ -328,6 +340,18 @@ function loadQuestions(): GoldRecord[] {
     throw new Error(`${GOLD_PATH.pathname} is not a JSON array — run npm run validate-gold`);
   }
   const gold = parsed as GoldRecord[];
+
+  if (IDS.length > 0) {
+    const wanted = new Set(IDS);
+    const named = gold.filter((record) => wanted.has(record.id));
+    if (named.length !== wanted.size) {
+      const found = new Set(named.map((record) => record.id));
+      const missing = IDS.filter((id) => !found.has(id));
+      throw new Error(`EVAL_IDS names ids not in gold/validated.json: ${missing.join(', ')}`);
+    }
+    return named;
+  }
+
   if (!DEV) return gold;
 
   const sliceIds = new Set(JSON.parse(readFileSync(SLICE_PATH, 'utf8')) as string[]);
@@ -519,7 +543,9 @@ async function runQuestion(record: GoldRecord, picker: PickerName): Promise<Ques
 
 const runName = [
   MODE,
-  `slice=${DEV ? 'dev' : 'full'}${LIMIT === undefined ? '' : ` | limit=${LIMIT}`}`,
+  ...(IDS.length > 0
+    ? [`slice=ids(${IDS.join(',')})`]
+    : [`slice=${DEV ? 'dev' : 'full'}${LIMIT === undefined ? '' : ` | limit=${LIMIT}`}`]),
   `picker=${BAKEOFF ? 'bakeoff' : PICKER}`,
   ...(REPAIR ? ['repair=on'] : []),
   `prompt=${PROMPT_VERSION}`,

@@ -1,0 +1,256 @@
+{
+  "run": {
+    "id": 57,
+    "runType": "full",
+    "createdAt": "2026-08-02 01:01:37"
+  },
+  "suites": [
+    {
+      "id": 60,
+      "name": "hard | slice=ids(bird-0058,bird-0372) | picker=llm | repair=on | prompt=v5 | pickerPrompt=picker-v1 | union=on | sqlContext=rows | check=probe check-v1 | rewrite=on | effort=medium | claude-sonnet-5",
+      "filepath": "/Users/phyonyanwinn/Project/ProJect/QueryProof/evals/main.eval.ts",
+      "duration": 0,
+      "status": "success",
+      "variantName": null,
+      "variantGroup": null,
+      "createdAt": "2026-08-02 01:01:37",
+      "averageScore": 0.5,
+      "evals": [
+        {
+          "id": 12277,
+          "duration": 7053,
+          "input": {
+            "id": "bird-0058",
+            "db_id": "student_club",
+            "difficulty": "moderate",
+            "question": "Based on the total cost for all event, what is the percentage of cost for Yearly Kickoff event?",
+            "evidence": "percentage = DIVIDE(SUM(cost where event_name = 'Yearly Kickoff'), SUM(cost)) * 100",
+            "sql": "SELECT CAST(SUM(CASE WHEN T1.event_name = 'Yearly Kickoff' THEN T3.cost ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(T3.cost), 0) FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event INNER JOIN expense AS T3 ON T2.budget_id = T3.link_to_budget",
+            "rowCount": 1,
+            "columns": [
+              "?column?"
+            ],
+            "ms": 0
+          },
+          "output": {
+            "correct": false,
+            "generatedSql": "SELECT SUM(CASE WHEN e.event_name = 'Yearly Kickoff' THEN ex.cost ELSE 0 END) / SUM(ex.cost) * 100 FROM expense ex JOIN budget b ON ex.link_to_budget = b.budget_id JOIN event e ON b.link_to_event = e.event_id",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "budget",
+              "event",
+              "expense"
+            ],
+            "tablesGoldNeeded": [
+              "event",
+              "budget",
+              "expense"
+            ],
+            "recallHit": true,
+            "tokensIn": 5095,
+            "tokensOut": 263,
+            "thinkingTokens": 0,
+            "pickerTokensIn": 4481,
+            "pickerTokensOut": 15,
+            "pickerMs": 2078,
+            "usd": 0.021932,
+            "modelMs": 4913,
+            "executionMs": 18,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "on",
+            "promptVersion": "v5",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "probe",
+            "checkAction": "skipped",
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT CAST(SUM(CASE WHEN T1.event_name = 'Yearly Kickoff' THEN T3.cost ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(T3.cost), 0) FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event INNER JOIN expense AS T3 ON T2.budget_id = T3.link_to_budget",
+          "status": "success",
+          "colOrder": 0,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0058 (moderate)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT SUM(CASE WHEN e.event_name = 'Yearly Kickoff' THEN ex.cost ELSE 0 END) / SUM(ex.cost) * 100 FROM expense ex JOIN budget b ON ex.link_to_budget = b.budget_id JOIN event e ON b.link_to_event = e.event_id"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "3 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "5095 in, 263 out"
+            }
+          ],
+          "createdAt": "2026-08-02 01:01:37",
+          "averageScore": 0.5,
+          "scores": [
+            {
+              "id": 23371,
+              "name": "same-rows",
+              "score": 0,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 01:01:44"
+            },
+            {
+              "id": 23372,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 01:01:44"
+            }
+          ],
+          "traces": []
+        },
+        {
+          "id": 12278,
+          "duration": 9974,
+          "input": {
+            "id": "bird-0372",
+            "db_id": "card_games",
+            "difficulty": "challenging",
+            "question": "What percentage of cards without power are in French?",
+            "evidence": "in French refers to language = 'French'; cards without power refers to power IS NULL OR power = '*'; percentage = DIVIDE(COUNT(language = 'French' and power is NULL or power = '*'), COUNT( power is NULL or power = '*'))*100",
+            "sql": "SELECT CAST(SUM(CASE WHEN T2.language = 'French' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(T1.id), 0) FROM cards AS T1 INNER JOIN foreign_data AS T2 ON T1.uuid = T2.uuid WHERE T1.power IS NULL OR T1.power = '*'",
+            "rowCount": 1,
+            "columns": [
+              "?column?"
+            ],
+            "ms": 107
+          },
+          "output": {
+            "correct": false,
+            "generatedSql": "SELECT COUNT(CASE WHEN fd.\"language\" = 'French' THEN 1 END) * 100.0 / COUNT(*) FROM \"cards\" c LEFT JOIN \"foreign_data\" fd ON c.\"uuid\" = fd.\"uuid\" WHERE c.\"power\" IS NULL OR c.\"power\" = '*'",
+            "attempts": 2,
+            "lastPgError": null,
+            "rowsReturned": 1,
+            "goldRowCount": 1,
+            "columnCountMatch": true,
+            "tablesSent": [
+              "cards",
+              "foreign_data",
+              "set_translations",
+              "tags"
+            ],
+            "tablesGoldNeeded": [
+              "cards",
+              "foreign_data"
+            ],
+            "recallHit": true,
+            "tokensIn": 11194,
+            "tokensOut": 343,
+            "thinkingTokens": 35,
+            "pickerTokensIn": 4462,
+            "pickerTokensOut": 54,
+            "pickerMs": 3136,
+            "usd": 0.035282,
+            "modelMs": 6696,
+            "executionMs": 63,
+            "mode": "hard",
+            "picker": "llm",
+            "repair": "on",
+            "promptVersion": "v5",
+            "pickerPromptVersion": "picker-v1",
+            "expand": "off",
+            "union": "on",
+            "sqlContext": "rows",
+            "pickerContext": "",
+            "check": "probe",
+            "checkAction": "skipped",
+            "rewrite": "on",
+            "rewritesFired": "",
+            "vote": 1,
+            "voteAgreement": null,
+            "model": "claude-sonnet-5",
+            "effort": "medium"
+          },
+          "expected": "SELECT CAST(SUM(CASE WHEN T2.language = 'French' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(T1.id), 0) FROM cards AS T1 INNER JOIN foreign_data AS T2 ON T1.uuid = T2.uuid WHERE T1.power IS NULL OR T1.power = '*'",
+          "status": "success",
+          "colOrder": 1,
+          "renderedColumns": [
+            {
+              "label": "id",
+              "value": "bird-0372 (challenging)"
+            },
+            {
+              "label": "sql",
+              "value": "SELECT COUNT(CASE WHEN fd.\"language\" = 'French' THEN 1 END) * 100.0 / COUNT(*) FROM \"cards\" c LEFT JOIN \"foreign_data\" fd ON c.\"uuid\" = fd.\"uuid\" WHERE c.\"power\" IS NULL OR c.\"power\" = '*'"
+            },
+            {
+              "label": "pg error",
+              "value": ""
+            },
+            {
+              "label": "rows",
+              "value": "1 vs 1"
+            },
+            {
+              "label": "tables",
+              "value": "4 sent, recall hit"
+            },
+            {
+              "label": "attempts",
+              "value": "2"
+            },
+            {
+              "label": "tokens",
+              "value": "11194 in, 343 out"
+            }
+          ],
+          "createdAt": "2026-08-02 01:01:37",
+          "averageScore": 0.5,
+          "scores": [
+            {
+              "id": 23373,
+              "name": "same-rows",
+              "score": 0,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 01:01:47"
+            },
+            {
+              "id": 23374,
+              "name": "table-recall",
+              "score": 1,
+              "description": null,
+              "metadata": null,
+              "createdAt": "2026-08-02 01:01:47"
+            }
+          ],
+          "traces": []
+        }
+      ]
+    }
+  ]
+}

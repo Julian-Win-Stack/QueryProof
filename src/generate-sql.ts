@@ -9,6 +9,14 @@ import { buildUserMessage, PROMPT_VERSION, SYSTEM, type FailedAttempt } from './
 // version — the eval's run name included — reads it from here, so switching
 // the import above can never leave a run labeled with the wrong prompt.
 //
+// v7 = v5 plus only the two v6 rules that had looked clean (multiply before
+// dividing, INNER-join the percentage population) — rejected. It converts
+// bird-0058 3/3 against v5's 0/2 and holds bird-0372 3/3, but measured against
+// v5 in the same sitting over the 74 currently-passing questions those rules
+// can touch, it converted 2 and broke 4 (RUNS.md, 2026-08-01). Adding a rule
+// here is not free: check the named targets *and* re-run the passers the rule
+// can reach, with this prompt as the control.
+//
 // v5 = v4 plus three aggregation-shape rules (percentage, formula, grain) —
 // the bundle run, 2026-08-01, 72.4%. v6 (ten more targeted rules) measured
 // 71.0%, a tie that converted 8 named targets while its rules broke about as

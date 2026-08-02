@@ -35,6 +35,7 @@ PICKER=keyword npm run eval:hard:dev  # hard mode on the dev slice
 PICKER=llm npm run eval:hard:repair   # hard mode + self-repair (REPAIR=on, 2 retries)
 npm run eval:pickers           # keyword vs LLM picker, one evalite.each run, dev slice
 TAG=<name> PICKER=llm npm run eval:exp    # hard-mode experiment run; TAG names the export file
+TAG=<name> PICKER=llm EVAL_IDS=bird-0058,bird-0372 npm run eval:ids   # only those ids
 npm run triage -- runs/<file>.json    # failure counts, four buckets, per suite
 npm run replay -- runs/<file>.json    # measure the dialect rewrites on stored SQL, no model calls
 npm run picker-recall          # picker-v3 recall vs a stored run's selections, no SQL generation
@@ -90,10 +91,17 @@ Four things follow from this, and each one has bitten:
   the union run's 68.8% or anything earlier needs `CHECK=off REPAIR=off`. Run
   names stamp all of them either way, so no run is ever mislabeled — but a
   baseline re-run without the `off`s is measuring the wrong thing.
-- **v5 is the default; v1–v4 and the rejected v6 stay in `src/prompts/`** as
-  the evidence behind their RUNS.md entries. v6 (ten more targeted rules)
-  measured 71.0%, a tie that broke as many passers as it converted targets —
-  the prompt lever is exhausted. Reproducing the 68.8 run needs the
+- **v5 is the default; v1–v4, the rejected v6 and the unmeasured v7 stay in
+  `src/prompts/`** as the evidence behind their RUNS.md entries. v6 (ten more
+  targeted rules) measured 71.0%, a tie that broke as many passers as it
+  converted targets. **v7 = v5 + only the two v6 rules that had looked clean,
+  and it lost too**: measured against v5 in the same sitting over the 74
+  currently-passing questions those rules can touch, it converted 2 and broke 4
+  (RUNS.md, 2026-08-01). The prompt lever is exhausted — each rule is right for
+  one question and wrong for its twin. **After any prompt change, run both
+  checks** — the named targets, and the currently-passing questions the rule can
+  touch with the old prompt as a same-sitting control. `EVAL_IDS` makes the
+  second one cost a few dollars. Reproducing the 68.8 run needs the
   `generate-sql.ts` import switched back to v4 *and* `CHECK=off REPAIR=off`;
   the 61.0 run needs v1, `REWRITE=off`, `UNION=off`, `CHECK=off`,
   `REPAIR=off`.
@@ -113,7 +121,10 @@ only under `npm run test:db`. `.dbtest.ts` is deliberately not `.db.test.ts` —
 Postgres into the pure suite.
 
 **Every eval script is one eval file plus environment variables** (`EVAL_MODE`,
-`EVAL_DEV`, `PICKER`, `REPAIR`, `TRIALS`, `LIMIT`, `CONCURRENCY`, the Batch E
+`EVAL_DEV`, `PICKER`, `REPAIR`, `TRIALS`, `LIMIT`, `CONCURRENCY`, `EVAL_IDS` —
+a comma list of gold ids, for checking a targeted fix on its named questions
+for cents; the ids are stamped into the run name so a subset run can never read
+as an accuracy figure — the Batch E
 experiment axes `PICKER_PROMPT`, `EXPAND`, `SQL_CONTEXT`, `PICKER_CONTEXT`,
 `CHECK`, the Batch F axis `VOTE=N` — best-of-N by execution agreement,
 `src/vote.ts` — the Batch G axis `REWRITE` — dialect repairs,
@@ -139,8 +150,8 @@ run was voided by exactly this.
 - `KNOWN_ISSUES.md` — deliberate divergences from BIRD's evaluation.
 - `RUNS.md` — append-only log of every run, with its verdict.
 - `docs/winnable-failures.md` — **the work list.** The 21 questions the default
-  gets wrong that a known mechanism could still win — 8 agent-reachable, 3
-  pipeline-fixable below the noise band, 10 re-roll-only — each with the
+  gets wrong that a known mechanism could still win — 8 agent-reachable, 2
+  pipeline-fixable below the noise band, 11 re-roll-only — each with the
   reference SQL, ours, and — for 10 of them — SQL from another run that did
   match. The 116 out-of-reach failures (97 broken or unguessable references,
   19 measured dead ends, reclassified 2026-08-01) are excluded on purpose; the

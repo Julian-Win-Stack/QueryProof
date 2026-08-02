@@ -62,6 +62,34 @@ errors gets up to two repair retries with the error fed back; every query runs
 under a `SELECT`-only role. Model: `claude-sonnet-5`, pinned for every number
 here.
 
+> ### Changing the prompt: check both halves, or the change is unmeasured
+>
+> A prompt rule that fixes one question usually breaks the question that looks
+> just like it. So every prompt change gets checked twice, and the second check
+> is the one people skip.
+>
+> 1. **Does it fix the target?** Re-run the named questions a few times each —
+>    the model is not deterministic, so one pass proves nothing.
+> 2. **Does it break anything that already worked?** Re-run the questions the
+>    new rule can touch, and run the old prompt over the same set in the same
+>    sitting as a control. A failure only counts if the old prompt got that
+>    question right minutes earlier.
+>
+> Both are cheap. `EVAL_IDS=id,id,...` runs exactly the ids you name, so the
+> second check costs a few dollars instead of a full run's ten.
+>
+> **Measured twice, same result.** Prompt v6 added ten targeted rules and scored
+> 71.0% against v5's 72.4% — it converted 8 named questions and broke about as
+> many. Prompt v7 then isolated the two v6 rules that had looked clean: it
+> converted 2 questions and broke 4 of the 74 it could touch, with the control
+> run beside it. One of those two rules is the fix a question on the work list
+> still needs — and it broke that question's mirror.
+>
+> **The prompt lever is exhausted.** Not because the rules are wrong: because
+> each one is right for one question and wrong for its twin. Anything that moves
+> accuracy from here has to read the data per question, not add another line to
+> the prompt ([RUNS.md](RUNS.md), 2026-08-01).
+
 ## Results
 
 **The hard setting** — the question does *not* say which database it belongs to.
@@ -374,7 +402,14 @@ npm run eval:easy                                   # easy setting, all 500
 npm run diff -- runs/<before>.json runs/<after>.json   # what a change broke
 npm run replay -- runs/<file>.json                     # rewrites on stored SQL
 npm run rescore -- runs/<file>.json                    # re-grade a stored run
+
+TAG=name PICKER=llm EVAL_IDS=bird-0058,bird-0372 npm run eval:ids  # only those ids
 ```
+
+`eval:ids` is what makes the two-sided prompt check at the top of this file
+affordable: run the named questions under the new prompt, then the same ids
+under the old one, and compare. The ids are stamped into the run name, so a
+subset run can never be mistaken for an accuracy figure.
 
 Sample rows, the dialect rewrites, the table-addition code, the empty-result
 probe, and error repair are all on by default — the headline configuration is

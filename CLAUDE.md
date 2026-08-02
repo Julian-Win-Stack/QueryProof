@@ -153,6 +153,10 @@ run was voided by exactly this.
 - `docs/adr/` — the two decisions with consequences big enough to need a page.
 - `KNOWN_ISSUES.md` — deliberate divergences from BIRD's evaluation.
 - `RUNS.md` — append-only log of every run, with its verdict.
+- `docs/remaining-failures.md` — the reader-facing version of the work list:
+  the 26 open questions in scannable tables with plain-English reasons and
+  per-run records. The README links here, never to the work list. Keep it in
+  sync when the work list's counts change.
 - `docs/winnable-failures.md` — **the work list.** The 21 questions the default
   gets wrong that a known mechanism could still win — 8 agent-reachable, 2
   pipeline-fixable below the noise band, 11 re-roll-only — each with the

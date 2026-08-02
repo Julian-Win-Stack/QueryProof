@@ -1,26 +1,28 @@
 # Known issues
 
-Deliberate divergences from BIRD's evaluation, and decisions that would
-otherwise read as bugs. Each is a settled choice with its reasoning, not an open
-question.
+The grading decisions an outside reader could mistake for bugs — or for
+tricks. Each is a settled choice, recorded with its reasoning and its measured
+cost. Nothing here is an open question. Throughout, the *reference query* is
+the SQL the benchmark ships as the correct answer to each question.
 
 ## 1. Rows are compared as a set, matching BIRD — reversed 2026-07-31
 
-**Choice.** Two results are equal iff they contain the same distinct rows. Row
-order is ignored, column order is significant, column names are never consulted,
-and a duplicated row is **not** a difference. This is BIRD's own rule.
+**Choice.** Two results are equal exactly when they contain the same distinct
+rows. Row order is ignored, column order is significant, column names are never
+consulted, and a duplicated row is **not** a difference. This is BIRD's own
+rule.
 
 **Why.** The README's central claim places this project's accuracy next to
 BIRD's published baselines. A number produced by a stricter grader cannot be
 placed there — it is lower for reasons that have nothing to do with the system
 being measured, and no amount of footnoting fixes that.
 
-**What it was, and what the reversal cost.** Until 2026-07-31 duplicates were
-significant, on the reasoning that a join on a non-unique key returns every
-correct row several times and that is the most common way LLM-written SQL is
-wrong. That reasoning still holds. Set comparison scores those queries correct,
-so the project has traded a real diagnostic for comparability, deliberately
-(**D23**).
+**What it was, and what the reversal cost.** Until 2026-07-31 duplicate rows
+counted as differences, on the reasoning that a join on a non-unique key
+returns every correct row several times and that is the most common way
+LLM-written SQL is wrong. That reasoning still holds. Set comparison scores
+those queries correct, so the project has traded a real diagnostic for
+comparability, deliberately (**D23**).
 
 **Measured effect of the reversal.** Re-scoring the four full runs from their
 stored SQL, with no new model calls: HARD baseline 54.6% → 57.4%, HARD + picker
@@ -36,15 +38,15 @@ after the fact, including when the grader changes underneath it.
 
 ## 2. Reference queries that do not answer their own question stay in the set
 
-**Choice.** A gold query whose SQL answers a different question than its English
-prompt is scored as written, like every other question. It is not quarantined,
-not rejected, and not excluded from the denominator.
+**Choice.** A reference query that answers a different question than its
+English prompt is scored as written, like every other question. It is not set
+aside, not rejected, and not excluded from the denominator.
 
 **Example.** `bird-0032` asks "Among the events attended by more than 10 members,
-how many of them are meetings?" — a count. Its gold SQL takes events with more
-than 10 attendees, `EXCEPT`s away every event of type `Meeting`, and returns the
-*names* of what remains: nine rows describing the events that are **not**
-meetings. A correct answer to the English question scores 0.
+how many of them are meetings?" — a count. Its reference SQL takes events with
+more than 10 attendees, `EXCEPT`s away every event of type `Meeting`, and
+returns the *names* of what remains: nine rows describing the events that are
+**not** meetings. A correct answer to the English question scores 0.
 
 **Why not exclude them.** Two reasons, and the first is the serious one.
 
@@ -71,28 +73,29 @@ never as a subtraction from the denominator.
 
 **Why.** A question like "what are the budget categories of events at MU 215"
 does not say whether to return each category once or once per matching event.
-Both readings are correct English; the gold SQL picks one, and on the next
-question it picks the other. Measured over the 227 failures of the HARD baseline
-run: gold used `DISTINCT` where the generated SQL did not **29** times, and the
-generated SQL used it where gold did not **28** times. A blanket rule in either
-direction wins one side and loses the other.
+Both readings are correct English; the reference SQL picks one, and on the next
+question it picks the other. Measured over the 227 failures of the HARD
+baseline run: the reference used `DISTINCT` where the generated SQL did not
+**29** times, and the generated SQL used it where the reference did not **28**
+times. A blanket rule in either direction wins one side and loses the other.
 
 **Interaction with issue 1.** Under BIRD's set comparison this disagreement is
-mostly invisible; under multiset comparison it is a full failure. So this bucket
-is partly the price of the stricter comparator, and it is paid deliberately.
+mostly invisible; under the old duplicate-counting comparison it is a full
+failure. So this bucket was partly the price of the stricter comparator, and
+it was paid deliberately.
 
 **Effect.** Largely resolved by the reversal in issue 1: under set comparison a
 dedupe disagreement is invisible unless the two results differ for some other
 reason as well. It is recorded here because the underlying ambiguity in the
-questions is still there, and any future return to multiset grading brings the
-whole bucket back.
+questions is still there, and grading duplicates again would bring the whole
+bucket back.
 
-## 4. The gold set is dialect-patched for Postgres; generated SQL gets the same patches by rewrite
+## 4. The reference queries are dialect-patched for Postgres; generated SQL gets the same patches by rewrite
 
 **Finding (2026-08-01).** BIRD ships its reference queries three times — SQLite,
 MySQL, Postgres — and this project grades against the Postgres port. Porting
 changed the queries' meaning in two places, and BIRD's own maintainers patched
-one of them: 60 of the 500 Postgres gold queries carry `NULLS LAST`, a clause
+one of them: 60 of the 500 Postgres reference queries carry `NULLS LAST`, a clause
 that appears in **zero** of the SQLite originals. It is there because SQLite
 sorts NULLs last under `ORDER BY x DESC` while Postgres sorts them first, so
 every unpatched `DESC LIMIT 1` used as a max silently returns a NULL row. The
@@ -115,10 +118,11 @@ not the model's.
 calls, so the counts are exact, not noisy): nulls-last fired on 67 queries and
 flipped 5 wrong→right, the text cast fired on 2 and flipped both, zero losses
 either way — 305/500 → 312/500 on identical SQL. The 11 currently-correct
-answers where gold also lacks `NULLS LAST` were re-executed and none broke.
+answers where the reference also lacks `NULLS LAST` were re-executed and none
+broke.
 
-**What it is not.** Not a benchmark hack: the rewrite never sees gold, never
-sees the question, and changes only what the SQL means across dialects — the
+**What it is not.** Not a benchmark hack: the rewrite never sees the reference
+query, never sees the question, and changes only what the SQL means across dialects — the
 same correction BIRD applied to its own side. A stricter reading ("the model
 should write portable SQL unaided") is available; it was rejected because the
 README compares against BIRD's Postgres baselines, whose reference queries did

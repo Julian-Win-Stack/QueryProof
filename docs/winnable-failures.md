@@ -99,10 +99,16 @@ each candidate would show which column actually holds the value. 0225 needs the
 stored value format read off real rows. 0494 and 0432 need a schema fact
 (a filter value, the right of two join paths) the data hints at.
 
+**Outcome (2026-08-01, two agent full runs).** The prediction held partly:
+the lookup happens, not reliably. 0023, 0366, 0369, 0447 each won one roll of
+two; 0432 won one; 0225, 0494 and 0367 never converted (0367's table is never
+sent, so no loop can reach it). "Agent-reachable" measured as *agent-flippy*.
+
 ### bird-0023 — debit_card_specializing, simple
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — won 1 of 2 (agent-v1 yes, agent-v3 no).**
 
 **Question.** What's the nationality of the customer who spent 548.4 in 2012/8/24?
 
@@ -162,6 +168,7 @@ SELECT DISTINCT g.country FROM transactions_1k t JOIN gasstations g ON t.gasstat
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — won 1 of 2 (agent-v1 yes, agent-v3 no).**
 
 **Question.** Lists all types of cards in German.
 
@@ -233,6 +240,7 @@ SELECT DISTINCT c."subtypes", c."supertypes" FROM "cards" c JOIN "foreign_data" 
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — failed both.**
 
 **Question.** How many unknown power cards contain info about the triggered ability
 
@@ -281,6 +289,7 @@ SELECT COUNT(*) FROM "cards" WHERE ("power" IS NULL OR "power" = '*') AND "text"
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — won 1 of 2 (agent-v1 yes, agent-v3 no).**
 
 **Question.** What is the foreign name of the card in French of type Creature, normal layout and black border color, by artist Matthew D. Wilson?
 
@@ -348,6 +357,7 @@ SELECT fd.name FROM "cards" c JOIN "foreign_data" fd ON c."uuid" = fd."uuid" WHE
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — won 1 of 2 (agent-v1 yes, agent-v3 no).**
 
 **Question.** Consider the average difference between K-12 enrollment and 15-17 enrollment of schools that are locally funded, list the names and DOC type of schools which has a difference above this average.
 
@@ -419,6 +429,7 @@ SELECT s.school, s.doc FROM schools s JOIN frpm f ON s.cdscode = f.cdscode WHERE
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — failed both.**
 
 **Question.** What is the fastest lap number of the champion in 2009?
 
@@ -490,6 +501,7 @@ SELECT r."fastestlap" FROM "results" r JOIN "races" ra ON r."raceid" = ra."racei
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — failed both.**
 
 **Question.** What was the growth rate of the total amount of loans across all accounts for a male client between 1996 and 1997?
 
@@ -538,6 +550,7 @@ SELECT (SUM(CASE WHEN EXTRACT(YEAR FROM l."date")=1997 THEN l."amount" ELSE 0 EN
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — won 1 of 2 (agent-v1 no, agent-v3 yes).**
 
 **Question.** What is the composition of element chlorine in percentage among the single bond molecules?
 
@@ -603,10 +616,14 @@ itself on the headline; it would be judged by these ids holding with no
 regressions elsewhere. v7 has never been run on the full 500 and is not the
 default (RUNS.md, 2026-08-01).
 
+**Outcome (2026-08-01, two agent full runs).** 0372 won both agent rolls —
+the agent reaches it with no rule at all. 0058 won one of two.
+
 ### bird-0058 — student_club, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — won 1 of 2 (agent-v1 yes, agent-v3 no).**
 
 **Reclassified 2026-08-01: pipeline-fixable, not agent-reachable.** The
 twin-column half of this is fixed — the current default is sent the expense
@@ -674,6 +691,7 @@ SELECT 100.0 * SUM(CASE WHEN e.event_name = 'Yearly Kickoff' THEN ex.cost ELSE 0
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — won both.**
 
 **Question.** What percentage of cards without power are in French?
 
@@ -737,10 +755,16 @@ because the picker's own selection wobbles. v6 measured that pushing harder in
 the prompt breaks as many questions as it fixes, and best-of-5 voting measured
 a tie. These flip in and out on their own.
 
+**Outcome (2026-08-01, two agent full runs).** "Re-roll only" measured wrong
+for three of the eleven: 0013, 0199 and 0449 won *both* agent rolls — under
+the agent they are stable wins, not coin flips. The other eight behaved as
+filed.
+
 ### bird-0462 — california_schools, moderate
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — failed both.**
 
 **Reclassified 2026-08-01 (evening): re-roll only, not pipeline-fixable.**
 Measured directly on this id under prompt v7, which carries the
@@ -799,6 +823,7 @@ SELECT s."school", f."Percent (%) Eligible FRPM (Ages 5-17)" FROM "frpm" f JOIN 
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — won both.**
 
 **Question.** What is the highest monthly consumption in the year 2012?
 
@@ -847,6 +872,7 @@ SELECT MAX(CAST(consumption AS float)) FROM yearmonth WHERE SUBSTRING(CAST(date 
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — failed both.**
 
 **Question.** For all the people who paid more than 29.00 per unit of product id No.5. Give their consumption status in the August of 2012.
 
@@ -903,6 +929,7 @@ SELECT y.customerid, y.date, y.consumption FROM "yearmonth" y WHERE y.date = '20
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — failed both.**
 
 **Question.** Was each expense in October Meeting on October 8, 2019 approved?
 
@@ -955,6 +982,7 @@ SELECT e.expense_id, e.expense_description, e.approved FROM "expense" e WHERE e.
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — won 1 of 2 (agent-v1 yes, agent-v3 no).**
 
 **Question.** What are the patient's diagnosis for those who has lower red blood blood cell? State their ID and age.
 
@@ -1011,6 +1039,7 @@ SELECT DISTINCT p."id", p.diagnosis, EXTRACT(YEAR FROM CURRENT_TIMESTAMP) - EXTR
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — won both.**
 
 **Question.** What is the best lap time recorded? List the driver and race with such recorded lap time.
 
@@ -1059,6 +1088,7 @@ SELECT d.forename, d.surname, r.name, l.milliseconds FROM laptimes l JOIN driver
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — won 1 of 2 (agent-v1 yes, agent-v3 no).**
 
 **Question.** List down top 3 German drivers who has the shortest average pit stop duration and were born between 1980-1985.
 
@@ -1110,6 +1140,7 @@ SELECT d.forename, d.surname, AVG(p.milliseconds) AS avg_duration FROM drivers d
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — won 1 of 2 (agent-v1 yes, agent-v3 no).**
 
 **Question.** What is the average of the up votes and the average user age for users creating more than 10 posts?
 
@@ -1173,6 +1204,7 @@ SELECT AVG(sub.upvotes) AS avg_upvotes, AVG(sub.age) AS avg_age FROM (SELECT u.i
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — won both.**
 
 **Question.** What is the eligible free or reduced price meal rate for the top 5 schools in grades 1-12 with the highest free or reduced price meal count of the schools with the ownership code 66?
 
@@ -1229,6 +1261,7 @@ SELECT f."School Name", f."FRPM Count (K-12)" / f."Enrollment (K-12)" AS frpm_ra
 
 **Status: passing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — failed both.**
 
 **Question.** What is the postal street address for the school with the 7th highest Math average? Indicate the school's name.
 
@@ -1288,6 +1321,7 @@ SELECT s.street, s.school FROM schools s JOIN satscores t ON s.cdscode = t.cds W
 
 **Status: still failing in the 2026-08-01 `union` run (68.8%).**
 **Status: still failing in the 2026-08-01 `v5-bundle` run (72.4%).**
+**Status: agent full runs (2026-08-01) — failed both.**
 
 **Question.** What is the Percent (%) Eligible Free (K-12) in the school administered by an administrator whose first name is Alusine. List the district code of the school.
 

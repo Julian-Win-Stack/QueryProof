@@ -342,9 +342,9 @@ reading scores zero. Constructor points live in two tables; the reference
 wants the standings table. Nothing in the data marks the winning side, and
 legislating one is measured three times as a net loss: prompt v6 (ten rules,
 broke as many as it converted), v7 (two "clean" rules: converted 2, broke 4),
-and the agent's v2 discipline block, whose LIMIT rule converted nothing and
-broke three previously-passing questions in its own control run before being
-cut ([RUNS.md](RUNS.md), 2026-08-01).
+and the agent's v2 discipline block, whose LIMIT rule converted nothing,
+broke two passing questions in its own control run, and pushed its one target
+into a new wrong answer before being cut ([RUNS.md](RUNS.md), 2026-08-01).
 
 The agent experiment drew the line precisely. Given tools to inspect stored
 values before answering, it converted the failures whose wrongness is *visible
@@ -486,10 +486,56 @@ Needs Docker Postgres with the BIRD dump loaded, `DATABASE_URL`,
 `DATABASE_URL_RO`, and `ANTHROPIC_API_KEY` in `.env` — see
 [CLAUDE.md](CLAUDE.md) for the full environment.
 
-## Next: Version B
+## Version B: the agent
 
 Version A (everything above) hand-writes the control flow: pick tables →
-generate SQL → execute → retry on error. **Version B hands the same five tools to
-the model in a loop and lets it drive** — an agent instead of a pipeline. It will
-be measured on the identical question slice, against Version A's numbers and
-Version A's noise band.
+generate SQL → execute → retry on error. Version B hands the loop to the
+model. Same table selection, same schema text, same grading — but instead of
+one generation call, the model gets three tools and up to 10 calls per
+question: `inspect_column` (a column's 20 most common stored values),
+`run_sql` (execute and see the first rows), `submit_sql` (hand in). Code only
+executes what it asks for and feeds the result back. A repeated identical
+lookup is answered from memory; a submission that errors or returns empty goes
+back to the model exactly once — the pipeline's repair and probe, rebuilt
+inside the loop; the tenth pass forces a hand-in, so the loop always ends
+holding a query.
+
+**Measured on the same 500: 71.2% (356/500) against the pipeline's 72.4%
+(362/500) — a tie inside the ±2.5 band.** $12.96 per run against $9.53;
+prompt caching is what keeps a multi-call loop in the pipeline's cost class —
+3.16M tokens read from cache at 0.1× the input rate, ~$4.5 that would
+otherwise be on the bill.
+
+The behavior numbers say more than the headline:
+
+- **499 of 500** loops ended with the model submitting voluntarily. The
+  10-pass cap bound once — and that answer was wrong anyway.
+- **490 of 500** looked at the data at least once before answering. The 10
+  that never looked went 10 for 10 — it skipped looking exactly where looking
+  had nothing to add.
+- **Median 2 passes**: one look, one answer. The 10-call budget was there and
+  the model mostly declined it.
+
+What looking bought is the line drawn in the failures section above: the agent
+converted failures whose wrongness is visible in the data — 4 of the 8 named
+lookup targets, plus the two questions prompt v7 had tried and failed to fix
+with rules, won here by looking with no rule at all — and converted none
+whose wrongness lives only in the answer key. Evidence-gathering does not beat
+five static sample rows plus probe and repair at this plateau; it matches
+them, which is its own finding.
+
+The agent's own losses then got the pipeline treatment: every one read by
+hand, two mechanical fixes built — the submission bounce above, and a prompt
+discipline block (no filters, `ROUND`s, `LIMIT`s or inlined constants nobody
+asked for) — and checked both ways per the protocol at the top of this file.
+The control run caught the block's LIMIT sentence converting nothing,
+breaking two passing questions, and pushing its own target into a new wrong
+answer; it was cut before it could ship. What
+remains (prompt `agent-v3`) converts 5 of the 8 addressed failures stably, at
+the cost of one new loss — receipts in [RUNS.md](RUNS.md), 2026-08-01. The
+full 500 under agent-v3 runs next; until that number is in the log, none is
+claimed for it.
+
+```bash
+PICKER=llm npm run eval:agent     # the agent on all 500
+```

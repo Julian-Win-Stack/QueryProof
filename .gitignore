@@ -12,5 +12,8 @@ PLAN.md
 .next/
 next-env.d.ts
 
+# TypeScript incremental build artifact
+tsconfig.tsbuildinfo
+
 # macOS
 .DS_Store

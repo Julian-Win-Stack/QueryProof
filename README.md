@@ -23,6 +23,32 @@ Loom: https://www.loom.com/share/f578e364fb4e485494af0b4b94f789dd
 For context, BIRD's published GPT-4-turbo baseline on these same 500 questions
 is **36.0%**.
 
+## How every point was won
+
+One loop, run over and over:
+
+1. **Read the failures.** Every run stores every query it generated, so the
+   last run's failures get read by hand and grouped by cause. No fix is built
+   for a failure nobody looked at.
+2. **Name the cause, write the hypothesis.** One mechanism, and the specific
+   questions it should fix, named before anything is built.
+3. **Build the cheapest fix.** Code where code can reach it, a prompt rule
+   only where it can't.
+4. **Run the questions the fix could touch.** A runner re-runs just those
+   questions for cents instead of ten dollars, several times each, because
+   the model is not deterministic and one pass proves nothing.
+5. **Rerun all 500, with the old version beside it as a control, same
+   sitting.** This is the step people skip, and it is where most changes here
+   died.
+
+**Ship rule: the named failures converted, and nothing that was passing
+broke.** The headline number is not the gate. A change whose headline lands
+inside the ±2.5-point noise band (the measured run-to-run wobble) still
+ships if its targets converted and the control held (the empty-result probe
+shipped exactly that way, 5 for 5 once targeted). A change that lifts the
+headline but breaks passing questions does not ship. Win or lose, every run
+gets an entry in [RUNS.md](RUNS.md) with a verdict.
+
 ## How it works
 
 Two model calls per question; everything else is deterministic code.
@@ -88,30 +114,6 @@ in the prompt the model finds the right ones on its own. And the
 table-selection step bought cost, not accuracy: +1.8 points is a tie, but
 sending ~2 tables instead of 75 cuts the bill 2.5×. The only thing that
 reliably kills accuracy is a shortlist *missing* a table the answer needs.
-
-## The method
-
-Every point of accuracy came from the same loop:
-
-1. **Read the failures by hand.** Every run stores every generated query, so
-   the failures of the last run get classified into named mechanisms with
-   named target questions; no fix is built for a failure that hasn't been
-   read.
-2. **Build the cheapest fix for one mechanism**: code where possible, a
-   prompt rule only where code can't reach.
-3. **Measure it both ways before it ships.** Did the named targets convert,
-   and did the questions that were already passing stay passing? The old
-   configuration re-runs beside the new one in the same sitting as the
-   control. The second check is the one people skip, and it is where most
-   changes here died.
-4. **Read the headline against the ±2.5 band, but decide on the
-   per-question record.** A delta smaller than the band is a tie and is
-   never claimed as a win: run-to-run luck flips more questions than most
-   fixes touch, so a tied headline is expected even when a fix works. A
-   change ships through a tied headline if its named targets converted and
-   the control held; the probe shipped exactly that way (a tie applied
-   blindly, 5 for 5 once targeted). What kills a change is the control
-   breaking. Win or lose, the run is logged with a verdict.
 
 ## What moved the number
 

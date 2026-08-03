@@ -13,7 +13,6 @@ in [RUNS.md](RUNS.md) with a verdict and a committed JSON export in `runs/`.
 
 
 Loom: https://www.loom.com/share/f578e364fb4e485494af0b4b94f789dd 
-(If you do only one thing, watch the loom but the ReadMe has the details of the experiments and my judgements.)
 
 
 
